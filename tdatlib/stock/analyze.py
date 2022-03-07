@@ -11,24 +11,10 @@ np.seterr(divide='ignore', invalid='ignore')
 
 
 class stock(fetch.stock):
-    __pivot, __trend, __filters = pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+    __ta, __pivot, __trend, __filters = pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
     def __init__(self, ticker:str, period:int=5, meta=None):
         super().__init__(ticker=ticker, period=period, meta=meta)
         self.__fillz()
-
-
-        # Technical Analysis
-        # https://technical-analysis-library-in-python.readthedocs.io/en/latest/ta.html#trend-indicators
-        if self.exchange == 'krx':
-            o, h, l, c, v = '시가', '고가', '저가', '종가', '거래량'
-        else:
-            o, h, l, c, v = 'open', 'high', 'low', 'close', 'volume'
-
-        try:
-            self.__ta = lib(self.ohlcv.copy(), open=o, close=c, low=l, high=h, volume=v)
-        except ConnectionError as ce:
-            print(f'{self.name}({self.ticker}) TA Aborted: {ce}')
-            return
         return
 
     def __fillz(self):
@@ -80,6 +66,20 @@ class stock(fetch.stock):
         return diff_extrema(minFunc), diff_extrema(maxFunc)
 
     @property
+    def ta(self) -> pd.DataFrame:
+        # Technical Analysis
+        # https://technical-analysis-library-in-python.readthedocs.io/en/latest/ta.html#trend-indicators
+        if self.__ta.empty:
+            if self.exchange == 'krx':
+                o, h, l, c, v = '시가', '고가', '저가', '종가', '거래량'
+            else:
+                o, h, l, c, v = 'open', 'high', 'low', 'close', 'volume'
+
+            if len(self.ohlcv) > 20:
+                self.__ta = lib(self.ohlcv.copy(), open=o, close=c, low=l, high=h, volume=v)
+        return self.__ta
+
+    @property
     def fiftytwo(self) -> pd.DataFrame:
         """
                      52H      52L   pct52H   pct52L
@@ -103,11 +103,11 @@ class stock(fetch.stock):
         """
         return pd.concat(
             objs={
-                '상한선': self.__ta.volatility_bbh,
-                '하한선': self.__ta.volatility_bbl,
-                '기준선': self.__ta.volatility_bbm,
-                '밴드폭': self.__ta.volatility_bbw,
-                '신호': self.__ta.volatility_bbp
+                '상한선': self.ta.volatility_bbh,
+                '하한선': self.ta.volatility_bbl,
+                '기준선': self.ta.volatility_bbm,
+                '밴드폭': self.ta.volatility_bbw,
+                '신호': self.ta.volatility_bbp
             }, axis=1
         )
 
@@ -119,9 +119,9 @@ class stock(fetch.stock):
         """
         return pd.concat(
             objs={
-                'MACD': self.__ta.trend_macd,
-                'MACD-Sig': self.__ta.trend_macd_signal,
-                'MACD-Hist': self.__ta.trend_macd_diff
+                'MACD': self.ta.trend_macd,
+                'MACD-Sig': self.ta.trend_macd_signal,
+                'MACD-Hist': self.ta.trend_macd_diff
             }, axis=1
         )
 
@@ -131,7 +131,7 @@ class stock(fetch.stock):
         STC: Schaff Trend Cycle 데이터프레임
         :return:
         """
-        sr = self.__ta.trend_stc
+        sr = self.ta.trend_stc
         sr.name = 'STC'
         return sr
 
@@ -141,7 +141,7 @@ class stock(fetch.stock):
         CCI: Commodity Channel Index 데이터프레임
         :return:
         """
-        sr = self.__ta.trend_cci
+        sr = self.ta.trend_cci
         sr.name = 'CCI'
         return sr
 
@@ -151,7 +151,7 @@ class stock(fetch.stock):
         TRIX: Triple exponential moving average
         :return:
         """
-        sr = self.__ta.trend_trix
+        sr = self.ta.trend_trix
         sr.name = 'TRIX'
         return sr
 
@@ -161,7 +161,7 @@ class stock(fetch.stock):
         RSI: Relative Strength Index 데이터프레임
         :return:
         """
-        sr = self.__ta.momentum_rsi
+        sr = self.ta.momentum_rsi
         sr.name = 'RSI'
         return sr
 
@@ -172,7 +172,7 @@ class stock(fetch.stock):
         :return:
         """
         return pd.concat(
-            objs={'STOCH-RSI': self.__ta.momentum_stoch, 'STOCH-RSI-Sig': self.__ta.momentum_stoch_signal}, axis=1
+            objs={'STOCH-RSI': self.ta.momentum_stoch, 'STOCH-RSI-Sig': self.ta.momentum_stoch_signal}, axis=1
         )
 
     @property
@@ -183,9 +183,9 @@ class stock(fetch.stock):
         """
         return pd.concat(
             objs={
-                'VORTEX(+)': self.__ta.trend_vortex_ind_pos,
-                'VORTEX(-)': self.__ta.trend_vortex_ind_neg,
-                'VORTEX-Diff': self.__ta.trend_vortex_ind_diff
+                'VORTEX(+)': self.ta.trend_vortex_ind_pos,
+                'VORTEX(-)': self.ta.trend_vortex_ind_neg,
+                'VORTEX-Diff': self.ta.trend_vortex_ind_diff
             }, axis=1
         )
 

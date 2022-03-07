@@ -10,7 +10,7 @@ class collector:
         self.prog = progress
         self.__corp, self.__etf, self.__tickers, self.__objects = None, None, list(), dict()
         self.__wics, self.__wi26 = pd.DataFrame(), pd.DataFrame()
-        self.__depo, self.__icm = pd.DataFrame(), pd.DataFrame()
+        self.__depo, self.__icm, self.__df_etf = pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
         self.__market = pd.DataFrame()
         self.archive = os.path.join(tdatlib.get_root(__file__), 'archive')
         self.today = datetime.today().strftime("%Y%m%d")
@@ -92,31 +92,17 @@ class collector:
         """
         ETF 분류
         """
-        if not isinstance(self.__etf, tdatlib.etf):
-            self.__etf = tdatlib.etf()
+        if self.__df_etf.empty:
+            if not isinstance(self.__etf, tdatlib.etf):
+                self.__etf = tdatlib.etf()
 
-        def is_etf_latest(operator) -> bool:
-            prev = pd.read_excel(os.path.join(self.archive, f'market/etf_theme/ETF.xlsx'), index_col='종목코드')
-            prev.index = prev.index.astype(str).str.zfill(6)
-            curr = operator.list
-            to_be_delete = prev[~prev.index.isin(curr.index)]
-            to_be_update = curr[~curr.index.isin(prev.index)]
-            if to_be_delete.empty and to_be_update.empty:
-                return True
-            else:
-                for kind, frm in [('삭제', to_be_delete), ('추가', to_be_update)]:
-                    if not frm.empty:
-                        print("-" * 70, f"\n▷ ETF 분류 {kind} 필요 항목: {'없음' if frm.empty else '있음'}")
-                        print(frm)
-                os.startfile(os.path.join(self.archive, 'market/etf_theme'))
-                return False
+            if self.prog == 'print' or not self.prog:
+                self.is_etf_latest()
 
-        if self.prog == 'print' or not self.prog:
-            is_etf_latest(self.__etf)
-        _file = os.path.join(self.archive, f'market/etf_theme/ETF.csv')
-        df = pd.read_csv(_file, index_col='종목코드')
-        df.index = df.index.astype(str).str.zfill(6)
-        return df
+            _file = os.path.join(self.archive, f'market/etf_theme/ETF.csv')
+            self.__df_etf = pd.read_csv(_file, index_col='종목코드')
+            self.__df_etf.index = self.__df_etf.index.astype(str).str.zfill(6)
+        return self.__df_etf
 
     @property
     def deposit(self) -> pd.DataFrame:
@@ -145,6 +131,22 @@ class collector:
                     self.__depo.index.name = '종목코드'
                     self.__depo.to_csv(_file)
         return self.__depo
+
+    def is_etf_latest(self) -> bool:
+        prev = pd.read_excel(os.path.join(self.archive, f'market/etf_theme/ETF.xlsx'), index_col='종목코드')
+        prev.index = prev.index.astype(str).str.zfill(6)
+        curr = self.__etf.list
+        to_be_delete = prev[~prev.index.isin(curr.index)]
+        to_be_update = curr[~curr.index.isin(prev.index)]
+        if to_be_delete.empty and to_be_update.empty:
+            return True
+        else:
+            for kind, frm in [('삭제', to_be_delete), ('추가', to_be_update)]:
+                if not frm.empty:
+                    print("-" * 70, f"\n▷ ETF 분류 {kind} 필요 항목: {'없음' if frm.empty else '있음'}")
+                    print(frm)
+            os.startfile(os.path.join(self.archive, 'market/etf_theme'))
+            return False
 
     def set_tickers(self, index=None, tickers=None, period:int=5):
         self.__tickers = list()
