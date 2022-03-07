@@ -148,7 +148,7 @@ class treemap(collector):
             while True:
                 try:
                     other = tdatlib.stock(ticker=ticker, period=2, meta=self.icm).returns
-                    perf = perf.append(other=other, ignore_index=False)
+                    perf = pd.concat(objs=[perf, other], axis=0, ignore_index=False)
                     perf.index.name = '종목코드'
                     break
                 except ConnectionError as e:
@@ -235,7 +235,7 @@ class treemap(collector):
                             child.loc[child["종목명"] == _name, f] = (_t[f] * _t['크기'] / _t['크기'].sum()).sum()
                 if level == "섹터":
                     self.__bar = child["종목코드"].tolist()
-            parent = parent.append(child, ignore_index=True)
+            parent = pd.concat(objs=[parent, child], axis=0, ignore_index=True)
             if n == len(levels) - 1:
                 data = {'종목코드': f'{m_type}_{m_group}', '종목명': f'{m_group}', '분류': '', '크기': _frm['크기'].sum()}
                 parent = parent.append(other=pd.DataFrame(data=data, index=[0]), ignore_index=True)

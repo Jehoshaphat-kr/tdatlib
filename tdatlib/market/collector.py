@@ -82,8 +82,9 @@ class collector:
         """
         테마 분류
         """
-        _file = os.path.join(self.archive, f'market/etf_theme/THEME.csv')
-        df = pd.read_csv(_file, index_col='종목코드')
+        # link = os.path.join(self.archive, f'market/etf_theme/THEME.csv')
+        link = 'https://raw.githubusercontent.com/Jehoshaphat-kr/tdatlib/master/archive/market/etf_theme/THEME.csv'
+        df = pd.read_csv(link, index_col='종목코드')
         df.index = df.index.astype(str).str.zfill(6)
         return df
 
@@ -99,8 +100,9 @@ class collector:
             if self.prog == 'print' or not self.prog:
                 self.is_etf_latest()
 
-            _file = os.path.join(self.archive, f'market/etf_theme/ETF.csv')
-            self.__df_etf = pd.read_csv(_file, index_col='종목코드')
+            # link = os.path.join(self.archive, f'market/etf_theme/ETF.csv')
+            link = 'https://raw.githubusercontent.com/Jehoshaphat-kr/tdatlib/master/archive/market/etf_theme/ETF.csv'
+            self.__df_etf = pd.read_csv(link, index_col='종목코드')
             self.__df_etf.index = self.__df_etf.index.astype(str).str.zfill(6)
         return self.__df_etf
 
@@ -121,15 +123,16 @@ class collector:
             return pd.concat(objs=objs, axis=0)
 
         if self.__depo.empty:
-            _file = os.path.join(self.archive, f'market/deposit.csv')
-            self.__depo = pd.read_csv(_file, index_col='종목코드')
+            # link = os.path.join(self.archive, f'market/deposit.csv')
+            link = 'https://raw.githubusercontent.com/Jehoshaphat-kr/tdatlib/master/archive/market/deposit.csv'
+            self.__depo = pd.read_csv(link, index_col='종목코드')
             self.__depo.index = self.__depo.index.astype(str).str.zfill(6)
             if datetime.today().weekday() == 3:
                 latest_date = str(self.__depo['날짜'].values[0])
                 if not latest_date == self.today:
                     self.__depo = update(self.today)
                     self.__depo.index.name = '종목코드'
-                    self.__depo.to_csv(_file)
+                    self.__depo.to_csv(os.path.join(self.archive, f'market/deposit.csv'))
         return self.__depo
 
     def is_etf_latest(self) -> bool:
@@ -185,7 +188,7 @@ if __name__ == "__main__":
 
     test_tickers = ['005930', '000660', '035720', '137310', '253450', '096770']
 
-    app = market(progress='tqdm')
+    app = collector(progress='tqdm')
     # print(app.wics)
     # print(app.wi26)
     # print(app.icm)
