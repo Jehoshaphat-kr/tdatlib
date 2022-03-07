@@ -192,22 +192,6 @@ class _stock:
         return self.__returns
 
     @property
-    def fiftytwo(self) -> pd.DataFrame:
-        """
-                 52wHigh   52wLow  52wHigh-Close  52wLow-Close
-        000660  148500.0  91500.0         -17.17         34.43
-        """
-        key = '종가' if self.__exchange == 'krx' else 'close'
-        frame = self.ohlcv[self.ohlcv.index >= self.__toc - timedelta(365)][key]
-        close, _max, _min = frame[-1], frame.max(), frame.min()
-        by_max, by_min = round(100 * (close/_max - 1), 2), round(100 * (close/_min - 1), 2)
-        return pd.DataFrame(
-            data=[_max, _min, by_max, by_min],
-            columns=[self.ticker],
-            index=['52wHigh', '52wLow', '52wHigh-Close', '52wLow-Close']
-        ).T
-
-    @property
     def multiples(self) -> pd.DataFrame:
         """
                       BPS    PER   PBR   EPS   DIV   DPS   PSR

@@ -16,6 +16,7 @@ class stock(fetch.stock):
         super().__init__(ticker=ticker, period=period, meta=meta)
         self.__fillz()
 
+
         # Technical Analysis
         # https://technical-analysis-library-in-python.readthedocs.io/en/latest/ta.html#trend-indicators
         if self.exchange == 'krx':
@@ -25,8 +26,9 @@ class stock(fetch.stock):
 
         try:
             self.__ta = lib(self.ohlcv.copy(), open=o, close=c, low=l, high=h, volume=v)
-        except:
-            pass
+        except ConnectionError as ce:
+            print(f'{self.name}({self.ticker}) TA Aborted: {ce}')
+            return
         return
 
     def __fillz(self):
@@ -76,6 +78,22 @@ class stock(fetch.stock):
 
         minFunc, maxFunc, diff_extrema = get_peak(h)
         return diff_extrema(minFunc), diff_extrema(maxFunc)
+
+    @property
+    def fiftytwo(self) -> pd.DataFrame:
+        """
+                     52H      52L   pct52H   pct52L
+        000660  148500.0  91500.0   -17.17    34.43
+        """
+        key = '종가' if self.__exchange == 'krx' else 'close'
+        frame = self.ohlcv[self.ohlcv.index >= self.__toc - timedelta(365)][key]
+        close, _max, _min = frame[-1], frame.max(), frame.min()
+        by_max, by_min = round(100 * (close/_max - 1), 2), round(100 * (close/_min - 1), 2)
+        return pd.DataFrame(
+            data=[_max, _min, by_max, by_min],
+            columns=[self.ticker],
+            index=['52H', '52L', 'pct52H', 'pct52L']
+        ).T
 
     @property
     def bb(self) -> pd.DataFrame:
