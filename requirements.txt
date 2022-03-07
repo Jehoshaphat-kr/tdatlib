@@ -1,0 +1,13 @@
+numpy
+pandas
+pykrx
+lxml
+jsmin
+plotly
+scipy
+pyautogui
+requests
+bs4
+findiff
+ta
+yfinance
