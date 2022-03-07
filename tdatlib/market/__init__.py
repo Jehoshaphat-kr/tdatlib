@@ -1,1 +1,1 @@
-from collector import market
+from .collector import collector

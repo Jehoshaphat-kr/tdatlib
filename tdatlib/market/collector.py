@@ -5,7 +5,7 @@ from datetime import datetime
 from pykrx import stock as krx
 
 
-class market:
+class collector:
     def __init__(self, progress:str=str()):
         self.prog = progress
         self.__corp, self.__etf, self.__tickers, self.__objects = None, None, list(), dict()

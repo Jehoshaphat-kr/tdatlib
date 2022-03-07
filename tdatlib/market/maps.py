@@ -2,11 +2,11 @@ import os, time, codecs, jsmin, tdatlib
 import pandas as pd
 import plotly.graph_objects as go
 import plotly.offline as of
-from tdatlib.market import market
+from tdatlib.market import collector
 from pykrx import stock as krx
 
 
-class treemap(market):
+class treemap(collector):
     __tickers, __category, __kq, __name = list(), pd.DataFrame(), list(), str()
     __cat, __idx, __bar = str(), str(), list()
     __labels, __covers, __ids, __bars = dict(), dict(), dict(), dict()
