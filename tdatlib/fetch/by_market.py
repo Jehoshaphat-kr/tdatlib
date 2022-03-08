@@ -1,30 +1,34 @@
 import pandas as pd
 import urllib.request as req
-import json, requests, time, os
+import json, requests, time
+from tdatlib import archive
+from tqdm import tqdm
 from pykrx import stock
 from datetime import datetime, timedelta
 
 
 class corporate:
-    __market_ipo = pd.DataFrame()
-    __market_ohlcv, __market_cap, __market_fundamentals = pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+    __icm, __ohlcv, __theme = pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
     __wics, __wi26, __wise_date = pd.DataFrame(), pd.DataFrame(), str()
+    __today = datetime.today().strftime("%Y%m%d")
 
-    def __wise(self, codes:dict) -> pd.DataFrame:
-        """
-        WISE INDEX 산업/업종 구분 데이터 Fetch
-        :param codes: 산업/업종명 by 구분코드
-        :return: 
-        """
+    def __set_wise_date(self):
         if not self.__wise_date:
             source = requests.get(url='http://www.wiseindex.com/Index/Index#/G1010.0.Components').text
             tic = source.find("기준일")
             toc = source[tic:].find("</p>")
             self.__wise_date = datetime.strptime(source[tic + 6: tic + toc], "%Y.%m.%d").strftime("%Y%m%d")
+        return
 
+    def __fetch_wise(self, codes:dict, name:str) -> pd.DataFrame:
+        """
+        WISE INDEX 산업/업종 구분 데이터 Fetch
+        :param codes: 산업/업종명 by 구분코드
+        :param name: WICS 또는 WI26
+        :return: 
+        """
         frame = pd.DataFrame()
-        for n, (code, name) in enumerate(codes.items()):
-            print(f'{100 * (n + 1) / len(codes):.2f}% :: {code} {name}')
+        for code, name in tqdm(codes.items(), desc=f'Fetch {name}'):
             is_done = False
             while not is_done:
                 try:
@@ -36,7 +40,7 @@ class corporate:
                         columns=['종목코드', '종목명', '산업', '섹터']
                     )
                 except ConnectionError as e:
-                    print(f'Parse error while fetching WISE INDEX {code} {name}')
+                    print(f'\t- Parse error while fetching WISE INDEX {code} {name}')
                     time.sleep(1)
                     continue
 
@@ -45,31 +49,45 @@ class corporate:
         return frame.copy()
 
     @property
-    def market_ipo(self) -> pd.DataFrame:
+    def icm(self) -> pd.DataFrame:
         """
-                     종목명             IPO
+        IPO, Market Cap and Multiples: 상장일, 시가총액 및 투자배수(기초) 정보
+
+                 종목명         IPO   종가       시가총액   거래량    거래대금  상장주식수      BPS    PER   PBR      EPS   DIV     DPS
         종목코드
-        000210                DL 1976-02-02
-        004840           DRB동일 1976-05-21
-        155660               DSR 2013-05-15
-        078930                GS 2004-08-05
-        ...          ...        ...
-        217880              틸론 2015-05-28
-        222670  플럼라인생명과학 2015-07-28
-        331660  한국미라클피플사 2019-10-28
-        212310            휴벡셀 2016-07-26
+        000210       DL  1976-02-02  57100  1196580976400    56637  3230631400    20955884  67178.0   4.37  0.85  13077.0  2.28  1300.0
+        004840  DRB동일  1976-05-21   4970    99052100000     4725    23512045    19930000  17702.0  41.06  0.28    121.0  1.01    50.0
+        155660      DSR  2013-05-15   5560    88960000000   154220   874995590    16000000  10087.0   9.96  0.55    558.0  0.90    50.0
+        ...         ...         ...    ...            ...      ...         ...         ...      ...    ...   ...      ...   ...     ...
+        000547      NaN         NaN  27800     4270080000      231     6440750      153600      0.0   0.00  0.00      0.0  0.00     0.0
+        009275      NaN         NaN  36500     3312010000      215     7855350       90740      0.0   0.00  0.00      0.0  0.00     0.0
+        001529      NaN         NaN  34650     3108867300    12358   437491300       89722      0.0   0.00  0.00      0.0  0.43   150.0
         """
-        if self.__market_ipo.empty:
-            _ = pd.read_html(
-                io='http://kind.krx.co.kr/corpgeneral/corpList.do?method=download&searchType=13', header=0
-            )[0][['회사명', '종목코드', '상장일']].rename(columns={'회사명':'종목명', '상장일':'IPO'}).set_index(keys='종목코드')
-            _.index = _.index.astype(str).str.zfill(6)
-            _.IPO = pd.to_datetime(_.IPO)
-            self.__market_ipo = _.copy()
-        return self.__market_ipo
+        if self.__icm.empty:
+            self.__icm = pd.read_csv(archive.icm, index_col='종목코드', encoding='utf-8')
+            self.__icm.index = self.__icm.index.astype(str).str.zfill(6)
+            cond1 = not str(self.__icm['날짜'][0]) == self.__today
+            cond2 = str(self.__icm['날짜'][0]) == self.__today and int(datetime.now().strftime("%H%M")) <= 1530
+            if cond1 or cond2:
+                link = 'http://kind.krx.co.kr/corpgeneral/corpList.do?method=download&searchType=13'
+                ipo = pd.read_html(io=link, header=0)[0]
+                ipo = ipo[['회사명', '종목코드', '상장일']]
+                ipo = ipo.rename(columns={'회사명': '종목명', '상장일': 'IPO'}).set_index(keys='종목코드')
+                ipo.index = ipo.index.astype(str).str.zfill(6)
+                ipo.IPO = pd.to_datetime(ipo.IPO)
+
+                cap = stock.get_market_cap_by_ticker(date=self.__today, market="ALL", prev=True)
+                cap.index.name = '종목코드'
+
+                mul = stock.get_market_fundamental(date=self.__today, market='ALL', prev=True)
+                mul.index.name = '종목코드'
+                self.__icm = pd.concat(objs=[ipo, cap, mul], axis=1)
+                self.__icm['날짜'] = self.__today
+                self.__icm.to_csv(archive.icm, index=True, encoding='utf-8')
+        return self.__icm.drop(columns=['날짜'])
 
     @property
-    def market_ohlcv(self) -> pd.DataFrame:
+    def ohlcv(self) -> pd.DataFrame:
         """
                    시가   고가   저가   종가    거래량      거래대금     등락률
         종목코드
@@ -81,56 +99,10 @@ class corporate:
         037440     9980  10900   8110   8280  11677769  115022877210 -17.610001
         238490     9400   9440   9150   9250     27351     255012310  -2.120000
         """
-        if self.__market_ohlcv.empty:
-            self.__market_ohlcv = stock.get_market_ohlcv_by_ticker(
-                date=datetime.today().strftime("%Y%m%d"), market='ALL', prev=True
-            )
-            self.__market_ohlcv.index.name = '종목코드'
-        return self.__market_ohlcv
-
-    @property
-    def market_cap(self) -> pd.DataFrame:
-        """
-                    종가         시가총액    거래량       거래대금   상장주식수
-        종목코드
-        005930     78300  467433973665000  15163757  1184236552700  5969782550
-        000660    127000   92456300355000   3270119   417803212500   728002365
-        005935     71400   58754110380000    999511    71140623600   822886700
-        207940    844000   55843260000000     72184    60917111000    66165000
-        ...          ...              ...       ...            ...         ...
-        267810      1355       2421385000         3           4545     1787000
-        329020      2575       2150516400       333         772470      835152
-        225850       283       1414575217         0              0     4998499
-        225860        75       1277785350         0              0    17037138
-        """
-        if self.__market_cap.empty:
-            self.__market_cap = stock.get_market_cap_by_ticker(
-                date=datetime.today().strftime("%Y%m%d"), market="ALL", prev=True
-            )
-            self.__market_cap.index.name = '종목코드'
-        return self.__market_cap
-
-    @property
-    def market_fundamentals(self) -> pd.DataFrame:
-        """
-                  BPS         PER       PBR   EPS       DIV  DPS
-        종목코드
-        060310    792  216.000000  4.359375    16  0.000000    0
-        095570   6089    0.000000  0.839844     0  4.101562  210
-        006840  50471    0.000000  0.389893     0  2.050781  400
-        054620   8135    0.000000  1.620117     0  0.000000    0
-        ...       ...         ...       ...   ...       ...  ...
-        000545      0    0.000000  0.000000     0  0.000000    0
-        003280      0    0.000000  0.000000     0  0.000000    0
-        037440   4034   16.843750  1.620117   389  2.289062  150
-        238490   6872    6.570312  1.459961  1522  1.500000  150
-        """
-        if self.__market_fundamentals.empty:
-            self.__market_fundamentals = stock.get_market_fundamental(
-                date=datetime.today().strftime("%Y%m%d"), market='ALL', prev=True
-            )
-            self.__market_fundamentals.index.name = '종목코드'
-        return self.__market_fundamentals
+        if self.__ohlcv.empty:
+            self.__ohlcv = stock.get_market_ohlcv_by_ticker(date=self.__today, market='ALL', prev=True)
+            self.__ohlcv.index.name = '종목코드'
+        return self.__ohlcv
 
     @property
     def wics(self) -> pd.DataFrame:
@@ -146,38 +118,45 @@ class corporate:
         034590      인천도시가스  유틸리티  유틸리티
         """
         if self.__wics.empty:
-            wics_code = {
-                'G1010': '에너지',
-                'G1510': '소재',
-                'G2010': '자본재',
-                'G2020': '상업서비스와공급품',
-                'G2030': '운송',
-                'G2510': '자동차와부품',
-                'G2520': '내구소비재와의류',
-                'G2530': '호텔,레스토랑,레저 등',
-                'G2550': '소매(유통)',
-                'G2560': '교육서비스',
-                'G3010': '식품과기본식료품소매',
-                'G3020': '식품,음료,담배',
-                'G3030': '가정용품과개인용품',
-                'G3510': '건강관리장비와서비스',
-                'G3520': '제약과생물공학',
-                'G4010': '은행',
-                'G4020': '증권',
-                'G4030': '다각화된금융',
-                'G4040': '보험',
-                'G4050': '부동산',
-                'G4510': '소프트웨어와서비스',
-                'G4520': '기술하드웨어와장비',
-                'G4530': '반도체와반도체장비',
-                'G4535': '전자와 전기제품',
-                'G4540': '디스플레이',
-                'G5010': '전기통신서비스',
-                'G5020': '미디어와엔터테인먼트',
-                'G5510': '유틸리티'
-            }
-            self.__wics = self.__wise(codes=wics_code)
-        return self.__wics.set_index(keys='종목코드')
+            self.__set_wise_date()
+            self.__wics = pd.read_csv(archive.wics, index_col='종목코드', encoding='utf-8')
+            self.__wics.index = self.__wics.index.astype(str).str.zfill(6)
+            if not str(self.__wics['날짜'][0]) == self.__wise_date:
+                wics_code = {
+                    'G1010': '에너지',
+                    'G1510': '소재',
+                    'G2010': '자본재',
+                    'G2020': '상업서비스와공급품',
+                    'G2030': '운송',
+                    'G2510': '자동차와부품',
+                    'G2520': '내구소비재와의류',
+                    'G2530': '호텔,레스토랑,레저 등',
+                    'G2550': '소매(유통)',
+                    'G2560': '교육서비스',
+                    'G3010': '식품과기본식료품소매',
+                    'G3020': '식품,음료,담배',
+                    'G3030': '가정용품과개인용품',
+                    'G3510': '건강관리장비와서비스',
+                    'G3520': '제약과생물공학',
+                    'G4010': '은행',
+                    'G4020': '증권',
+                    'G4030': '다각화된금융',
+                    'G4040': '보험',
+                    'G4050': '부동산',
+                    'G4510': '소프트웨어와서비스',
+                    'G4520': '기술하드웨어와장비',
+                    'G4530': '반도체와반도체장비',
+                    'G4535': '전자와 전기제품',
+                    'G4540': '디스플레이',
+                    'G5010': '전기통신서비스',
+                    'G5020': '미디어와엔터테인먼트',
+                    'G5510': '유틸리티'
+                }
+                self.__wics = self.__fetch_wise(codes=wics_code, name='WICS')
+                self.__wics['날짜'] = self.__wise_date
+                self.__wics.to_csv(archive.wics, index=False, encoding='utf-8')
+                self.__wics.set_index(keys='종목코드')
+        return self.__wics.drop(columns=['날짜'])
 
     @property
     def wi26(self) -> pd.DataFrame:
@@ -193,41 +172,68 @@ class corporate:
         034590      인천도시가스  유틸리티
         """
         if self.__wi26.empty:
-            wi26_code = {
-                'WI100': '에너지',
-                'WI110': '화학',
-                'WI200': '비철금속',
-                'WI210': '철강',
-                'WI220': '건설',
-                'WI230': '기계',
-                'WI240': '조선',
-                'WI250': '상사,자본재',
-                'WI260': '운송',
-                'WI300': '자동차',
-                'WI310': '화장품,의류',
-                'WI320': '호텔,레저',
-                'WI330': '미디어,교육',
-                'WI340': '소매(유통)',
-                'WI400': '필수소비재',
-                'WI410': '건강관리',
-                'WI500': '은행',
-                'WI510': '증권',
-                'WI520': '보험',
-                'WI600': '소프트웨어',
-                'WI610': 'IT하드웨어',
-                'WI620': '반도체',
-                'WI630': 'IT가전',
-                'WI640': '디스플레이',
-                'WI700': '통신서비스',
-                'WI800': '유틸리티',
-            }
-            self.__wi26 = self.__wise(codes=wi26_code)
-            self.__wi26.drop(columns=['산업'], inplace=True)
-        return self.__wi26.set_index(keys='종목코드')
+            self.__set_wise_date()
+            self.__wi26 = pd.read_csv(archive.wi26, index_col='종목코드', encoding='utf-8')
+            self.__wi26.index = self.__wi26.index.astype(str).str.zfill(6)
+            if not str(self.__wi26['날짜'][0]) == self.__wise_date:
+                wi26_code = {
+                    'WI100': '에너지',
+                    'WI110': '화학',
+                    'WI200': '비철금속',
+                    'WI210': '철강',
+                    'WI220': '건설',
+                    'WI230': '기계',
+                    'WI240': '조선',
+                    'WI250': '상사,자본재',
+                    'WI260': '운송',
+                    'WI300': '자동차',
+                    'WI310': '화장품,의류',
+                    'WI320': '호텔,레저',
+                    'WI330': '미디어,교육',
+                    'WI340': '소매(유통)',
+                    'WI400': '필수소비재',
+                    'WI410': '건강관리',
+                    'WI500': '은행',
+                    'WI510': '증권',
+                    'WI520': '보험',
+                    'WI600': '소프트웨어',
+                    'WI610': 'IT하드웨어',
+                    'WI620': '반도체',
+                    'WI630': 'IT가전',
+                    'WI640': '디스플레이',
+                    'WI700': '통신서비스',
+                    'WI800': '유틸리티',
+                }
+                self.__wi26 = self.__fetch_wise(codes=wi26_code, name='WI26')
+                self.__wi26['날짜'] = self.__wise_date
+                self.__wi26.drop(columns=['산업'], inplace=True)
+                self.__wi26.to_csv(archive.wi26, index=False, encoding='utf-8')
+                self.__wi26.set_index(keys='종목코드')
+        return self.__wi26.drop(columns=['날짜'])
+
+    @property
+    def theme(self) -> pd.DataFrame:
+        """
+                     종목명          섹터
+        종목코드
+        211270       AP위성      우주항공
+        138930  BNK금융지주          배당
+        079160       CJ CGV  미디어컨텐츠
+        ...             ...           ...
+        298000     효성화학        수소차
+        093370         후성       2차전지
+        145020         휴젤        바이오
+        """
+        # link = 'https://raw.githubusercontent.com/Jehoshaphat-kr/tdatlib/master/archive/market/etf_theme/THEME.csv'
+        if self.__theme.empty:
+            self.__theme = pd.read_csv(archive.theme, index_col='종목코드')
+            self.__theme.index = self.__theme.index.astype(str).str.zfill(6)
+        return self.__theme
 
 
 class index:
-    __ks, __kq, __krx, __theme, __display = pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+    __ks, __kq, __krx = pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+    __depo, __theme, __display = pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
 
     @staticmethod
     def __update(market) -> pd.DataFrame:
@@ -238,9 +244,35 @@ class index:
             '지수분류': [market] * len(tickers)
         }).set_index(keys='종목코드')
 
-    @staticmethod
-    def deposit_list(ticker:str) -> list:
-        return stock.get_index_portfolio_deposit_file(ticker=ticker)
+    @property
+    def deposit(self) -> pd.DataFrame:
+        """
+        주요 지수: 코스피200, 코스닥150, 코스피 중형주, 코스피 소형주, 코스닥 중형주 종목
+        """
+        def update(date:str):
+            indices, objs = ['1028', '1003', '1004', '2203', '2003'], list()
+            for index in indices:
+                tickers = stock.get_index_portfolio_deposit_file(ticker=index)
+                df = pd.DataFrame(index=tickers)
+                df['지수코드'] = index
+                df['지수명'] = stock.get_index_ticker_name(index)
+                df['날짜'] = date
+                objs.append(df)
+            return pd.concat(objs=objs, axis=0)
+
+        if self.__depo.empty:
+            self.__depo = pd.read_csv(archive.deposit, index_col='종목코드')
+            self.__depo.index = self.__depo.index.astype(str).str.zfill(6)
+
+            today = datetime.today().weekday()
+            d_date = datetime.today() + (timedelta((3 - today) - 7) if today < 3 else -timedelta(today - 3))
+
+            latest_date = str(self.__depo['날짜'].values[0])
+            if not latest_date == d_date.strftime("%Y%m%d"):
+                self.__depo = update(d_date.strftime("%Y%m%d"))
+                self.__depo.index.name = '종목코드'
+                self.__depo.to_csv(archive.deposit)
+        return self.__depo
 
     @property
     def kospi(self) -> pd.DataFrame:
@@ -335,7 +367,25 @@ class index:
 
 
 class etf:
-    __list, __meta = pd.DataFrame(), pd.DataFrame()
+    __list, __meta, __group = pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+
+    @property
+    def group(self) -> pd.DataFrame:
+        """
+                                          종목명          산업   섹터
+        종목코드
+        069500                         KODEX 200  국내 시장지수  대형
+        278540               KODEX MSCI Korea TR  국내 시장지수  대형
+        278530                       KODEX 200TR  국내 시장지수  대형
+        ...                                  ...            ...   ...
+        396520         TIGER 차이나반도체FACTSET           해외  중국
+        391600    KINDEX 미국친환경그린테마INDXX           해외  미국
+        391590         KINDEX 미국스팩&IPO INDXX           해외  미국
+        """
+        if self.__group.empty:
+            self.__group = pd.read_csv(archive.etf, index_col='종목코드')
+            self.__group.index = self.__group.index.astype(str).str.zfill(6)
+        return self.__group
 
     @property
     def list(self) -> pd.DataFrame:
@@ -389,7 +439,7 @@ class etf:
         """
         if isinstance(date_or_period, str) or not date_or_period:
             if self.__meta.empty:
-                self.__meta = corporate().market_ipo['종목명']
+                self.__meta = corporate().icm['종목명']
             depo = stock.get_etf_portfolio_deposit_file(ticker=ticker, date=date_or_period)
             if '' in depo.index:
                 depo.drop(index=[''], inplace=True)
@@ -412,3 +462,46 @@ class etf:
             return pd.concat(objs=objs, axis=0)
         else:
             raise KeyError(f'Argument not appropriate for date_or_period = {date_or_period}')
+
+    def is_etf_latest(self) -> bool:
+        prev = pd.read_excel(archive.etf_xl, index_col='종목코드')
+        prev.index = prev.index.astype(str).str.zfill(6)
+        curr = self.list
+        to_be_delete = prev[~prev.index.isin(curr.index)]
+        to_be_update = curr[~curr.index.isin(prev.index)]
+        if to_be_delete.empty and to_be_update.empty:
+            return True
+        else:
+            for kind, frm in [('삭제', to_be_delete), ('추가', to_be_update)]:
+                if not frm.empty:
+                    print("-" * 70, f"\n▷ ETF 분류 {kind} 필요 항목: {'없음' if frm.empty else '있음'}")
+                    print(frm)
+
+            import os
+            os.startfile(archive.etf_xl)
+            return False
+
+    @staticmethod
+    def excel2csv():
+        df = pd.read_excel(archive.etf_xl, index_col='종목코드')
+        df.index = df.index.astype(str).str.zfill(6)
+        df.to_csv(archive.etf, index=True, encoding='utf-8')
+        return
+
+
+if __name__ == "__main__":
+    pd.set_option('display.expand_frame_repr', False)
+
+    # corp = corporate()
+    # print(corp.icm)
+    # print(corp.wics)
+    # print(corp.wi26)
+    # print(corp.theme)
+
+    # index = index()
+    # print(index.deposit)
+
+    # etf = etf()
+    # print(etf.group)
+    # if etf.is_etf_latest():
+    #     etf.excel2csv()

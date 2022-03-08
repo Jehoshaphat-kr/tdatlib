@@ -2,8 +2,5 @@ from tdatlib.fetch import corporate, index, etf
 from tdatlib.market.maps import treemap
 from tdatlib.market import collector
 from tdatlib.stock.analyze import stock
+import tdatlib.archive as archive
 
-def get_root(file:str) -> str:
-    import os
-    path = os.path.dirname(file)
-    return os.path.join(path[:path.find('tdatlib')], 'tdatlib')

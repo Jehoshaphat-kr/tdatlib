@@ -64,10 +64,10 @@ function setSelect(){
 }
 
 function setSearch(key){
-	$("#map-search").empty();
-	$('#map-search').append("<option></option>");
+	$('#map-search').empty();
+	$('#map-search').append('<option></option>');
 	for (var n = 0; n < ids[key].length; n++){
-		$('#map-search').append("<option>" + ids[key][n] + "</option>");
+		$('#map-search').append('<option>' + ids[key][n] + '</option>');
 	}
 }
 
@@ -84,11 +84,11 @@ function search_top(__group__){
 	}
 	if (clicker == null) {return;}
 	if (document.createEvent) {
-			var event = document.createEvent("MouseEvents");
-			event.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+			var event = document.createEvent('MouseEvents');
+			event.initMouseEvent('click', true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
 			!clicker.dispatchEvent(event);
 	} else if (link.fireEvent) {
-		!clicker.fireEvent("onclick");
+		!clicker.fireEvent('onclick');
 	}
 }
 
@@ -104,9 +104,9 @@ function search_asset(__asset_name){
       if (digits != null){
   			tail_cnt += digits.length;
   		}
-      if (leftover.includes("-")){ tail_cnt += 1 }
-      if (leftover.includes(".")){ tail_cnt += 1 }
-      if (leftover.includes("%")){ tail_cnt += 1 }
+      if (leftover.includes('-')){ tail_cnt += 1 }
+      if (leftover.includes('.')){ tail_cnt += 1 }
+      if (leftover.includes('%')){ tail_cnt += 1 }
       if ((leftover.length - tail_cnt) == 0){
         clicker = $(elems[n]).parent().get(0);
   		  break;
@@ -117,19 +117,19 @@ function search_asset(__asset_name){
 		return
 	}
 	if (document.createEvent) {
-			var event = document.createEvent("MouseEvents");
-			event.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+			var event = document.createEvent('MouseEvents');
+			event.initMouseEvent('click', true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
 			!clicker.dispatchEvent(event);
 	} else if (link.fireEvent) {
-		!clicker.fireEvent("onclick");
+		!clicker.fireEvent('onclick');
 	}
 }
 
 function reframe(code){
-  names.push(frm[code]["종목명"])
-  scale.push(frm[code]["크기"])
-  caps.push(frm[code]["시가총액"])
-  price.push(frm[code]["종가"])
+  names.push(frm[code]['종목명'])
+  scale.push(frm[code]['크기'])
+  caps.push(frm[code]['시가총액'])
+  price.push(frm[code]['종가'])
   perf.push(frm[code][option_type])
   color.push(frm[code]['C' + option_type])
 }
@@ -196,9 +196,9 @@ function barplot(key){
 		orientation:'h',
 		marker:{color:color},
 		text:perf,
-		texttemplate:"%{text}" + unit,
-		textposition:"outside",
-		hovertemplate:"섹터명: %{y}<br>" + text + ": %{x}" + unit + "<extra></extra>",
+		texttemplate:'%{text}' + unit,
+		textposition:'outside',
+		hovertemplate:'섹터명: %{y}<br>' + text + ': %{x}' + unit + '<extra></extra>',
 		opacity:0.9
 	};
 	Plotly.newPlot('myMap', [bar_draw], bar_layout, bar_option);
@@ -207,10 +207,10 @@ function barplot(key){
 function treemap(key){
   names = []; scale = []; caps = []; price = []; perf = []; color = []
   labels[key].forEach(function(code){
-	  names.push(frm[code]["종목명"])
-	  scale.push(frm[code]["크기"])
-	  caps.push(frm[code]["시가총액"])
-	  price.push(frm[code]["종가"])
+	  names.push(frm[code]['종목명'])
+	  scale.push(frm[code]['크기'])
+	  caps.push(frm[code]['시가총액'])
+	  price.push(frm[code]['종가'])
 	  perf.push(frm[code][option_type])
 	  color.push(frm[code]['C' + option_type])
 	})
@@ -250,7 +250,7 @@ function treemap(key){
       colors: color,
       visible: true
     },
-    pathbar: {"visible": true}
+    pathbar: {'visible': true}
   }
 	Plotly.newPlot('myMap', [map_draw], map_layout, map_option);
 }
@@ -259,10 +259,10 @@ $(document).ready(function(){
 
   /* Initialize */
   setSelect();
-  $(".map-select").prop('selectedIndex',0);
-  $(".market-select").prop('selectedIndex',0);
-  $(".option-select").prop('selectedIndex',0);
-  $("#map-search").select2({placeholder:"종목명 검색..", allowClear: true});
+  $('.map-select').prop('selectedIndex',0);
+  $('.market-select').prop('selectedIndex',0);
+  $('.option-select').prop('selectedIndex',0);
+  $('#map-search').select2({placeholder:"종목명 검색..", allowClear: true});
   $('#mapbar').prop('checked', false);
 
   map_type = $('.map-select').val()
@@ -273,20 +273,20 @@ $(document).ready(function(){
   setSearch(map_key);
 
 	// MAP-BAR Switch
-	$( "#mapbar" ).click(function() {
+	$('#mapbar').click(function() {
 		if ($('#mapbar').is(":checked")) { barplot(map_key) }
 		else { treemap(map_key) }
 	})
 
   // MAP type selection
-  $(".map-select").on('change', function(){
-    $(".market-select").empty();
-    $(".option-select option[value='PER']").remove();
-    $(".option-select option[value='PBR']").remove();
-    $(".option-select option[value='DIV']").remove();
+  $('.map-select').on('change', function(){
+    $('.market-select').empty();
+    $('.option-select option[value="PER"]').remove();
+    $('.option-select option[value="PBR"]').remove();
+    $('.option-select option[value="DIV"]').remove();
     map_type = $('.map-select').val()
-    $(".market-select").prop('selectedIndex',0);
-    $(".option-select").prop('selectedIndex',0);
+    $('.market-select').prop('selectedIndex',0);
+    $('.option-select').prop('selectedIndex',0);
 
     if (map_type != 'etf'){
       $('.option-select').append('<option value="PER">PER</option>');

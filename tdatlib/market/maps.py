@@ -2,17 +2,23 @@ import os, time, codecs, jsmin, tdatlib
 import pandas as pd
 import plotly.graph_objects as go
 import plotly.offline as of
-from tdatlib.market import collector
 from pykrx import stock as krx
+from datetime import datetime
+from tqdm import tqdm
 
 
-class treemap(collector):
+class treemap:
     __tickers, __category, __kq, __name = list(), pd.DataFrame(), list(), str()
     __cat, __idx, __bar = str(), str(), list()
     __labels, __covers, __ids, __bars = dict(), dict(), dict(), dict()
     __cover, __datum = list(), pd.DataFrame(columns=['종목코드'])
-    def __init__(self, progress:str=str()):
-        super().__init__(progress=progress)
+    def __init__(self):
+        self.corp, _etf = tdatlib.corporate(), tdatlib.etf()
+        self.etf = _etf.group
+        self.deposit = tdatlib.index().deposit
+        self.icm = pd.concat(objs=[self.corp.icm, _etf.list[['시가총액', '종가']]], axis=0, ignore_index=False)
+        self.theme = self.corp.theme
+        self.today = datetime.today().strftime("%Y%m%d")
         return
 
     def set_option(self, category:str, index:str=str()):
@@ -20,13 +26,13 @@ class treemap(collector):
         if not index in [str(), '1028', '1003', '1004', '2203', '2003']:
             raise KeyError(f'지수(Index):{index} 입력 오류: 코스피[200/중형주/소형주] 및 코스닥[150/중형주]만 가능!')
         if category == 'WICS':
-            self.__category, self.__name = self.wics.copy(), '전체'
+            self.__category, self.__name = self.corp.wics, '전체'
         elif category == 'WI26':
-            self.__category, self.__name = self.wi26.copy(), '전체'
+            self.__category, self.__name = self.corp.wi26, '전체'
         elif category == 'THEME':
-            self.__category, self.__name = self.theme.copy(), '테마'
+            self.__category, self.__name = self.theme, '테마'
         elif category == 'ETF':
-            self.__category, self.__name = self.etf.copy(), 'ETF'
+            self.__category, self.__name = self.etf, 'ETF'
 
         self.__name = krx.get_index_ticker_name(index) if index else self.__name
         return
@@ -58,11 +64,11 @@ class treemap(collector):
 
         yy, mm, dd = self.today[:4], self.today[4:6], self.today[6:]
         suffix = codecs.open(
-            filename=os.path.join(self.archive, 'deploy/src/map-suffix.js'), mode='r', encoding='utf-8'
+            filename=os.path.join(tdatlib.archive.map_js), mode='r', encoding='utf-8'
         ).read()
 
         syntax = f'document.getElementsByClassName("date")[0].innerHTML="{yy}년 {mm}월 {dd}일 종가 기준";'
-        _dir = os.path.join(self.archive, 'deploy/js')
+        _dir = os.path.join(tdatlib.archive.root, 'deploy/js')
         _cnt = 1
         _js = os.path.join(_dir, f"{self.today[2:]}MM-r{_cnt}.js")
         while os.path.isfile(_js):
@@ -134,7 +140,7 @@ class treemap(collector):
         006400 -6.01 -7.36 -24.56 -29.99 -33.59 -34.60
         002790 -0.94  1.40  12.65   2.39 -13.87 -25.08
         """
-        _file = os.path.join(self.archive, f'market/{self.today}/perf.csv')
+        _file = os.path.join(tdatlib.archive.root, f'market/performance/{self.today}perf.csv')
         if os.path.isfile(_file):
             perf = pd.read_csv(_file, index_col='종목코드')
             perf.index = perf.index.astype(str).str.zfill(6)
@@ -142,21 +148,23 @@ class treemap(collector):
             perf = pd.DataFrame()
 
         tickers = [ticker for ticker in self.tickers if not ticker in perf.index]
-        for n, ticker in enumerate(tickers):
-            if self.prog == 'print':
-                print(f"{(n+1)}/{len(tickers)} ({round(100 * (n+1)/len(tickers), 2)}%) ... {ticker}")
-            while True:
-                try:
-                    other = tdatlib.stock(ticker=ticker, period=2, meta=self.icm).returns
-                    perf = pd.concat(objs=[perf, other], axis=0, ignore_index=False)
-                    perf.index.name = '종목코드'
-                    break
-                except ConnectionError as e:
-                    time.sleep(1.5)
-
-            if n and not n % 200:
-                perf.to_csv(_file)
         if tickers:
+            process = tqdm(tickers, leave=False)
+            for n, ticker in enumerate(process):
+                process.set_description(f'Fetch Returns - {ticker}')
+                done = False
+                while not done:
+                    try:
+                        other = tdatlib.stock(ticker=ticker, period=2, meta=self.icm).returns
+                        perf = pd.concat(objs=[perf, other], axis=0, ignore_index=False)
+                        done = True
+                    except ConnectionError as e:
+                        time.sleep(1.5)
+
+                if n and not (n % 200):
+                    perf.to_csv(_file)
+
+            perf.index.name = '종목코드'
             perf.to_csv(_file)
         return perf
 
@@ -316,9 +324,12 @@ class treemap(collector):
             ["THEME", '', "thmful"]
         ]
 
-        for group, index, var in targets:
+        # process = tqdm(targets, leave=False)
+        for n, (group, index, var) in enumerate(targets):
+        # for group, index, var in process:
             self.set_option(category=group, index=index)
-            print(f"Proc... 시장 지도: {group}({self.__name}) 수집 중... ")
+            print(f"Update Market Map: {group}({self.__name}) ... ({n+1}/{len(targets)})")
+            # process.set_description(f'Updating Market Map {group} / {self.__name}...')
 
             self.__labels[var] = self.map_frame['종목코드'].tolist()
             self.__covers[var] = self.map_frame['분류'].tolist()
@@ -340,9 +351,9 @@ class treemap(collector):
 if __name__ == "__main__":
     # 코스피200(1028), 코스피 중형주(1003), 코스피 소형주(1004), 코스닥150(2203), 코스닥 중형주(2003)
 
-    marketMap = treemap(progress='print')
+    marketMap = treemap()
 
-    # marketMap.set_option(category='WICS')
+    marketMap.set_option(category='WICS')
     # marketMap.set_option(category='WICS', index='1028')
     # marketMap.set_option(category='WICS', index='1003')
     # marketMap.set_option(category='WICS', index='1004')
@@ -357,7 +368,6 @@ if __name__ == "__main__":
     # marketMap.set_option(category='THEME')
     # marketMap.set_option(category='ETF')
 
-    # print(marketMap.category)
     # print(marketMap.perform)
     # print(marketMap.baseline)
     # print(marketMap.map_frame)
