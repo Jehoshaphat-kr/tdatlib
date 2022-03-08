@@ -238,7 +238,8 @@ class treemap(collector):
             parent = pd.concat(objs=[parent, child], axis=0, ignore_index=True)
             if n == len(levels) - 1:
                 data = {'종목코드': f'{m_type}_{m_group}', '종목명': f'{m_group}', '분류': '', '크기': _frm['크기'].sum()}
-                parent = parent.append(other=pd.DataFrame(data=data, index=[0]), ignore_index=True)
+                parent = pd.concat(objs=[parent, pd.DataFrame(data=data, index=[0])], axis=0, ignore_index=True)
+
 
         _t = parent[parent['종목명'] == parent['분류']].copy()
         if not _t.empty:
@@ -324,9 +325,9 @@ class treemap(collector):
             self.__ids[var] = self.map_frame['ID'].tolist()
             self.__bars[var] = self.__bar
 
-            self.__datum = self.__datum.append(
-                other=self.map_frame[~self.map_frame['종목코드'].isin(self.__datum['종목코드'])],
-                ignore_index=True
+            self.__datum = pd.concat(
+                objs=[self.__datum, self.map_frame[~self.map_frame['종목코드'].isin(self.__datum['종목코드'])]],
+                axis=0, ignore_index=True
             )
         self.__datum.set_index(keys=['종목코드'], inplace=True)
         self.__cover = self.__datum[

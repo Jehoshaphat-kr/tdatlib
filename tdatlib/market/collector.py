@@ -6,8 +6,8 @@ from pykrx import stock as krx
 
 
 class collector:
-    def __init__(self, progress:str=str()):
-        self.prog = progress
+    def __init__(self, progress:str=str(), runon:str='server'):
+        self.prog, self.runon = progress, runon
         self.__corp, self.__etf, self.__tickers, self.__objects = None, None, list(), dict()
         self.__wics, self.__wi26 = pd.DataFrame(), pd.DataFrame()
         self.__depo, self.__icm, self.__df_etf = pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
@@ -97,7 +97,7 @@ class collector:
             if not isinstance(self.__etf, tdatlib.etf):
                 self.__etf = tdatlib.etf()
 
-            if self.prog == 'print' or not self.prog:
+            if self.runon == 'local':
                 self.is_etf_latest()
 
             # link = os.path.join(self.archive, f'market/etf_theme/ETF.csv')

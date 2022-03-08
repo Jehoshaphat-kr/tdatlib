@@ -40,7 +40,7 @@ class corporate:
                     time.sleep(1)
                     continue
 
-                frame = frame.append(read, ignore_index=True)
+                frame = pd.concat(objs=[frame, read], axis=0, ignore_index=True)
                 is_done = True
         return frame.copy()
 
