@@ -6,12 +6,12 @@ from pykrx import stock as krx
 
 
 class collector:
+    __corp, __etf, __idx, __tickers, __objects = None, None, None, list(), dict()
+    __wics, __wi26 = pd.DataFrame(), pd.DataFrame()
+    __depo, __icm, __df_etf = pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+    __market = pd.DataFrame()
     def __init__(self, progress:str=str(), runon:str='server'):
         self.prog, self.runon = progress, runon
-        self.__corp, self.__etf, self.__tickers, self.__objects = None, None, list(), dict()
-        self.__wics, self.__wi26 = pd.DataFrame(), pd.DataFrame()
-        self.__depo, self.__icm, self.__df_etf = pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
-        self.__market = pd.DataFrame()
         self.archive = os.path.join(tdatlib.get_root(__file__), 'archive')
         self.today = datetime.today().strftime("%Y%m%d")
 
@@ -150,6 +150,19 @@ class collector:
                     print(frm)
             os.startfile(os.path.join(self.archive, 'market/etf_theme'))
             return False
+
+    def covers(self, keywords:list):
+        """
+
+        :param keywords: 찾고자 하는 지수/ETF 키워드
+        :return:
+        """
+        return
+    # keywords = ['은행', '증권', '배당'] # 찾고자하는 테마/섹터 키워드
+    # basis = pd.concat(
+    #     objs=[etf_list[etf_list['종목명'].str.contains(key)] for key in keywords],
+    #     axis=0, ignore_index=False
+    # )
 
     def set_tickers(self, index=None, tickers=None, period:int=5):
         self.__tickers = list()
