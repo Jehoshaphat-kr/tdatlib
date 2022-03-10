@@ -3,10 +3,12 @@ import pandas as pd
 import plotly.graph_objects as go
 import plotly.offline as of
 from pykrx import stock as krx
-from datetime import datetime
+from datetime import datetime, timedelta
+from pytz import timezone
 from tqdm import tqdm
 
 
+kst = datetime.now(timezone('Asia/Seoul'))
 class treemap:
     __tickers, __category, __kq, __name = list(), pd.DataFrame(), list(), str()
     __cat, __idx, __bar = str(), str(), list()
@@ -18,7 +20,8 @@ class treemap:
         self.deposit = tdatlib.index().deposit
         self.icm = pd.concat(objs=[self.corp.icm, _etf.list[['시가총액', '종가']]], axis=0, ignore_index=False)
         self.theme = self.corp.theme
-        self.today = datetime.today().strftime("%Y%m%d")
+        self.today = kst.today().strftime("%Y%m%d")
+        self.prev = (kst.today() - timedelta(365*2)).strftime("%Y%m%d")
         return
 
     def set_option(self, category:str, index:str=str()):
@@ -147,7 +150,7 @@ class treemap:
         else:
             perf = pd.DataFrame()
 
-        tickers = [ticker for ticker in self.tickers if not ticker in perf.index]
+        tickers, returns = [ticker for ticker in self.tickers if not ticker in perf.index], list()
         if tickers:
             process = tqdm(tickers)
             for n, ticker in enumerate(process):
@@ -155,16 +158,22 @@ class treemap:
                 done = False
                 while not done:
                     try:
-                        other = tdatlib.stock(ticker=ticker, period=2, meta=self.icm).returns
-                        perf = pd.concat(objs=[perf, other], axis=0, ignore_index=False)
+                        # other = tdatlib.stock(ticker=ticker, period=2, meta=self.icm).returns
+                        close = krx.get_market_ohlcv_by_date(fromdate=self.prev, todate=self.today, ticker=ticker)['종가']
+                        returns.append(
+                            [100 * close.pct_change(periods=ago).values[-1] for ago in [1, 5, 21, 63, 126, 252]]
+                        )
+                        # perf = pd.concat(objs=[perf, other], axis=0, ignore_index=False)
                         done = True
                     except ConnectionError as e:
                         time.sleep(1)
 
-                if n and not (n % 200):
-                    perf.to_csv(_file)
+                # if n and not (n % 200):
+                #     perf.to_csv(_file)
 
-            perf.index.name = '종목코드'
+            _perf = pd.DataFrame(data=returns, index=tickers, columns=['R1D', 'R1W', 'R1M', 'R3M', 'R6M', 'R1Y'])
+            _perf.index.name = '종목코드'
+            perf = pd.concat(objs=[perf, _perf], axis=0, ignore_index=False)
             perf.to_csv(_file)
         return perf
 
@@ -324,12 +333,9 @@ class treemap:
             ["THEME", '', "thmful"]
         ]
 
-        # process = tqdm(targets, leave=False)
         for n, (group, index, var) in enumerate(targets):
-        # for group, index, var in process:
             self.set_option(category=group, index=index)
             print(f"Update Market Map: {group}({self.__name}) ... ({n+1}/{len(targets)})")
-            # process.set_description(f'Updating Market Map {group} / {self.__name}...')
 
             self.__labels[var] = self.map_frame['종목코드'].tolist()
             self.__covers[var] = self.map_frame['분류'].tolist()
@@ -373,4 +379,4 @@ if __name__ == "__main__":
     # print(marketMap.map_frame)
     # marketMap.show()
 
-    marketMap.to_js()
+    # marketMap.to_js()

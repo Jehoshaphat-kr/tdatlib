@@ -160,7 +160,7 @@ class corporate:
                 self.__wics = self.__fetch_wise(codes=wics_code, name='WICS')
                 self.__wics['날짜'] = self.__wise_date
                 self.__wics.to_csv(archive.wics, index=False, encoding='utf-8')
-                self.__wics.set_index(keys='종목코드')
+                self.__wics.set_index(keys='종목코드', inplace=True)
         return self.__wics.drop(columns=['날짜'])
 
     @property
@@ -213,7 +213,7 @@ class corporate:
                 self.__wi26['날짜'] = self.__wise_date
                 self.__wi26.drop(columns=['산업'], inplace=True)
                 self.__wi26.to_csv(archive.wi26, index=False, encoding='utf-8')
-                self.__wi26.set_index(keys='종목코드')
+                self.__wi26.set_index(keys='종목코드', inplace=True)
         return self.__wi26.drop(columns=['날짜'])
 
     @property
