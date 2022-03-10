@@ -4,13 +4,15 @@ import json, requests, time
 from tdatlib import archive
 from tqdm import tqdm
 from pykrx import stock
+from pytz import timezone
 from datetime import datetime, timedelta
 
 
+kst = datetime.now(timezone('Asia/Seoul'))
 class corporate:
     __icm, __ohlcv, __theme = pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
     __wics, __wi26, __wise_date = pd.DataFrame(), pd.DataFrame(), str()
-    __today = datetime.today().strftime("%Y%m%d")
+    __today = kst.strftime("%Y%m%d")
 
     def __set_wise_date(self):
         if not self.__wise_date:
@@ -67,22 +69,25 @@ class corporate:
             self.__icm = pd.read_csv(archive.icm, index_col='종목코드', encoding='utf-8')
             self.__icm.index = self.__icm.index.astype(str).str.zfill(6)
             cond1 = not str(self.__icm['날짜'][0]) == self.__today
-            cond2 = str(self.__icm['날짜'][0]) == self.__today and int(datetime.now().strftime("%H%M")) <= 1530
+            cond2 = str(self.__icm['날짜'][0]) == self.__today and int(kst.now().strftime("%H%M")) <= 1530
             if cond1 or cond2:
-                link = 'http://kind.krx.co.kr/corpgeneral/corpList.do?method=download&searchType=13'
-                ipo = pd.read_html(io=link, header=0)[0]
-                ipo = ipo[['회사명', '종목코드', '상장일']]
-                ipo = ipo.rename(columns={'회사명': '종목명', '상장일': 'IPO'}).set_index(keys='종목코드')
-                ipo.index = ipo.index.astype(str).str.zfill(6)
-                ipo.IPO = pd.to_datetime(ipo.IPO)
-
-                cap = stock.get_market_cap_by_ticker(date=self.__today, market="ALL", prev=True)
-                cap.index.name = '종목코드'
-
-                mul = stock.get_market_fundamental(date=self.__today, market='ALL', prev=True)
-                mul.index.name = '종목코드'
-                self.__icm = pd.concat(objs=[ipo, cap, mul], axis=1)
+                process, objs = tqdm(['IPO-DATE', 'MARKET-CAP', 'FUNDAMENTAL']), list()
+                for text in process:
+                    process.set_description(desc=f'Fetch {text} ...')
+                    if text == 'IPO-DATE':
+                        link = 'http://kind.krx.co.kr/corpgeneral/corpList.do?method=download&searchType=13'
+                        ipo = pd.read_html(io=link, header=0)[0][['회사명', '종목코드', '상장일']]
+                        ipo = ipo.rename(columns={'회사명': '종목명', '상장일': 'IPO'}).set_index(keys='종목코드')
+                        ipo.index = ipo.index.astype(str).str.zfill(6)
+                        ipo.IPO = pd.to_datetime(ipo.IPO)
+                        objs.append(ipo)
+                    if text == 'MARKET-CAP':
+                        objs.append(stock.get_market_cap_by_ticker(date=self.__today, market="ALL", prev=True))
+                    if text == 'FUNDAMENTAL':
+                        objs.append(stock.get_market_fundamental(date=self.__today, market='ALL', prev=True))
+                self.__icm = pd.concat(objs=objs, axis=1)
                 self.__icm['날짜'] = self.__today
+                self.__icm.index.name = '종목코드'
                 self.__icm.to_csv(archive.icm, index=True, encoding='utf-8')
         return self.__icm.drop(columns=['날짜'])
 
@@ -264,8 +269,8 @@ class index:
             self.__depo = pd.read_csv(archive.deposit, index_col='종목코드')
             self.__depo.index = self.__depo.index.astype(str).str.zfill(6)
 
-            today = datetime.today().weekday()
-            d_date = datetime.today() + (timedelta((3 - today) - 7) if today < 3 else -timedelta(today - 3))
+            today = kst.today().weekday()
+            d_date = kst.today() + (timedelta((3 - today) - 7) if today < 3 else -timedelta(today - 3))
 
             latest_date = str(self.__depo['날짜'].values[0])
             if not latest_date == d_date.strftime("%Y%m%d"):
@@ -446,8 +451,7 @@ class etf:
             return depo.join(self.__meta, how='left')
 
         elif isinstance(date_or_period, int):
-            import time
-            toc = datetime.today()
+            toc = kst.today()
             objs = []
             for dt in range(date_or_period, -1, -1):
                 _date = (toc - timedelta(dt)).date()
@@ -492,16 +496,16 @@ class etf:
 if __name__ == "__main__":
     pd.set_option('display.expand_frame_repr', False)
 
-    # corp = corporate()
-    # print(corp.icm)
-    # print(corp.wics)
-    # print(corp.wi26)
-    # print(corp.theme)
+    corp = corporate()
+    print(corp.icm)
+    print(corp.wics)
+    print(corp.wi26)
+    print(corp.theme)
 
-    # index = index()
-    # print(index.deposit)
+    index = index()
+    print(index.deposit)
 
-    # etf = etf()
-    # print(etf.group)
-    # if etf.is_etf_latest():
-    #     etf.excel2csv()
+    etf = etf()
+    print(etf.group)
+    if etf.is_etf_latest():
+        etf.excel2csv()

@@ -12,3 +12,4 @@ findiff
 ta
 yfinance
 tqdm
+pytz
