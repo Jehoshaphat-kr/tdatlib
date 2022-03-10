@@ -149,7 +149,7 @@ class treemap:
 
         tickers = [ticker for ticker in self.tickers if not ticker in perf.index]
         if tickers:
-            process = tqdm(tickers, leave=False)
+            process = tqdm(tickers)
             for n, ticker in enumerate(process):
                 process.set_description(f'Fetch Returns - {ticker}')
                 done = False
@@ -159,7 +159,7 @@ class treemap:
                         perf = pd.concat(objs=[perf, other], axis=0, ignore_index=False)
                         done = True
                     except ConnectionError as e:
-                        time.sleep(1.5)
+                        time.sleep(1)
 
                 if n and not (n % 200):
                     perf.to_csv(_file)
