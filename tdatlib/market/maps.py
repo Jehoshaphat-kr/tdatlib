@@ -14,14 +14,17 @@ class treemap:
     __cat, __idx, __bar = str(), str(), list()
     __labels, __covers, __ids, __bars = dict(), dict(), dict(), dict()
     __cover, __datum = list(), pd.DataFrame(columns=['종목코드'])
-    def __init__(self):
+    def __init__(self, set_date:str=str()):
+        """
+        :param set_date: datetime in "%Y%m%d"
+        """
         self.corp, _etf = tdatlib.corporate(), tdatlib.etf()
         self.etf = _etf.group
         self.deposit = tdatlib.index().deposit
         self.icm = pd.concat(objs=[self.corp.icm, _etf.list[['시가총액', '종가']]], axis=0, ignore_index=False)
         self.theme = self.corp.theme
-        self.today = kst.today().strftime("%Y%m%d")
-        self.prev = (kst.today() - timedelta(365*2)).strftime("%Y%m%d")
+        self.today = set_date if set_date else kst.today().strftime("%Y%m%d")
+        self.prev = (datetime.strptime(self.today, "%Y%m%d") - timedelta(365*2)).strftime("%Y%m%d")
         return
 
     def set_option(self, category:str, index:str=str()):
@@ -152,9 +155,10 @@ class treemap:
 
         tickers, returns = [ticker for ticker in self.tickers if not ticker in perf.index], list()
         if tickers:
-            process = tqdm(tickers)
-            for n, ticker in enumerate(process):
-                process.set_description(f'Fetch Returns - {ticker}')
+            # process = tqdm(tickers)
+            # for n, ticker in enumerate(process):
+            #     process.set_description(f'Fetch Returns - {ticker}')
+            for n, ticker in enumerate(tickers):
                 done = False
                 while not done:
                     try:
