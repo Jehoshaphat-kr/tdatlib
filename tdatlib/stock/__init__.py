@@ -1,1 +1,1 @@
-from .analyze import stock
+from .analyze import analyzer

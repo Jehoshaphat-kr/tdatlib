@@ -3,4 +3,4 @@ from .by_market import (
     index,
     etf
 )
-from .by_stock import _stock as stock
+from .by_stock import stock

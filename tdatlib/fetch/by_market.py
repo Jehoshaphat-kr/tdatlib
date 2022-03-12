@@ -1,9 +1,10 @@
 import pandas as pd
 import urllib.request as req
-import json, requests, time
+import json, requests, time, os
+# from by_stock import stock
 from tdatlib import archive
 from tqdm import tqdm
-from pykrx import stock
+from pykrx import stock as krx
 from pytz import timezone
 from datetime import datetime, timedelta
 
@@ -15,11 +16,15 @@ class corporate:
     __today = kst.strftime("%Y%m%d")
 
     def __set_wise_date(self):
+        """
+        WISE 산업분류 기준 날짜
+        """
         if not self.__wise_date:
             source = requests.get(url='http://www.wiseindex.com/Index/Index#/G1010.0.Components').text
             tic = source.find("기준일")
             toc = source[tic:].find("</p>")
-            self.__wise_date = datetime.strptime(source[tic + 6: tic + toc], "%Y.%m.%d").strftime("%Y%m%d")
+            # self.__wise_date = datetime.strptime(source[tic + 6: tic + toc], "%Y.%m.%d").strftime("%Y%m%d")
+            self.__wise_date = source[tic + 6: tic + toc].replace('.', '')
         return
 
     def __fetch_wise(self, codes:dict, name:str) -> pd.DataFrame:
@@ -49,6 +54,73 @@ class corporate:
                 frame = pd.concat(objs=[frame, read], axis=0, ignore_index=True)
                 is_done = True
         return frame.copy()
+
+    def __init_perform(self):
+        """
+        기준일자 기간별 수익률 파일 초기화
+        :return: 
+        """
+        file = os.path.join(archive.root, f'market/performance/{self.__today}perf.csv')
+        if not os.path.isfile(file):
+            t_label = ['R1W', 'R1M', 'R3M', 'R6M', 'R1Y']
+            t_stamp = [(kst - timedelta(days)).strftime("%Y%m%d") for days in [7, 30, 91, 183, 365]]
+            shares = pd.concat(objs={
+                f'PREV': krx.get_market_cap_by_ticker(date=t_stamp[-1], market='ALL', prev=True)['상장주식수'],
+                f'CURR': krx.get_market_cap_by_ticker(date=self.__today, market='ALL', prev=True)['상장주식수']
+            }, axis=1)
+
+            objs = {'R1D': round(krx.get_market_ohlcv(self.__today, market='ALL', prev=True)['등락률'], 2)}
+            for label, t in zip(t_label, t_stamp):
+                objs[label] = krx.get_market_price_change(t, self.__today, market='ALL')['등락률']
+            perf = pd.concat(objs=objs, axis=1, ignore_index=False)
+            perf = perf[perf.index.isin(shares[shares.PREV == shares.CURR].index)]
+            perf.index.name = '종목코드'
+            perf.to_csv(file, encoding='utf-8', index=True)
+        return
+
+    def get_performance(self, tickers:list=None) -> pd.DataFrame:
+        """
+        기간별 수익률
+        :param tickers: 대상 종목 리스트
+                 R1D   R1W    R1M    R3M    R6M     R1Y
+        종목코드
+        095570  0.35  0.18   9.88   6.18  -4.22   42.82
+        006840  3.39  1.91   8.10   2.64 -21.22  -25.48
+        054620  1.26 -0.82   7.11  -8.02 -33.97   59.39
+        ...      ...   ...    ...    ...    ...     ...
+        000545 -0.37 -1.72  -2.20  -3.50 -16.67   20.12
+        037440  0.44  0.11 -10.20  18.35  43.35  113.52
+        238490  0.00 -3.17  -2.07  -0.84  -6.24  -27.43
+        """
+        self.__init_perform()
+
+        file = os.path.join(archive.root, f'market/performance/{self.__today}perf.csv')
+        perf = pd.read_csv(file, encoding='utf-8', index_col='종목코드')
+        perf.index = perf.index.astype(str).str.zfill(6)
+        if not isinstance(tickers, list):
+            return perf
+
+        add = [ticker for ticker in tickers if not ticker in perf.index]
+        if not add:
+            return perf
+
+        process = tqdm(add)
+        for n, ticker in enumerate(process):
+            process.set_description(f'Fetch Returns - {ticker}')
+            while True:
+                # noinspection PyBroadException
+                try:
+                    perf = pd.concat(
+                        objs=[perf, stock(ticker=ticker, period=2, meta=self.icm).returns],
+                        axis=0, ignore_index=False
+                    )
+                    break
+                except Exception as e:
+                    time.sleep(1)
+
+        perf.index.name = '종목코드'
+        perf.to_csv(file, encoding='utf-8', index=True)
+        return perf
 
     @property
     def icm(self) -> pd.DataFrame:
@@ -82,32 +154,14 @@ class corporate:
                         ipo.IPO = pd.to_datetime(ipo.IPO)
                         objs.append(ipo)
                     if text == 'MARKET-CAP':
-                        objs.append(stock.get_market_cap_by_ticker(date=self.__today, market="ALL", prev=True))
+                        objs.append(krx.get_market_cap_by_ticker(date=self.__today, market="ALL", prev=True))
                     if text == 'FUNDAMENTAL':
-                        objs.append(stock.get_market_fundamental(date=self.__today, market='ALL', prev=True))
+                        objs.append(krx.get_market_fundamental(date=self.__today, market='ALL', prev=True))
                 self.__icm = pd.concat(objs=objs, axis=1)
                 self.__icm['날짜'] = self.__today
                 self.__icm.index.name = '종목코드'
                 self.__icm.to_csv(archive.icm, index=True, encoding='utf-8')
         return self.__icm.drop(columns=['날짜'])
-
-    @property
-    def ohlcv(self) -> pd.DataFrame:
-        """
-                   시가   고가   저가   종가    거래량      거래대금     등락률
-        종목코드
-        060310     2720   2920   2720   2810    173168     489665325   1.630000
-        095570     5140   5280   5140   5270     58999     308830910   2.530000
-        006840    19750  19750  18700  18700     32253     615633900  -5.320000
-        ...         ...    ...    ...    ...       ...           ...        ...
-        003280     2070   2245   2000   2005    758933    1592032000  -1.960000
-        037440     9980  10900   8110   8280  11677769  115022877210 -17.610001
-        238490     9400   9440   9150   9250     27351     255012310  -2.120000
-        """
-        if self.__ohlcv.empty:
-            self.__ohlcv = stock.get_market_ohlcv_by_ticker(date=self.__today, market='ALL', prev=True)
-            self.__ohlcv.index.name = '종목코드'
-        return self.__ohlcv
 
     @property
     def wics(self) -> pd.DataFrame:
@@ -127,37 +181,7 @@ class corporate:
             self.__wics = pd.read_csv(archive.wics, index_col='종목코드', encoding='utf-8')
             self.__wics.index = self.__wics.index.astype(str).str.zfill(6)
             if not str(self.__wics['날짜'][0]) == self.__wise_date:
-                wics_code = {
-                    'G1010': '에너지',
-                    'G1510': '소재',
-                    'G2010': '자본재',
-                    'G2020': '상업서비스와공급품',
-                    'G2030': '운송',
-                    'G2510': '자동차와부품',
-                    'G2520': '내구소비재와의류',
-                    'G2530': '호텔,레스토랑,레저 등',
-                    'G2550': '소매(유통)',
-                    'G2560': '교육서비스',
-                    'G3010': '식품과기본식료품소매',
-                    'G3020': '식품,음료,담배',
-                    'G3030': '가정용품과개인용품',
-                    'G3510': '건강관리장비와서비스',
-                    'G3520': '제약과생물공학',
-                    'G4010': '은행',
-                    'G4020': '증권',
-                    'G4030': '다각화된금융',
-                    'G4040': '보험',
-                    'G4050': '부동산',
-                    'G4510': '소프트웨어와서비스',
-                    'G4520': '기술하드웨어와장비',
-                    'G4530': '반도체와반도체장비',
-                    'G4535': '전자와 전기제품',
-                    'G4540': '디스플레이',
-                    'G5010': '전기통신서비스',
-                    'G5020': '미디어와엔터테인먼트',
-                    'G5510': '유틸리티'
-                }
-                self.__wics = self.__fetch_wise(codes=wics_code, name='WICS')
+                self.__wics = self.__fetch_wise(codes=archive.wics_code, name='WICS')
                 self.__wics['날짜'] = self.__wise_date
                 self.__wics.to_csv(archive.wics, index=False, encoding='utf-8')
                 self.__wics.set_index(keys='종목코드', inplace=True)
@@ -181,35 +205,7 @@ class corporate:
             self.__wi26 = pd.read_csv(archive.wi26, index_col='종목코드', encoding='utf-8')
             self.__wi26.index = self.__wi26.index.astype(str).str.zfill(6)
             if not str(self.__wi26['날짜'][0]) == self.__wise_date:
-                wi26_code = {
-                    'WI100': '에너지',
-                    'WI110': '화학',
-                    'WI200': '비철금속',
-                    'WI210': '철강',
-                    'WI220': '건설',
-                    'WI230': '기계',
-                    'WI240': '조선',
-                    'WI250': '상사,자본재',
-                    'WI260': '운송',
-                    'WI300': '자동차',
-                    'WI310': '화장품,의류',
-                    'WI320': '호텔,레저',
-                    'WI330': '미디어,교육',
-                    'WI340': '소매(유통)',
-                    'WI400': '필수소비재',
-                    'WI410': '건강관리',
-                    'WI500': '은행',
-                    'WI510': '증권',
-                    'WI520': '보험',
-                    'WI600': '소프트웨어',
-                    'WI610': 'IT하드웨어',
-                    'WI620': '반도체',
-                    'WI630': 'IT가전',
-                    'WI640': '디스플레이',
-                    'WI700': '통신서비스',
-                    'WI800': '유틸리티',
-                }
-                self.__wi26 = self.__fetch_wise(codes=wi26_code, name='WI26')
+                self.__wi26 = self.__fetch_wise(codes=archive.wi26_code, name='WI26')
                 self.__wi26['날짜'] = self.__wise_date
                 self.__wi26.drop(columns=['산업'], inplace=True)
                 self.__wi26.to_csv(archive.wi26, index=False, encoding='utf-8')
@@ -229,7 +225,6 @@ class corporate:
         093370         후성       2차전지
         145020         휴젤        바이오
         """
-        # link = 'https://raw.githubusercontent.com/Jehoshaphat-kr/tdatlib/master/archive/market/etf_theme/THEME.csv'
         if self.__theme.empty:
             self.__theme = pd.read_csv(archive.theme, index_col='종목코드')
             self.__theme.index = self.__theme.index.astype(str).str.zfill(6)
@@ -242,10 +237,10 @@ class index:
 
     @staticmethod
     def __update(market) -> pd.DataFrame:
-        tickers = stock.get_index_ticker_list(market='테마' if market == 'THEME' else market)
+        tickers = krx.get_index_ticker_list(market='테마' if market == 'THEME' else market)
         return pd.DataFrame(data={
             '종목코드': tickers,
-            '종목명': [stock.get_index_ticker_name(ticker) for ticker in tickers],
+            '종목명': [krx.get_index_ticker_name(ticker) for ticker in tickers],
             '지수분류': [market] * len(tickers)
         }).set_index(keys='종목코드')
 
@@ -257,10 +252,10 @@ class index:
         def update(date:str):
             indices, objs = ['1028', '1003', '1004', '2203', '2003'], list()
             for index in indices:
-                tickers = stock.get_index_portfolio_deposit_file(ticker=index)
+                tickers = krx.get_index_portfolio_deposit_file(ticker=index)
                 df = pd.DataFrame(index=tickers)
                 df['지수코드'] = index
-                df['지수명'] = stock.get_index_ticker_name(index)
+                df['지수명'] = krx.get_index_ticker_name(index)
                 df['날짜'] = date
                 objs.append(df)
             return pd.concat(objs=objs, axis=0)
@@ -445,7 +440,7 @@ class etf:
         if isinstance(date_or_period, str) or not date_or_period:
             if self.__meta.empty:
                 self.__meta = corporate().icm['종목명']
-            depo = stock.get_etf_portfolio_deposit_file(ticker=ticker, date=date_or_period)
+            depo = krx.get_etf_portfolio_deposit_file(ticker=ticker, date=date_or_period)
             if '' in depo.index:
                 depo.drop(index=[''], inplace=True)
             return depo.join(self.__meta, how='left')
@@ -455,7 +450,7 @@ class etf:
             objs = []
             for dt in range(date_or_period, -1, -1):
                 _date = (toc - timedelta(dt)).date()
-                _depo = stock.get_etf_portfolio_deposit_file(ticker=ticker, date=_date.strftime("%Y%m%d"))
+                _depo = krx.get_etf_portfolio_deposit_file(ticker=ticker, date=_date.strftime("%Y%m%d"))
                 if '' in _depo.index:
                     _depo.drop(index=[''], inplace=True)
                 if _depo['비중'].sum() < 10:
@@ -497,15 +492,16 @@ if __name__ == "__main__":
     pd.set_option('display.expand_frame_repr', False)
 
     corp = corporate()
-    print(corp.icm)
-    print(corp.wics)
-    print(corp.wi26)
-    print(corp.theme)
+    # print(corp.icm)
+    # print(corp.wics)
+    # print(corp.wi26)
+    # print(corp.theme)
+    print(corp.get_performance())
 
-    index = index()
-    print(index.deposit)
-
-    etf = etf()
-    print(etf.group)
-    if etf.is_etf_latest():
-        etf.excel2csv()
+    # index = index()
+    # print(index.deposit)
+    #
+    # etf = etf()
+    # print(etf.group)
+    # if etf.is_etf_latest():
+    #     etf.excel2csv()

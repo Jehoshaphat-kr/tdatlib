@@ -8,7 +8,7 @@ from pykrx import stock as krx
 from bs4 import BeautifulSoup as Soup
 
 
-class _stock:
+class stock:
     __summary, __p1obj, __p2obj = str(), list(), list()
     __ohlcv, __relative_returns, __multiples, __returns = pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
     __foreigner, __consensus =  pd.DataFrame(), pd.DataFrame()

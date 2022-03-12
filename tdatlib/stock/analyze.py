@@ -10,7 +10,7 @@ from findiff import FinDiff
 np.seterr(divide='ignore', invalid='ignore')
 
 
-class stock(fetch.stock):
+class analyzer(fetch.stock):
     __ta, __pivot, __trend, __filters = pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
     def __init__(self, ticker:str, period:int=5, meta=None):
         super().__init__(ticker=ticker, period=period, meta=meta)

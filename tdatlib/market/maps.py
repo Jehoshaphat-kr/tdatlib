@@ -148,37 +148,41 @@ class treemap:
         """
         _file = os.path.join(tdatlib.archive.root, f'market/performance/{self.today}perf.csv')
         if os.path.isfile(_file):
-            perf = pd.read_csv(_file, index_col='종목코드')
+            perf = pd.read_csv(_file, encoding='utf-8', index_col='종목코드')
             perf.index = perf.index.astype(str).str.zfill(6)
         else:
-            perf = pd.DataFrame()
+            t_stamp = [(kst - timedelta(days)).strftime("%Y%m%d") for days in [7, 30, 91, 183, 365]]
+            shares = pd.concat(
+                objs={
+                    f'PREV': krx.get_market_cap_by_ticker(date=t_stamp[-1], market='ALL')['상장주식수'],
+                    f'CURR': krx.get_market_cap_by_ticker(date=self.today, market='ALL')['상장주식수']
+                }, axis=1
+            ).dropna()
 
-        tickers, returns = [ticker for ticker in self.tickers if not ticker in perf.index], list()
+            objs = {'R1D':round(krx.get_market_ohlcv(self.today, market='ALL')['등락률'], 2)}
+            for label, t in zip(['R1W', 'R1M', 'R3M', 'R6M', 'R1Y'], t_stamp):
+                objs[label] = krx.get_market_price_change(t, self.today, market='ALL')['등락률']
+            perf = pd.concat(objs=objs, axis=1, ignore_index=False)
+            perf = perf[perf.index.isin(shares[shares.PREV == shares.CURR].index)]
+            perf.index.name = '종목코드'
+            perf.to_csv(_file, encoding='utf-8', index=True)
+
+        tickers = [ticker for ticker in self.tickers if not ticker in perf.index]
         if tickers:
-            # process = tqdm(tickers)
-            # for n, ticker in enumerate(process):
-            #     process.set_description(f'Fetch Returns - {ticker}')
-            for n, ticker in enumerate(tickers):
+            process = tqdm(tickers)
+            for n, ticker in enumerate(process):
+                process.set_description(f'Fetch Returns - {ticker}')
                 done = False
                 while not done:
                     try:
-                        # other = tdatlib.stock(ticker=ticker, period=2, meta=self.icm).returns
-                        close = krx.get_market_ohlcv_by_date(fromdate=self.prev, todate=self.today, ticker=ticker)['종가']
-                        returns.append(
-                            [100 * close.pct_change(periods=ago).values[-1] for ago in [1, 5, 21, 63, 126, 252]]
-                        )
-                        # perf = pd.concat(objs=[perf, other], axis=0, ignore_index=False)
+                        other = tdatlib.stock(ticker=ticker, period=2, meta=self.icm).returns
+                        perf = pd.concat(objs=[perf, other], axis=0, ignore_index=False)
                         done = True
                     except ConnectionError as e:
-                        time.sleep(1)
+                        time.sleep(0.5)
 
-                # if n and not (n % 200):
-                #     perf.to_csv(_file)
-
-            _perf = pd.DataFrame(data=returns, index=tickers, columns=['R1D', 'R1W', 'R1M', 'R3M', 'R6M', 'R1Y'])
-            _perf.index.name = '종목코드'
-            perf = pd.concat(objs=[perf, _perf], axis=0, ignore_index=False)
-            perf.to_csv(_file)
+            perf.index.name = '종목코드'
+            perf.to_csv(_file, encoding='utf-8', index=True)
         return perf
 
     @property
@@ -383,4 +387,4 @@ if __name__ == "__main__":
     # print(marketMap.map_frame)
     # marketMap.show()
 
-    # marketMap.to_js()
+    marketMap.to_js()
