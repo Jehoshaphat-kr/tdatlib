@@ -1,10 +1,11 @@
-from raw import *
+from .raw import *
 
 
 class interface:
     __local = False
-    __wics, __wi26, __thm, __etf = pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
-    __perf, __icm = pd.DataFrame(), pd.DataFrame()
+    __wics, __wi26, __thm = pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+    __etf_g, __etf_s = pd.DataFrame(), pd.DataFrame()
+    __perf, __icm, __depo, __disp = pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
     def __init__(self):
         self.__date = getWiseDate()
         return
@@ -37,11 +38,11 @@ class interface:
         is_ongoing = is_latest and int(kst.strftime("%H%M")) <= 1530
         if not is_latest or is_ongoing:
             self.__icm = pd.concat(
-                objs=[
+                objs=[_ for _ in tqdm([
                     getCorpIPO(),
                     krx.get_market_cap_by_ticker(date=today, market="ALL", prev=True),
                     krx.get_market_fundamental(date=today, market='ALL', prev=True)
-                ], axis=1
+                ], desc='ICM 파일 생성')], axis=1
             )
             self.__icm['날짜'] = today
             self.__icm.index.name = '종목코드'
@@ -69,9 +70,7 @@ class interface:
         self.__wi26.index = self.__wi26.index.astype(str).str.zfill(6)
         if not str(self.__wi26['날짜'][0]) == self.__date:
             self.__wi26 = getWiseGroup(name='WI26', date=self.__date)
-            self.__wi26['날짜'] = self.__date
-            self.__wi26.to_csv(archive.wi26, index=False, encoding='utf-8')
-            self.__wi26.set_index(keys='종목코드', inplace=True)
+            self.__wi26.to_csv(archive.wi26, index=True, encoding='utf-8')
         return self.__wi26.drop(columns=['날짜'])
 
     @property
@@ -94,9 +93,7 @@ class interface:
         self.__wics.index = self.__wics.index.astype(str).str.zfill(6)
         if not str(self.__wics['날짜'][0]) == self.__date:
             self.__wics = getWiseGroup(name='WICS', date=self.__date)
-            self.__wics['날짜'] = self.__date
-            self.__wics.to_csv(archive.wics, index=False, encoding='utf-8')
-            self.__wics.set_index(keys='종목코드', inplace=True)
+            self.__wics.to_csv(archive.wics, index=True, encoding='utf-8')
         return self.__wics.drop(columns=['날짜'])
 
     @property
@@ -117,7 +114,7 @@ class interface:
         return self.__thm
 
     @property
-    def etf(self) -> pd.DataFrame:
+    def etf_group(self) -> pd.DataFrame:
         """
                                           종목명          산업   섹터
         종목코드
@@ -132,9 +129,26 @@ class interface:
         if self.__local:
             checkEtfLatest()
 
-        if self.__etf.empty:
-            self.__etf = getEtfGroup()
-        return self.__etf
+        if self.__etf_g.empty:
+            self.__etf_g = getEtfGroup()
+        return self.__etf_g
+
+    @property
+    def etf_stat(self) -> pd.DataFrame:
+        """
+                                     종목명   종가        시가총액
+        종목코드
+        069500                    KODEX 200  39725  5718400000000
+        371460  TIGER 차이나전기차SOLACTIVE  16435  3229800000000
+        278540          KODEX MSCI Korea TR  12820  2239700000000
+        ...                             ...    ...            ...
+        334700   KBSTAR 팔라듐선물인버스(H)   5520     1700000000
+        287310         KBSTAR 200경기소비재  10895     1500000000
+        287320             KBSTAR 200산업재  11135     1300000000
+        """
+        if self.__etf_s.empty:
+            self.__etf_s = getEtfList()
+        return self.__etf_s
 
     @property
     def performance(self) -> pd.DataFrame:
@@ -151,7 +165,6 @@ class interface:
         """
         if not self.__perf.empty:
             return self.__perf
-
         if os.path.isfile(archive.performance):
             self.__perf = pd.read_csv(archive.performance, encoding='utf-8', index_col='종목코드')
             self.__perf.index = self.__perf.index.astype(str).str.zfill(6)
@@ -161,13 +174,54 @@ class interface:
         self.__perf.to_csv(archive.performance, encoding='utf-8', index=True)
         return self.__perf
 
-if __name__ == "__main__":
-    pd.set_option('display.expand_frame_repr', False)
+    @property
+    def i_deposit(self) -> pd.DataFrame:
+        """
+                 지수코드         지수명      날짜
+        종목코드
+        005930       1028     코스피 200  20220310
+        000660       1028     코스피 200  20220310
+        035420       1028     코스피 200  20220310
+           ...        ...            ...       ...
+        042040       2003  코스닥 중형주  20220310
+        072520       2003  코스닥 중형주  20220310
+        045660       2003  코스닥 중형주  20220310
+        """
+        if not self.__depo.empty:
+            return self.__depo
 
-    api = interface()
-    print(api.icm)
-    print(api.wi26)
-    print(api.wics)
-    print(api.theme)
-    print(api.etf)
-    print(api.performance)
+        self.__depo = pd.read_csv(archive.deposit, encoding='utf-8', index_col='종목코드')
+        self.__depo.index = self.__depo.index.astype(str).str.zfill(6)
+
+        today = kst.today().weekday()
+        d_date = kst.today() + (timedelta((3 - today) - 7) if today < 3 else -timedelta(today - 3))
+
+        latest_date = str(self.__depo['날짜'].values[0])
+        if not latest_date == d_date.strftime("%Y%m%d"):
+            self.__depo = getIndexMainDeposit(date=d_date.strftime("%Y%m%d"))
+            self.__depo.index.name = '종목코드'
+            self.__depo.to_csv(archive.deposit, encoding='utf-8', index=True)
+        return self.__depo
+
+    @property
+    def i_display(self) -> pd.DataFrame:
+        """
+        KOSPI코드        KOSPI지수  KOSDAQ코드     KOSDAQ지수  KRX코드     KRX지수 THEME코드           THEME지수
+             1001           코스피        2001         코스닥     5042     KRX 100      1163    코스피 고배당 50
+             1002    코스피 대형주        2002  코스닥 대형주     5043  KRX 자동차      1164  코스피 배당성장 50
+             1003    코스피 중형주        2003  코스닥 중형주     5044  KRX 반도체      1165   코스피 우선주 지수
+              ...              ...         ...            ...       ...         ...       ...                 ...
+        """
+        if not self.__disp.empty:
+            return self.__disp
+
+        objs = []
+        process = tqdm(['KOSPI', 'KOSDAQ', 'KRX', 'THEME'])
+        for market in process:
+            process.set_description(desc=f'{market} 지수 종목 수집 중...')
+            data = getIndexGroup(market=market)
+            obj = data.rename(columns={'종목명': f'{market}지수'}).drop(columns=['지수분류'])
+            obj.index.name = f'{market}코드'
+            objs.append(obj.reset_index(level=0))
+        self.__disp = pd.concat(objs=objs, axis=1).fillna('-')
+        return self.__disp
