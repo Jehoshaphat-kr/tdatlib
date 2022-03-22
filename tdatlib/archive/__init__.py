@@ -14,6 +14,15 @@ map_js = os.path.join(root, 'market/map/map-suffix.js')
 deposit = os.path.join(root, 'market/general/deposit.csv')
 icm = os.path.join(root, 'market/general/icm.csv')
 performance = os.path.join(root, f'market/performance/{kst.strftime("%Y%m%d")}perf.csv')
+desktop = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
+
+index_code = {
+    '1028': '코스피200',
+    '1003': '코스피 중형주',
+    '1004': '코스피 소형주',
+    '2203': '코스닥150',
+    '2003': '코스닥 중형주'
+}
 
 wics_code = {
     'G1010': '에너지',
