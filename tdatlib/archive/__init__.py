@@ -83,3 +83,7 @@ wi26_code = {
     'WI700': '통신서비스',
     'WI800': '유틸리티',
 }
+
+map_label = ['종목명', '종가', '시가총액', '크기',
+             'R1D', 'R1W', 'R1M', 'R3M', 'R6M', 'R1Y', 'PER', 'PBR', 'DIV',
+             'CR1D', 'CR1W', 'CR1M', 'CR3M', 'CR6M', 'CR1Y', 'CPER', 'CPBR', 'CDIV']

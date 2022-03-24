@@ -155,17 +155,35 @@ def checkEtfLatest(etfs=None) -> bool:
 
 def getTradingDate() -> dict:
     """
-    가장 최근 거래일 기준 1W, 1M, 3M, 6M, 1Y 거래일 계산
+    가장 최근 거래일 기준 1D, 1W, 1M, 3M, 6M, 1Y 거래일 계산
     """
     td = datetime.strptime(tdt, "%Y%m%d")
     dm = lambda x:(td - timedelta(x)).strftime("%Y%m%d")
-    label, delta = ['R1W', 'R1M', 'R3M', 'R6M', 'R1Y'], [7, 30, 91, 183, 365]
-    return {l:krx.get_nearest_business_day_in_a_week(date=dm(d)) for l, d in zip(label, delta)}
+    iter = [('1D', 1), ('1W', 7), ('1M', 30), ('3M', 91), ('6M', 183), ('1Y', 365)]
+    return {l:krx.get_nearest_business_day_in_a_week(date=dm(d)) for l, d in iter}
 
-def getCorpPerformance(tds:dict=None) -> pd.DataFrame:
+def getEvenShares(date:str=str()) -> list:
     """
-    보통주 기간별 수익률: 1Y 상장주식수 미변동 분
+    입력 기간[date] ~ 최종 거래일[tdt] 간 상장 주식수 미변동 종목 선별
+    :param date: 기준 날짜, 미입력 시 1Y 전 거래일 생성
+    ['005930', '000660', '005935', ..., '344860', '000325', '001529']
+    """
+    date = krx.get_nearest_business_day_in_a_week(
+        date=(datetime.strptime(tdt, "%Y%m%d") - timedelta(365)).strftime("%Y%m%d")
+    ) if not date else date
+
+    shares = pd.concat(objs={
+        'prev': krx.get_market_cap_by_ticker(date=date, market='ALL')['상장주식수'],
+        'curr': krx.get_market_cap_by_ticker(date=tdt, market='ALL')['상장주식수']
+    }, axis=1)
+    return shares[shares.prev == shares.curr].index.tolist()
+
+def getCorpPerformance(even_tickers:list=None, tds:dict=None, key:str='종가') -> pd.DataFrame:
+    """
+    보통주 기간별 수익률: 1Y 상장 주식수 미변동 분
+    :param even_tickers: 상장 주식수 미변동 종목코드
     :param tds: 기간 거래일
+    :param key: 시/고/저/종가 중 택
              R1D   R1W    R1M    R3M    R6M     R1Y
     종목코드
     095570  0.35  0.18   9.88   6.18  -4.22   42.82
@@ -176,32 +194,26 @@ def getCorpPerformance(tds:dict=None) -> pd.DataFrame:
     037440  0.44  0.11 -10.20  18.35  43.35  113.52
     238490  0.00 -3.17  -2.07  -0.84  -6.24  -27.43
     """
+    if not isinstance(even_tickers, list) or not even_tickers:
+        even_tickers = getEvenShares()
     if not isinstance(tds, dict) and not tds:
         tds = getTradingDate()
 
-    keys, vals, objs = list(tds.keys()), list(tds.values()), dict()
-    shares = pd.concat(objs={
-        f'PREV': krx.get_market_cap_by_ticker(date=vals[-1], market='ALL', prev=True)['상장주식수'],
-        f'CURR': krx.get_market_cap_by_ticker(date=tdt, market='ALL', prev=True)['상장주식수']
-    }, axis=1)
-    n_changed = shares[shares.PREV == shares.CURR].index
+    objs = {'TD0D': krx.get_market_ohlcv_by_ticker(date=tdt, market='ALL', prev=False)[key]}
+    for k, date, in tqdm(tds.items(), desc='기간별 수익률 계산(주식)'):
+        objs[f'TD{k}'] = krx.get_market_ohlcv_by_ticker(date=date, market='ALL', prev=False)[key]
+    prices = pd.concat(objs=objs, axis=1)
 
-    for i in tqdm(range(len(tds) + 1), desc='기간별 수익률 계산(주식)'):
-        if not i:
-            df_today = krx.get_market_ohlcv_by_ticker(tdt, market='ALL')
-            objs['R1D'] = round(df_today['등락률'], 2)
-            continue
-        objs[keys[i-1]] = krx.get_market_price_change(vals[i-1], tdt, market='ALL')['등락률']
-
-    perf = pd.concat(objs=objs, axis=1, ignore_index=False)
-    perf = perf[perf.index.isin(n_changed)]
+    perf = pd.concat(objs={f'R{k}': round(100 * (prices.TD0D/prices[f'TD{k}'] - 1), 2) for k in tds.keys()}, axis=1)
     perf.index.name = '종목코드'
-    return perf.round(2)
+    return perf[perf.index.isin(even_tickers)]
 
-def getEtfPerformance(tds:dict=None) -> pd.DataFrame:
+
+def getEtfPerformance(tds:dict=None, key:str='종가') -> pd.DataFrame:
     """
     ETF 기간별 수익률: ETF는 신주 발행/증자 이슈 없음(2022.3.12 기준)
     :param tds: 기간 거래일
+    :param key: 시/고/저/종가 중 택1
              R1D   R1W   R1M    R3M    R6M    R1Y
     종목코드
     152100 -0.19 -1.77 -3.86  -9.34 -11.23 -12.98
@@ -215,15 +227,14 @@ def getEtfPerformance(tds:dict=None) -> pd.DataFrame:
     if not isinstance(tds, dict) and not tds:
         tds = getTradingDate()
 
-    keys = ['R1D'] + list(tds.keys())
-    vals = [(datetime.strptime(tdt, "%Y%m%d") - timedelta(1)).strftime("%Y%m%d")] + list(tds.values())
-    iters = tqdm(dict(zip(keys, vals)).items(), desc='기간별 수익률 계산(ETF)')
-    perf = pd.concat(
-        objs={key:krx.get_etf_price_change_by_ticker(fromdate=val, todate=tdt)['등락률'] for key, val in iters},
-        axis=1, ignore_index=False
-    )
+    objs = {'TD0D': krx.get_etf_ohlcv_by_ticker(date=tdt)[key]}
+    for k, date in tqdm(tds.items(), desc='기간별 수익률 계산(ETF)'):
+        objs[f'TD{k}'] = krx.get_etf_ohlcv_by_ticker(date=date)[key]
+    prices = pd.concat(objs=objs, axis=1)
+
+    perf = pd.concat(objs={f'R{k}': round(100 * (prices.TD0D/prices[f'TD{k}'] - 1), 2) for k in tds.keys()}, axis=1)
     perf.index.name = '종목코드'
-    return perf.round(2)
+    return perf
 
 def getIndexGroup(market:str) -> pd.DataFrame:
     """
@@ -248,33 +259,6 @@ def getIndexGroup(market:str) -> pd.DataFrame:
         '지수분류': [market] * len(tickers)
     }).set_index(keys='종목코드')
 
-def getIndexMainDeposit(date: str):
-    """
-    코스피200, 코스닥150, 코스피중형주, 코스닥중형주, 코스피소형주 지수 포함 종목코드 관리
-    :param date: 기준 일자
-            지수코드         지수명      날짜
-    종목코드
-    005930      1028     코스피 200  20220312
-    373220      1028     코스피 200  20220312
-    000660      1028     코스피 200  20220312
-    ...          ...            ...       ...
-    088390      2003  코스닥 중형주  20220312
-    097780      2003  코스닥 중형주  20220312
-    025950      2003  코스닥 중형주  20220312
-    """
-    indices, objs = tqdm(['1028', '1003', '1004', '2203', '2003']), list()
-    for index in tqdm(indices, desc='지수별 종목코드 수집'):
-        indices.set_description(desc=f'Gathering {index} Deposits ...')
-        tickers = krx.get_index_portfolio_deposit_file(ticker=index)
-        df = pd.DataFrame(index=tickers)
-        df['지수코드'] = index
-        df['지수명'] = krx.get_index_ticker_name(index)
-        df['날짜'] = date
-        objs.append(df)
-    depo = pd.concat(objs=objs, axis=0)
-    depo.index.name = '종목코드'
-    return depo
-
 
 if __name__ == "__main__":
     pd.set_option('display.expand_frame_repr', False)
@@ -284,6 +268,7 @@ if __name__ == "__main__":
     # print(getWiseGroup(name='WICS'))
     # print(getWiseGroup(name='WI26'))
     # print(getTradingDate())
+    # print(getEvenShares())
     # print(getCorpPerformance())
     print(getEtfPerformance())
     # print(getThemeGroup())

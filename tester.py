@@ -1,4 +1,4 @@
-from tdatlib import market
+import tdatlib as tl
 from pykrx import stock as krx
 from datetime import datetime, timedelta
 from pytz import timezone
@@ -26,42 +26,17 @@ def auto_mouse(t_gap:int=50, due:int=0):
 
 
 if __name__ == "__main__":
-    auto_mouse(t_gap=90)
+    # auto_mouse(t_gap=90)
 
     pd.set_option('display.expand_frame_repr', False)
     kst = datetime.now(timezone('Asia/Seoul'))
     t_today = kst.strftime("%Y%m%d")
     t_stamp = [(kst - timedelta(days)).strftime("%Y%m%d") for days in [7, 30, 91, 183, 365]]
 
+    if tl.is_etf_latest():
+        tl.convert_etf_excel2csv()
 
-    # key = '상장주식수'
-    # shares = pd.concat(
-    #     objs={
-    #         f'PREV':krx.get_market_cap_by_ticker(date=t_stamp[-1], market='ALL')[key],
-    #         f'CURR':krx.get_market_cap_by_ticker(date=t_today, market='ALL')[key]
-    #     }, axis=1
-    # ).dropna()
-    # tickers_still = shares[shares.PREV == shares.CURR].index
-    #
-    # objs = dict()
-    # objs['R1D'] = krx.get_market_ohlcv(t_today, market='ALL')['등락률']
-    # for label, t in zip(['R1W', 'R1M', 'R3M', 'R6M', 'R1Y'], t_stamp):
-    #     objs[label] = krx.get_market_price_change(t, t_today, market='ALL')['등락률']
-    # perf = pd.concat(objs=objs, axis=1, ignore_index=False)
-    # perf = perf[perf.index.isin(tickers_still)]
-    # # perf.to_csv(r'./test.csv', encoding='euc-kr', index=True)
-    # print(perf)
-    #
-    #
-    # indices = ['1028', '1003', '1004', '2203', '2003']
-    # tickers = krx.get_etf_ticker_list(t_today)
-    # for index in tqdm(indices):
-    #     tickers += krx.get_index_portfolio_deposit_file(index, date=t_today)
-    # tickers = list(set(tickers))
-    # print(len(tickers), tickers)
-    #
-    #
-    #
+
     # ticker = '037440'
     # ohlcv = krx.get_market_ohlcv_by_date(fromdate=t_stamp[-1], todate=t_today, ticker=ticker)['종가'].tolist()
     # market_curr = krx.get_market_ohlcv_by_ticker(date=t_today, market='ALL')['종가']

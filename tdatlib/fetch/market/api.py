@@ -29,22 +29,23 @@ class interface:
         001529      NaN         NaN  34650     3108867300    12358   437491300       89722      0   0.00  0.00      0  0.43   150
         """
         if not self.__icm.empty:
-            return self.__icm
+            return self.__icm.drop(columns=['날짜'])
 
-        today = kst.strftime("%Y%m%d")
+        today = krx.get_nearest_business_day_in_a_week(date=kst.strftime("%Y%m%d"))
         self.__icm = pd.read_csv(archive.icm, index_col='종목코드', encoding='utf-8')
         self.__icm.index = self.__icm.index.astype(str).str.zfill(6)
-        is_latest = str(self.__icm['날짜'][0]) == today
-        is_ongoing = is_latest and int(kst.strftime("%H%M")) <= 1530
+        icm_date = str(self.__icm['날짜'][0])
+        is_latest = icm_date == today
+        is_ongoing = is_latest and 830 < int(kst.strftime("%H%M")) <= 1530
         if not is_latest or is_ongoing:
             self.__icm = pd.concat(
-                objs=[_ for _ in tqdm([
+                objs=[
                     getCorpIPO(),
-                    krx.get_market_cap_by_ticker(date=today, market="ALL", prev=True),
-                    krx.get_market_fundamental(date=today, market='ALL', prev=True)
-                ], desc='ICM 파일 생성')], axis=1
+                    krx.get_market_cap_by_ticker(date=today, market="ALL"),
+                    krx.get_market_fundamental(date=today, market='ALL')
+                ], axis=1
             )
-            self.__icm['날짜'] = today
+            self.__icm['날짜'] = today if not is_ongoing else icm_date
             self.__icm.index.name = '종목코드'
             self.__icm.to_csv(archive.icm, index=True, encoding='utf-8')
         return self.__icm.drop(columns=['날짜'])
@@ -64,7 +65,7 @@ class interface:
         034590      인천도시가스  유틸리티
         """
         if not self.__wi26.empty:
-            return self.__wi26
+            return self.__wi26.drop(columns=['날짜'])
 
         self.__wi26 = pd.read_csv(archive.wi26, index_col='종목코드', encoding='utf-8')
         self.__wi26.index = self.__wi26.index.astype(str).str.zfill(6)
@@ -87,7 +88,7 @@ class interface:
         034590      인천도시가스  유틸리티  유틸리티
         """
         if not self.__wics.empty:
-            return self.__wics
+            return self.__wics.drop(columns=['날짜'])
 
         self.__wics = pd.read_csv(archive.wics, index_col='종목코드', encoding='utf-8')
         self.__wics.index = self.__wics.index.astype(str).str.zfill(6)
@@ -173,35 +174,6 @@ class interface:
         self.__perf = pd.concat(objs=[getCorpPerformance(), getEtfPerformance()], axis=0, ignore_index=False)
         self.__perf.to_csv(archive.performance, encoding='utf-8', index=True)
         return self.__perf
-
-    @property
-    def i_deposit(self) -> pd.DataFrame:
-        """
-                 지수코드         지수명      날짜
-        종목코드
-        005930       1028     코스피 200  20220310
-        000660       1028     코스피 200  20220310
-        035420       1028     코스피 200  20220310
-           ...        ...            ...       ...
-        042040       2003  코스닥 중형주  20220310
-        072520       2003  코스닥 중형주  20220310
-        045660       2003  코스닥 중형주  20220310
-        """
-        if not self.__depo.empty:
-            return self.__depo
-
-        self.__depo = pd.read_csv(archive.deposit, encoding='utf-8', index_col='종목코드')
-        self.__depo.index = self.__depo.index.astype(str).str.zfill(6)
-
-        today = kst.today().weekday()
-        d_date = kst.today() + (timedelta((3 - today) - 7) if today < 3 else -timedelta(today - 3))
-
-        latest_date = str(self.__depo['날짜'].values[0])
-        if not latest_date == d_date.strftime("%Y%m%d"):
-            self.__depo = getIndexMainDeposit(date=d_date.strftime("%Y%m%d"))
-            self.__depo.index.name = '종목코드'
-            self.__depo.to_csv(archive.deposit, encoding='utf-8', index=True)
-        return self.__depo
 
     @property
     def i_display(self) -> pd.DataFrame:
