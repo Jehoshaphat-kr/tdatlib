@@ -18,7 +18,7 @@ performance = os.path.join(root, f'market/performance/{kst.strftime("%Y%m%d")}pe
 # noinspection PyBroadException
 try:
     desktop = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
-Except:
+except Exception:
     desktop = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop')    
 
 index_code = {
