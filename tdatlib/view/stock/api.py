@@ -8,13 +8,17 @@ import plotly.offline as of
 class analyze(stock):
     __pv, __bb, __ot = go.Figure(), go.Figure(), go.Figure()
 
-    def saveas(self, fig:go.Figure, title:str):
+    def saveas(self, fig:go.Figure, title:str, path:str=str()):
         """
         차트 저장
         :param fig: 차트 오브젝트 
         :param title: 차트 종류
+        :param path:
         """
-        of.plot(fig, filename=f'{archive.desktop}/{self.name}_{title}.html', auto_open=False)
+        if path:
+            of.plot(fig, filename=f'{path}/{self.name}_{title}.html', auto_open=False)
+        else:
+            of.plot(fig, filename=f'{archive.desktop}/{self.name}_{title}.html', auto_open=False)
         return
 
     @property
@@ -84,12 +88,16 @@ class analyze(stock):
                 fig.add_trace(trace=tracePrice(price=self.ohlcv[name], unit=self.currency), row=1, col=1)
             fig.add_trace(trace=traceLine(data=self.rsi.rsi, name='RSI', unit='%'), row=2, col=1)
 
+            fig.add_trace(trace=traceLine(data=self.rsi.stochastic, name='S-RSI', unit='%'), row=3, col=1)
+            fig.add_trace(trace=traceLine(data=self.rsi['stochastic-signal'], name='S-RSI-Sig', unit='%'), row=3, col=1)
+            fig.add_trace(trace=traceLine(data=self.cci, name='CCI', unit='%'), row=4, col=1)
 
             layout = go.Layout(
                 title=f'{self.name}({self.ticker}) 과매매(Over-Trade)',
                 plot_bgcolor='white',
                 xaxis=setXaxis(title=str(), label=False, xranger=True), yaxis=setYaxis(title=self.currency),
                 xaxis2=setXaxis(title=str(), label=False, xranger=False), yaxis2=setYaxis(title='RSI[%]'),
+                xaxis3=setXaxis(title=str(), label=False, xranger=False), yaxis3=setYaxis(title='S-RSI[%]'),
                 xaxis4=setXaxis(title='날짜', xranger=False), yaxis4=setYaxis(title='CCI[%]'),
                 xaxis_rangeslider=dict(visible=False)
             )
@@ -102,4 +110,6 @@ if __name__ == "__main__":
     t_analyze = analyze(ticker='000660')
     # t_analyze.price_volume.show()
     # t_analyze.bollinger_band.show()
-    t_analyze.overtrade.show()
+    # t_analyze.overtrade.show()
+
+    t_analyze.saveas(t_analyze.overtrade, title='과매매')
