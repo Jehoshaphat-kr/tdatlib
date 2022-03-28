@@ -49,7 +49,7 @@ def __getPerformance(tickers) -> pd.DataFrame:
             done = False
             while not done:
                 try:
-                    other = stock(ticker=ticker, period=2, name=ticker).perf
+                    other = stock(ticker=ticker, period=2).perf
                     perf = pd.concat(objs=[perf, other], axis=0, ignore_index=False)
                     done = True
                 except ConnectionError as e:
