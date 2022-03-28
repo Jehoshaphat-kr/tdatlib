@@ -1,1 +1,1 @@
-from .api import interface
+from tdatlib.fetch.stock.api import interface

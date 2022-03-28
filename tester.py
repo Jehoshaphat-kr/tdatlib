@@ -26,7 +26,7 @@ def auto_mouse(t_gap:int=50, due:int=0):
 
 
 if __name__ == "__main__":
-    # auto_mouse(t_gap=90)
+    auto_mouse(t_gap=90)
 
     pd.set_option('display.expand_frame_repr', False)
     kst = datetime.now(timezone('Asia/Seoul'))

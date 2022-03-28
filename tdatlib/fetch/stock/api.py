@@ -1,14 +1,16 @@
 from .fnguide import *
 from .timeseries import *
 from ta import add_all_ta_features as taf
+import numpy as np
+np.seterr(divide='ignore', invalid='ignore')
 
 
 class interface:
     __key = '종가'
     __ohlcv, __rel, __perf, __fiftytwo = pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
-    __ta = pd.DataFrame()
-    def __init__(self, ticker:str, name:str='Unknown', period:int=5):
-        self.ticker, self.name, self.period = ticker, name, period
+    __ta, __namebook = pd.DataFrame(), pd.DataFrame()
+    def __init__(self, ticker:str, period:int=5):
+        self.ticker, self.period = ticker, period
         return
 
     def set_key(self, key:str):
@@ -17,6 +19,34 @@ class interface:
         self.__key = key
         self.__rel, self.__perf = pd.DataFrame(), pd.DataFrame()
         return
+
+    def set_namebook(self, namebook:pd.DataFrame):
+        self.__namebook = namebook
+        return
+
+    @property
+    def name(self) -> str:
+        """
+        종목명 찾기
+        """
+        if self.ticker.isalpha():
+            return self.ticker
+        elif len(self.ticker) == 4:
+            return krx.get_index_ticker_name(ticker=self.ticker)
+        elif len(self.ticker) == 6:
+            if not self.__namebook.empty:
+                return self.__namebook.loc[self.ticker, '종목명']
+            name = krx.get_market_ticker_name(ticker=self.ticker)
+            if isinstance(name, pd.DataFrame):
+                return krx.get_etf_ticker_name(ticker=self.ticker)
+            return name
+
+    @property
+    def currency(self) -> str:
+        """
+        통화 단위
+        """
+        return 'USD' if self.ticker.isalpha() else 'KRW'
 
     @property
     def ta(self) -> pd.DataFrame:
@@ -36,7 +66,13 @@ class interface:
         가격 정보 시가/고가/저가/종가/거래량
         """
         if self.__ohlcv.empty:
-            self.__ohlcv = getOhlcv(ticker=self.ticker, years=self.period)
+            ohlcv = getOhlcv(ticker=self.ticker, years=self.period)
+            if 0 in ohlcv['시가'].tolist():
+                prices = zip(ohlcv.시가, ohlcv.종가, ohlcv.저가, ohlcv.고가, ohlcv.거래량)
+                data = [[c, c, c, c, v] if o == 0 else [o, c, l, h, v] for o, c, l, h, v in prices]
+                self.__ohlcv = pd.DataFrame(data=data, columns=ohlcv.columns, index=ohlcv.index)
+            else:
+                self.__ohlcv = ohlcv
         return self.__ohlcv
 
     @property
@@ -88,7 +124,7 @@ class interface:
             objs={
                 'rsi':self.ta.momentum_rsi,
                 'stochastic': self.ta.momentum_stoch,
-                'stochastic-signal': self.ta.momentum_stoch.signal
+                'stochastic-signal': self.ta.momentum_stoch_signal
             }, axis=1
         )
 
