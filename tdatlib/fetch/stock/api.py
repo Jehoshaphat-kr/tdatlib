@@ -120,7 +120,7 @@ class interface:
         기간별 수익률
         """
         if self.__perf.empty:
-            self.__perf = getPerformance(ohlcv=self.ohlcv, key=self.__key, name=self.name)
+            self.__perf = getPerformance(ohlcv=self.ohlcv, key=self.__key, name=self.ticker)
         return self.__perf
 
     @property

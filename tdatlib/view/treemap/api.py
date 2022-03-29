@@ -1,4 +1,4 @@
-from .tools import *
+from tdatlib.view.treemap.tools import *
 from datetime import datetime
 from pytz import timezone
 import plotly.graph_objects as go
@@ -148,7 +148,7 @@ if __name__ == "__main__":
     # t_treemap = mapping(category='WICS', sub_category='2203')
     # t_treemap = mapping(category='WICS', sub_category='2003')
 
-    # t_treemap = mapping(category='WI26')
+    t_treemap = mapping(category='WI26')
     # t_treemap = mapping(category='WI26', sub_category='1028')
     # t_treemap = mapping(category='WI26', sub_category='1003')
     # t_treemap = mapping(category='WI26', sub_category='1004')
@@ -156,7 +156,10 @@ if __name__ == "__main__":
     # t_treemap = mapping(category='WI26', sub_category='2003')
 
     # t_treemap = mapping(category='THEME')
-    t_treemap = mapping(category='ETF')
+    # t_treemap = mapping(category='ETF')
+
+    print(t_treemap.baseline)
+    print(t_treemap.reduced)
 
     t_treemap.show()
     # t_treemap.show(key='PER')
