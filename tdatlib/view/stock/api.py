@@ -86,11 +86,21 @@ class analyze(stock):
             fig.add_trace(trace=traceCandle(ohlcv=self.ohlcv, gap='일봉'), row=1, col=1)
             for name in ['시가', '고가', '저가', '종가']:
                 fig.add_trace(trace=tracePrice(price=self.ohlcv[name], unit=self.currency), row=1, col=1)
+
             fig.add_trace(trace=traceLine(data=self.rsi.rsi, name='RSI', unit='%'), row=2, col=1)
+            fig.add_hrect(y0=70, y1=80, line_width=0, fillcolor='red', opacity=0.2, row=2, col=1)
+            fig.add_hrect(y0=20, y1=30, line_width=0, fillcolor='green', opacity=0.2, row=2, col=1)
 
             fig.add_trace(trace=traceLine(data=self.rsi.stochastic, name='S-RSI', unit='%'), row=3, col=1)
             fig.add_trace(trace=traceLine(data=self.rsi['stochastic-signal'], name='S-RSI-Sig', unit='%'), row=3, col=1)
+            fig.add_hrect(y0=80, y1=100, line_width=0, fillcolor='red', opacity=0.2, row=3, col=1)
+            fig.add_hrect(y0=0, y1=20, line_width=0, fillcolor='green', opacity=0.2, row=3, col=1)
+
             fig.add_trace(trace=traceLine(data=self.cci, name='CCI', unit='%'), row=4, col=1)
+            fig.add_hrect(y0=200, y1=400, line_width=0, fillcolor='red', opacity=0.2, row=4, col=1)
+            fig.add_hrect(y0=100, y1=200, line_width=0, fillcolor='brown', opacity=0.2, row=4, col=1)
+            fig.add_hrect(y0=-200, y1=-100, line_width=0, fillcolor='lightgreen', opacity=0.2, row=4, col=1)
+            fig.add_hrect(y0=-400, y1=-200, line_width=0, fillcolor='green', opacity=0.2, row=4, col=1)
 
             layout = go.Layout(
                 title=f'{self.name}({self.ticker}) 과매매(Over-Trade)',
@@ -107,7 +117,7 @@ class analyze(stock):
 
 
 if __name__ == "__main__":
-    t_analyze = analyze(ticker='000660')
+    t_analyze = analyze(ticker='058470')
     # t_analyze.price_volume.show()
     # t_analyze.bollinger_band.show()
     # t_analyze.overtrade.show()
