@@ -1,4 +1,4 @@
-from .raw import *
+from tdatlib.fetch.market.raw import *
 
 
 class interface:
@@ -197,3 +197,8 @@ class interface:
             objs.append(obj.reset_index(level=0))
         self.__disp = pd.concat(objs=objs, axis=1).fillna('-')
         return self.__disp
+
+if __name__ == "__main__":
+    t_market = interface()
+    print(t_market.wics)
+    print(t_market.wi26)
