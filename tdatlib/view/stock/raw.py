@@ -55,20 +55,14 @@ def traceCandle(ohlcv:pd.DataFrame, gap:str='일봉') -> go.Candlestick:
         visible=True, showlegend=True,
     )
 
-def tracePrice(price:pd.Series, unit:str) -> go.Scatter:
-    """
-    1-D 가격선 차트
-    :param price: [pd.Series] 가격
-    :param unit: 단위
-    """
-    return go.Scatter(
-        name=price.name, x=price.index, y=price,
-        visible='legendonly', showlegend=True,
-        meta=reform(span=price.index),
-        hovertemplate='날짜: %{meta}<br>' + str(price.name) + ': %{y:,}' + unit + '<extra></extra>',
-    )
-
-def traceLine(data:pd.Series, unit:str, name:str=str(), visible:bool or str=True, showlegend:bool=True) -> go.Scatter:
+def traceLine(
+        data:pd.Series,
+        unit:str,
+        name:str=str(),
+        visible:bool or str=True,
+        showlegend:bool=True,
+        dtype:str='float'
+) -> go.Scatter:
     """
     1-D 시계열 차트
     :param data: [pd.Series] 데이터
@@ -76,13 +70,33 @@ def traceLine(data:pd.Series, unit:str, name:str=str(), visible:bool or str=True
     :param name: 이름
     :param visible: 시각화 여부
     :param showlegend: 범례 여부
+    :param dtype: 데이터 타입
     :return: 
     """
+    exp = '%{y:.2f}' if dtype == 'float' else '%{y:,}'
     return go.Scatter(
         name=data.name if not name else name, x=data.index, y=data,
         visible=visible, showlegend=showlegend,
         meta=reform(span=data.index),
-        hovertemplate='날짜: %{meta}<br>' + str(data.name) + ': %{y:.2f}' + unit + '<extra></extra>',
+        hovertemplate='날짜: %{meta}<br>' + f'{str(data.name)}: {exp}{unit}<extra></extra>'
+    )
+
+def traceBar(data:pd.Series, name:str, color:str or list or pd.Series) -> go.Bar:
+    """
+    1-D 시계열 막대 차트
+    :param data: [pd.Series] 데이터
+    :param name: 이름
+    :param color: 색상
+    :return: 
+    """
+    if isinstance(color, str) and color == 'zc':
+        color = ['royalblue' if y < 0 else 'red' for y in data.pct_change().fillna(1)]
+    return go.Bar(
+        name=name, x=data.index, y=data,
+        marker=dict(color=color),
+        visible=True, showlegend=True,
+        meta=reform(span=data.index),
+        hovertemplate='날짜: %{meta}<br>' + name + ': %{y:.2f}<extra></extra>'
     )
 
 def traceVolume(volume:pd.Series) -> go.Bar:

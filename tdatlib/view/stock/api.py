@@ -7,8 +7,9 @@ import plotly.offline as of
 
 class analyze(stock):
     __pv, __bb, __ot = go.Figure(), go.Figure(), go.Figure()
+    __rsi, __macd = go.Figure(), go.Figure()
 
-    def saveas(self, fig:go.Figure, title:str, path:str=str()):
+    def save(self, fig:go.Figure, title:str, path:str=str()):
         """
         차트 저장
         :param fig: 차트 오브젝트 
@@ -22,7 +23,7 @@ class analyze(stock):
         return
 
     @property
-    def price_volume(self) -> go.Figure:
+    def fig_pv(self) -> go.Figure:
         """
         가격, 거래량 차트
         """
@@ -30,8 +31,11 @@ class analyze(stock):
             fig = make_subplots(rows=2, cols=1, row_width=[0.15, 0.85], shared_xaxes=True, vertical_spacing=0.025)
 
             fig.add_trace(trace=traceCandle(ohlcv=self.ohlcv, gap='일봉'), row=1, col=1)
-            for name in ['시가', '고가', '저가', '종가']:
-                fig.add_trace(trace=tracePrice(price=self.ohlcv[name], unit=self.currency), row=1, col=1)
+            for n in ['시가', '고가', '저가', '종가']:
+                fig.add_trace(
+                    trace=traceLine(data=self.ohlcv[n], unit=self.currency, name=n, visible='legendonly', dtype='int'),
+                    row=1, col=1
+                )
             fig.add_trace(trace=traceVolume(volume=self.ohlcv.거래량), row=2, col=1)
 
             layout = go.Layout(
@@ -46,13 +50,16 @@ class analyze(stock):
         return self.__pv
 
     @property
-    def bollinger_band(self) -> go.Figure:
+    def fig_bb(self) -> go.Figure:
         if not self.__bb['data']:
             fig = make_subplots(rows=3, cols=1, row_width=[0.15, 0.15, 0.7], shared_xaxes=True, vertical_spacing=0.02)
 
             fig.add_trace(trace=traceCandle(ohlcv=self.ohlcv, gap='일봉'), row=1, col=1)
-            for name in ['시가', '고가', '저가', '종가']:
-                fig.add_trace(trace=tracePrice(price=self.ohlcv[name], unit=self.currency), row=1, col=1)
+            for n in ['시가', '고가', '저가', '종가']:
+                fig.add_trace(
+                    trace=traceLine(data=self.ohlcv[n], unit=self.currency, name=n, visible='legendonly', dtype='int'),
+                    row=1, col=1
+                )
 
             for n, col in enumerate(['upper', 'mid', 'lower']):
                 name = {'upper':'상한선', 'mid':'기준선', 'lower':'하한선'}[col]
@@ -79,13 +86,77 @@ class analyze(stock):
         return self.__bb
 
     @property
-    def overtrade(self) -> go.Figure:
+    def fig_rsi(self) -> go.Figure:
+        if not self.__rsi['data']:
+            fig = make_subplots(rows=3, cols=1, row_width=[0.2, 0.2, 0.6], shared_xaxes=True, vertical_spacing=0.02)
+
+            fig.add_trace(trace=traceCandle(ohlcv=self.ohlcv, gap='일봉'), row=1, col=1)
+            for n in ['시가', '고가', '저가', '종가']:
+                fig.add_trace(
+                    trace=traceLine(data=self.ohlcv[n], unit=self.currency, name=n, visible='legendonly', dtype='int'),
+                    row=1, col=1
+                )
+
+            fig.add_trace(trace=traceLine(data=self.rsi.rsi, name='RSI', unit='%'), row=2, col=1)
+            fig.add_hrect(y0=70, y1=80, line_width=0, fillcolor='red', opacity=0.2, row=2, col=1)
+            fig.add_hrect(y0=20, y1=30, line_width=0, fillcolor='green', opacity=0.2, row=2, col=1)
+
+            fig.add_trace(trace=traceLine(data=self.rsi.stochastic, name='S-RSI', unit='%'), row=3, col=1)
+            fig.add_trace(trace=traceLine(data=self.rsi['stochastic-signal'], name='S-RSI-Sig', unit='%'), row=3, col=1)
+            fig.add_hrect(y0=80, y1=100, line_width=0, fillcolor='red', opacity=0.2, row=3, col=1)
+            fig.add_hrect(y0=0, y1=20, line_width=0, fillcolor='green', opacity=0.2, row=3, col=1)
+
+            layout = go.Layout(
+                title=f'{self.name}({self.ticker}) RSI:Relative Strength Index',
+                plot_bgcolor='white',
+                xaxis=setXaxis(title=str(), label=False, xranger=True), yaxis=setYaxis(title=self.currency),
+                xaxis2=setXaxis(title=str(), label=False, xranger=False), yaxis2=setYaxis(title='RSI[%]'),
+                xaxis3=setXaxis(title='날짜', label=True, xranger=False), yaxis3=setYaxis(title='S-RSI[%]'),
+                xaxis_rangeslider=dict(visible=False)
+            )
+            fig.update_layout(layout)
+            self.__rsi = fig
+        return self.__rsi
+
+    @property
+    def fig_macd(self) -> go.Figure:
+        if not self.__macd['data']:
+            fig = make_subplots(rows=2, cols=1, row_width=[0.3, 0.7], shared_xaxes=True, vertical_spacing=0.02)
+
+            fig.add_trace(trace=traceCandle(ohlcv=self.ohlcv, gap='일봉'), row=1, col=1)
+            for n in ['시가', '고가', '저가', '종가']:
+                fig.add_trace(
+                    trace=traceLine(data=self.ohlcv[n], unit=self.currency, name=n, visible='legendonly', dtype='int'),
+                    row=1, col=1
+                )
+
+            fig.add_trace(trace=traceLine(data=self.macd.macd, name='MACD', unit=''), row=2, col=1)
+            fig.add_trace(trace=traceLine(data=self.macd.signal, name='Sigal', unit=''), row=2, col=1)
+            fig.add_trace(trace=traceBar(data=self.macd.histogram, name='Histogram', color='zc'), row=2, col=1)
+            fig.add_hline(y=0, line_width=0.5, line_dash="dash", line_color="black", row=2, col=1)
+
+            layout = go.Layout(
+                title=f'{self.name}({self.ticker}) MACD',
+                plot_bgcolor='white',
+                xaxis=setXaxis(title=str(), label=False, xranger=True), yaxis=setYaxis(title=self.currency),
+                xaxis2=setXaxis(title='날짜', label=True, xranger=False), yaxis2=setYaxis(title='MACD'),
+                xaxis_rangeslider=dict(visible=False)
+            )
+            fig.update_layout(layout)
+            self.__macd = fig
+        return self.__macd
+
+    @property
+    def fig_ot(self) -> go.Figure:
         if not self.__ot['data']:
             fig = make_subplots(rows=4, cols=1, row_width=[0.2, 0.2, 0.2, 0.4], shared_xaxes=True, vertical_spacing=0.02)
 
             fig.add_trace(trace=traceCandle(ohlcv=self.ohlcv, gap='일봉'), row=1, col=1)
-            for name in ['시가', '고가', '저가', '종가']:
-                fig.add_trace(trace=tracePrice(price=self.ohlcv[name], unit=self.currency), row=1, col=1)
+            for n in ['시가', '고가', '저가', '종가']:
+                fig.add_trace(
+                    trace=traceLine(data=self.ohlcv[n], unit=self.currency, name=n, visible='legendonly', dtype='int'),
+                    row=1, col=1
+                )
 
             fig.add_trace(trace=traceLine(data=self.rsi.rsi, name='RSI', unit='%'), row=2, col=1)
             fig.add_hrect(y0=70, y1=80, line_width=0, fillcolor='red', opacity=0.2, row=2, col=1)
@@ -117,9 +188,13 @@ class analyze(stock):
 
 
 if __name__ == "__main__":
-    t_analyze = analyze(ticker='058470')
-    # t_analyze.price_volume.show()
-    # t_analyze.bollinger_band.show()
-    # t_analyze.overtrade.show()
+    t_analyze = analyze(ticker='058470', period=3)
 
-    t_analyze.saveas(t_analyze.overtrade, title='과매매')
+    # t_analyze.fig_pv.show()
+    # t_analyze.fig_bb.show()
+    # t_analyze.fig_rsi.show()
+    t_analyze.fig_macd.show()
+
+    # t_analyze.fig_ot.show()
+
+    # t_analyze.save(t_analyze.overtrade, title='과매매')
