@@ -8,8 +8,7 @@ np.seterr(divide='ignore', invalid='ignore')
 class interface:
     __key = '종가'
     __ohlcv, __rel, __perf, __fiftytwo = pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
-    __pivot = pd.DataFrame()
-    __ta, __namebook = pd.DataFrame(), pd.DataFrame()
+    __pivot, __ta, __namebook, __trend = pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), dict()
     def __init__(self, ticker:str, period:int=5):
         self.ticker, self.period = ticker, period
         return
@@ -149,78 +148,36 @@ class interface:
             )
         return self.__pivot
 
-    @property
-    def bollinger(self) -> pd.DataFrame:
+    def avg_trend(self, gap:str=str()) -> pd.DataFrame:
         """
-        볼린저밴드(Bollinger Band)
+        평균 추세
+        :param gap: 기간
         """
-        return pd.concat(
-            objs={
-                'upper': self.ta.volatility_bbh, 'lower': self.ta.volatility_bbl, 'mid': self.ta.volatility_bbm,
-                'width': self.ta.volatility_bbw, 'signal': self.ta.volatility_bbp
-            }, axis=1
-        )
+        if not gap in self.__trend.keys():
+            self.__trend[gap] = trend(ohlcv=self.ohlcv, pivot=self.pivot, gap=gap)
+        t = self.__trend[gap]
+        return t.avg
 
-    @property
-    def rsi(self) -> pd.Series:
+    def bound(self, gap=None, days=None):
         """
-        RSI: Relative Strength Index 데이터프레임
+        기간별 지지선/저항선
+        :param gap: 기간
+        :param days: 일수
         """
-        return pd.concat(
-            objs={
-                'rsi':self.ta.momentum_rsi,
-                'stochastic': self.ta.momentum_stoch,
-                'stochastic-signal': self.ta.momentum_stoch_signal
-            }, axis=1
-        )
+        # if isinstance(gap, str):
+        #     gap2day = {'2M':61, '3M':92, '6M':183, '1Y':365}
+        #     if not gap in list(gap2day.keys()):
+        #         raise KeyError
+        #     days = gap2day[gap]
+        #
+        # since = self.ohlcv.index[-1] - timedelta(days)
+        # ohlcv = self.ohlcv[self.ohlcv.index >= since]
+        # span = pd.Series(data=np.arange(len(ohlcv)) + 1, index=ohlcv.index)
+        # pivot = self.pivot[self.pivot.index >= since]
+        return
 
-    @property
-    def macd(self) -> pd.DataFrame:
-        """
-        MACD: Moving Average Convergence & Divergence 데이터프레임
-        """
-        return pd.concat(
-            objs={
-                'macd': self.ta.trend_macd,
-                'signal': self.ta.trend_macd_signal,
-                'histogram': self.ta.trend_macd_diff
-            }, axis=1
-        )
-
-    @property
-    def vortex(self) -> pd.DataFrame:
-        """
-        Vortex
-        """
-        return pd.concat(
-            objs={
-                'VORTEX(+)': self.ta.trend_vortex_ind_pos,
-                'VORTEX(-)': self.ta.trend_vortex_ind_neg,
-                'VORTEX-Diff': self.ta.trend_vortex_ind_diff
-            }, axis=1
-        )
-
-    @property
-    def cci(self) -> pd.Series:
-        """
-        CCI: Commodity
-        """
-        return self.ta.trend_cci
-
-    @property
-    def stc(self) -> pd.Series:
-        """
-        STC: Schaff Trend Cycle
-        """
-        return self.ta.trend_stc
-
-    @property
-    def trix(self) -> pd.Series:
-        """
-        TRIX
-        """
-        return self.ta.trend_trix
 
 if __name__ == "__main__":
     t_interface = interface(ticker='000660', period=3)
-    print(t_interface.pivot)
+    # print(t_interface.pivot)
+

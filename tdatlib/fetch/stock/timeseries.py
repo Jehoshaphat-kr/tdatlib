@@ -126,24 +126,43 @@ def getExtrema(h:pd.Series or np.array, accuracy:int=2):
     minFunc, maxFunc, diff_extrema = get_peak(h)
     return diff_extrema(minFunc), diff_extrema(maxFunc)
 
-def calcAvgTrend(data:pd.Series):
-    """
-    피벗 데이터 입력 시, 평균 선형 회귀 리턴
-    :param data: 피벗 데이터                  :return:
-          날짜                                      날짜
-    2017-04-04     52200                      2017-04-04     62834.983262
-    2017-04-14     50700                      2017-04-14     63143.573207
-    2017-05-10     58100                      2017-05-10     63452.163153
-                     ...                                              ...
-    2022-03-10    121500                      2022-03-10    124861.562337
-    2022-03-18    125000                      2022-03-18    125170.152283
-    2022-03-30    123000                      2022-03-30    125478.742229
-    Name: 고가, Length: 204, dtype: int32     Length: 204, dtype: float64
-    """
-    data = data.dropna()
-    x = np.arange(len(data)) + 1
-    slope, intercept, r_value, p_value, std_err = linregress(x, data.values)
-    return pd.Series(data=slope * x + intercept, index=data.index)
+
+class trend:
+    __avg_slope_high, __avg_slope_low = None, None
+    def __init__(self, ohlcv: pd.DataFrame, pivot: pd.DataFrame, gap: str = str()):
+        days = {'2M': 61, '3M': 92, '6M': 183, '1Y': 365}[gap]
+        since = ohlcv.index[-1] - timedelta(days)
+        price = ohlcv[ohlcv.index >= since]
+        self.span = pd.Series(data=np.arange(len(price)) + 1, index=price.index)
+        self.pivot = pivot[pivot.index >= since]
+        return
+
+    @property
+    def avg(self) -> pd.DataFrame:
+        """
+        평균 선형 회귀
+        """
+        y_l, y_h = self.pivot.저점.dropna(), self.pivot.고점.dropna()
+        x_l, x_h = self.span[self.span.index.isin(y_l.index)], self.span[self.span.index.isin(y_h.index)]
+
+        self.__avg_slope_low, i_l, _, _, _ = linregress(x=x_l, y=y_l)
+        lo = self.__avg_slope_low * self.span + i_l
+
+        self.__avg_slope_high, i_h, _, _, _ = linregress(x=x_h, y=y_h)
+        hi = self.__avg_slope_high * self.span + i_h
+        return pd.concat(objs={'support': lo, 'resist': hi}, axis=1)
+
+    @property
+    def avg_slope_high(self) -> float:
+        if not self.__avg_slope_high:
+            _ = self.avg
+        return self.__avg_slope_high
+
+    @property
+    def avg_slope_low(self) -> float:
+        if not self.__avg_slope_low:
+            _ = self.avg
+        return self.__avg_slope_low
 
 
 if __name__ == "__main__":
@@ -154,7 +173,3 @@ if __name__ == "__main__":
     # print(getRelReturns(ohlcv=_ohlcv))
     # print(getPerformance(ohlcv=_ohlcv, name='SK하이닉스'))
     # print(getFiftyTwo(ohlcv=_ohlcv, name='SK하이닉스'))
-
-    _, maxima = getExtrema(h=_ohlcv.고가)
-    calc = calcAvgTrend(data=_ohlcv.고가.iloc[maxima])
-    print(calc)

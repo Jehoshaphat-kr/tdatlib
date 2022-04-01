@@ -36,12 +36,14 @@ class analyze(stock):
         )
         self.__band = [
             go.Scatter(
-                name='볼린저밴드', x=self.bollinger.index, y=self.bollinger[col],
+                name='볼린저밴드', x=df.index, y=df,
                 mode='lines', line=dict(color='rgb(184, 247, 212)'), fill='tonexty' if n else None,
                 visible=True, showlegend=False if n else True, legendgroup='볼린저밴드',
-                meta=reform(span=self.bollinger.index),
+                meta=reform(span=df.index),
                 hovertemplate=name + '<br>날짜: %{meta}<br>값: %{y:,d}원<extra></extra>',
-            ) for n, (col, name) in enumerate([('upper', '상한선'), ('mid', '기준선'), ('lower', '하한선')])
+            ) for n, (df, name) in enumerate([
+                (self.ta.volatility_bbh, '상한'), (self.ta.volatility_bbm, '기준'), (self.ta.volatility_bbl, '하한')
+            ])
         ]
         self.__init_done = True
         return
@@ -91,7 +93,6 @@ class analyze(stock):
         가격, 거래량 차트
         """
         fig = self.get_base(row_width=[0.15, 0.85], vertical_spacing=0.02)
-
         fig.update_layout(title=f'{self.name}({self.ticker}) 가격/거래량')
         return fig
 
@@ -105,6 +106,11 @@ class analyze(stock):
         for col in self.pivot.columns:
             color = 'red' if col == '고점' else 'royalblue'
             fig.add_trace(trace=traceScatter(data=self.pivot[col], unit=self.currency, color=color), row=1, col=1)
+
+        for gap in ['2M', '3M', '6M', '1Y']:
+            t, n = self.avg_trend(gap=gap), f'{gap}평균'
+            fig.add_trace(traceLine(data=t.resist, name=n, visible='legendonly', legendgroup=n, showlegend=False))
+            fig.add_trace(traceLine(data=t.support, name=n, visible='legendonly', legendgroup=n))
         fig.update_layout(title=f'{self.name}({self.ticker}) 직선 추세 차트')
         return fig
 
@@ -115,8 +121,8 @@ class analyze(stock):
         """
         fig = self.get_base(row_width=[0.15, 0.15, 0.1, 0.6])
 
-        fig.add_trace(trace=traceLine(data=self.bollinger.width, name='밴드폭', unit='%'), row=3, col=1)
-        fig.add_trace(trace=traceLine(data=self.bollinger.signal, name='신호', unit=''), row=4, col=1)
+        fig.add_trace(trace=traceLine(data=self.ta.volatility_bbw, name='밴드폭', unit='%'), row=3, col=1)
+        fig.add_trace(trace=traceLine(data=self.ta.volatility_bbp, name='신호', unit=''), row=4, col=1)
         fig.update_layout(
             title=f'{self.name}({self.ticker}) 볼린저밴드',
             xaxis3=setXaxis(title=str(), label=False, xranger=False), yaxis3=setYaxis(title='폭[%]'),
@@ -131,11 +137,11 @@ class analyze(stock):
         """
         fig = self.get_base(row_width=[0.25, 0.25, 0.1, 0.4])
 
-        fig.add_trace(trace=traceLine(data=self.rsi.rsi, name='RSI', unit='%'), row=3, col=1)
+        fig.add_trace(trace=traceLine(data=self.ta.momentum_rsi, name='RSI', unit='%'), row=3, col=1)
         fig.add_hrect(y0=70, y1=80, line_width=0, fillcolor='red', opacity=0.2, row=3, col=1)
         fig.add_hrect(y0=20, y1=30, line_width=0, fillcolor='green', opacity=0.2, row=3, col=1)
-        fig.add_trace(trace=traceLine(data=self.rsi.stochastic, name='S-RSI', unit='%'), row=4, col=1)
-        fig.add_trace(trace=traceLine(data=self.rsi['stochastic-signal'], name='S-RSI-Sig', unit='%'), row=4, col=1)
+        fig.add_trace(trace=traceLine(data=self.ta.momentum_stoch, name='S-RSI', unit='%'), row=4, col=1)
+        fig.add_trace(trace=traceLine(data=self.ta.momentum_stoch_signal, name='S-RSI-Sig', unit='%'), row=4, col=1)
         fig.add_hrect(y0=80, y1=100, line_width=0, fillcolor='red', opacity=0.2, row=4, col=1)
         fig.add_hrect(y0=0, y1=20, line_width=0, fillcolor='green', opacity=0.2, row=4, col=1)
         fig.update_layout(
@@ -152,9 +158,9 @@ class analyze(stock):
         """
         fig = self.get_base(row_width=[0.3, 0.1, 0.6])
 
-        fig.add_trace(trace=traceLine(data=self.macd.macd, name='MACD', unit=''), row=3, col=1)
-        fig.add_trace(trace=traceLine(data=self.macd.signal, name='Sigal', unit=''), row=3, col=1)
-        fig.add_trace(trace=traceBar(data=self.macd.histogram, name='Histogram', color='zc'), row=3, col=1)
+        fig.add_trace(trace=traceLine(data=self.ta.trend_macd, name='MACD', unit=''), row=3, col=1)
+        fig.add_trace(trace=traceLine(data=self.ta.trend_macd_signal, name='Signal', unit=''), row=3, col=1)
+        fig.add_trace(trace=traceBar(data=self.ta.trend_macd_diff, name='Histogram', color='zc'), row=3, col=1)
         fig.add_hline(y=0, line_width=0.5, line_dash="dash", line_color="black", row=3, col=1)
         fig.update_layout(
             title=f'{self.name}({self.ticker}) MACD',
@@ -169,7 +175,7 @@ class analyze(stock):
         """
         fig = self.get_base(row_width=[0.3, 0.1, 0.6])
 
-        fig.add_trace(trace=traceLine(data=self.cci, name='CCI', unit='%'), row=3, col=1)
+        fig.add_trace(trace=traceLine(data=self.ta.trend_cci, name='CCI', unit='%'), row=3, col=1)
         fig.add_hrect(y0=200, y1=400, line_width=0, fillcolor='red', opacity=0.2, row=3, col=1)
         fig.add_hrect(y0=100, y1=200, line_width=0, fillcolor='brown', opacity=0.2, row=3, col=1)
         fig.add_hrect(y0=-200, y1=-100, line_width=0, fillcolor='lightgreen', opacity=0.4, row=3, col=1)
@@ -187,9 +193,9 @@ class analyze(stock):
         """
         fig = self.get_base(row_width=[0.15, 0.35, 0.1, 0.4])
 
-        fig.add_trace(trace=traceLine(data=self.vortex['VORTEX(+)'], name='TRIX(+)', color='red'), row=3, col=1)
-        fig.add_trace(trace=traceLine(data=self.vortex['VORTEX(-)'], name='TRIX(-)', color='royalblue'), row=3, col=1)
-        fig.add_trace(trace=traceLine(data=self.vortex['VORTEX-Diff'], name='TRIX-Sig', color='brown'), row=4, col=1)
+        fig.add_trace(trace=traceLine(data=self.ta.trend_vortex_ind_pos, name='TRIX(+)', color='red'), row=3, col=1)
+        fig.add_trace(trace=traceLine(data=self.ta.trend_vortex_ind_neg, name='TRIX(-)', color='blue'), row=3, col=1)
+        fig.add_trace(trace=traceLine(data=self.ta.trend_vortex_ind_diff, name='TRIX-Sig', color='brown'), row=4, col=1)
         fig.add_hline(y=0, line_width=0.5, line_dash="dash", line_color="black", row=4, col=1)
         fig.update_layout(
             title=f'{self.name}({self.ticker}) VORTEX',
@@ -205,7 +211,7 @@ class analyze(stock):
         """
         fig = self.get_base(row_width=[0.3, 0.1, 0.6])
 
-        fig.add_trace(trace=traceLine(data=self.stc, name='STC', unit='%'), row=3, col=1)
+        fig.add_trace(trace=traceLine(data=self.ta.trend_stc, name='STC', unit='%'), row=3, col=1)
         fig.update_layout(
             title=f'{self.name}({self.ticker}) STC',
             xaxis3=setXaxis(title='날짜', label=True, xranger=False), yaxis3=setYaxis(title='STC'),
@@ -219,7 +225,7 @@ class analyze(stock):
         """
         fig = self.get_base(row_width=[0.3, 0.1, 0.6])
 
-        fig.add_trace(trace=traceLine(data=self.trix, name='TRIX', unit='[-]'), row=3, col=1)
+        fig.add_trace(trace=traceLine(data=self.ta.trend_trix, name='TRIX', unit='[-]'), row=3, col=1)
         fig.update_layout(
             title=f'{self.name}({self.ticker}) TRIX',
             xaxis3=setXaxis(title='날짜', label=True, xranger=False), yaxis3=setYaxis(title='TRIX'),
@@ -237,6 +243,7 @@ if __name__ == "__main__":
     t_analyze = analyze(ticker=ticker, period=3)
 
     # t_analyze.fig_pv.show()
+    t_analyze.fig_tline.show()
     # t_analyze.fig_bb.show()
     # t_analyze.fig_rsi.show()
     # t_analyze.fig_macd.show()
@@ -245,11 +252,11 @@ if __name__ == "__main__":
     # t_analyze.fig_trix.show()
 
 
-    path = rf'C:\Users\Administrator\Desktop\tdat\{datetime.datetime.today().strftime("%Y-%m-%d")}'
-    if not os.path.isdir(path):
-        os.makedirs(path)
+    # path = rf'C:\Users\Administrator\Desktop\tdat\{datetime.datetime.today().strftime("%Y-%m-%d")}'
+    # if not os.path.isdir(path):
+    #     os.makedirs(path)
     # t_analyze.save(t_analyze.fig_pv, title='가격', path=path)
-    t_analyze.save(t_analyze.fig_tline, title='직선추세', path=path)
+    # t_analyze.save(t_analyze.fig_tline, title='직선추세', path=path)
     # t_analyze.save(t_analyze.fig_bb, title='볼린저밴드', path=path)
     # t_analyze.save(t_analyze.fig_macd, title='MACD', path=path)
     # t_analyze.save(t_analyze.fig_rsi, title='RSI', path=path)

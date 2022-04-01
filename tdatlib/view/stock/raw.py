@@ -52,6 +52,7 @@ def traceLine(
         name:str=str(),
         visible:bool or str=True,
         showlegend:bool=True,
+        legendgroup:str=str(),
         color:str=str(),
         dtype:str='float'
 ) -> go.Scatter:
@@ -62,19 +63,23 @@ def traceLine(
     :param name: 이름
     :param visible: 시각화 여부
     :param showlegend: 범례 여부
+    :param legendgroup: 범례 그룹
     :param color: 색상
     :param dtype: 데이터 타입
     :return: 
     """
     exp = '%{y:.2f}' if dtype == 'float' else '%{y:,}'
+    name = data.name if not name else name
     scatter = go.Scatter(
-        name=data.name if not name else name, x=data.index, y=data,
+        name=name, x=data.index, y=data, mode='lines',
         visible=visible, showlegend=showlegend,
         meta=reform(span=data.index),
-        hovertemplate='날짜: %{meta}<br>' + f'{str(data.name)}: {exp}{unit}<extra></extra>'
+        hovertemplate='날짜: %{meta}<br>' + f'{name}: {exp}{unit}<extra></extra>'
     )
     if color:
         scatter['line'] = dict(color=color)
+    if legendgroup:
+        scatter['legendgroup'] = legendgroup
     return scatter
 
 def traceBar(data:pd.Series, name:str, color:str or list or pd.Series) -> go.Bar:
