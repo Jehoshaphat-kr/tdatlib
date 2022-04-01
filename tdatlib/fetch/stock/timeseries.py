@@ -5,6 +5,7 @@ from pykrx import stock as krx
 from datetime import datetime, timedelta
 from pytz import timezone
 from findiff import FinDiff
+from scipy.stats import linregress
 
 
 def getOhlcv(ticker:str, years:int=5) -> pd.DataFrame:
@@ -94,7 +95,7 @@ def getFiftyTwo(ohlcv:pd.DataFrame, key:str='종가', name:str='52주대비') ->
         index=['52H', '52L', 'pct52H', 'pct52L']
     ).T
 
-def getExtrema(h, accuracy=8):
+def getExtrema(h:pd.Series or np.array, accuracy:int=2):
     """
     Customized Pivot Detection
     Originally from PyPI: trendln @https://github.com/GregoryMorse/trendln
@@ -125,12 +126,35 @@ def getExtrema(h, accuracy=8):
     minFunc, maxFunc, diff_extrema = get_peak(h)
     return diff_extrema(minFunc), diff_extrema(maxFunc)
 
+def calcAvgTrend(data:pd.Series):
+    """
+    피벗 데이터 입력 시, 평균 선형 회귀 리턴
+    :param data: 피벗 데이터                  :return:
+          날짜                                      날짜
+    2017-04-04     52200                      2017-04-04     62834.983262
+    2017-04-14     50700                      2017-04-14     63143.573207
+    2017-05-10     58100                      2017-05-10     63452.163153
+                     ...                                              ...
+    2022-03-10    121500                      2022-03-10    124861.562337
+    2022-03-18    125000                      2022-03-18    125170.152283
+    2022-03-30    123000                      2022-03-30    125478.742229
+    Name: 고가, Length: 204, dtype: int32     Length: 204, dtype: float64
+    """
+    data = data.dropna()
+    x = np.arange(len(data)) + 1
+    slope, intercept, r_value, p_value, std_err = linregress(x, data.values)
+    return pd.Series(data=slope * x + intercept, index=data.index)
+
 
 if __name__ == "__main__":
     pd.set_option('display.expand_frame_repr', False)
 
     _ohlcv = getOhlcv(ticker='000660')
-    print(_ohlcv)
-    print(getRelReturns(ohlcv=_ohlcv))
-    print(getPerformance(ohlcv=_ohlcv, name='SK하이닉스'))
-    print(getFiftyTwo(ohlcv=_ohlcv, name='SK하이닉스'))
+    # print(_ohlcv)
+    # print(getRelReturns(ohlcv=_ohlcv))
+    # print(getPerformance(ohlcv=_ohlcv, name='SK하이닉스'))
+    # print(getFiftyTwo(ohlcv=_ohlcv, name='SK하이닉스'))
+
+    _, maxima = getExtrema(h=_ohlcv.고가)
+    calc = calcAvgTrend(data=_ohlcv.고가.iloc[maxima])
+    print(calc)

@@ -1,7 +1,5 @@
-import pandas as pd
-
-from .fnguide import *
-from .timeseries import *
+from tdatlib.fetch.stock.fnguide import *
+from tdatlib.fetch.stock.timeseries import *
 from ta import add_all_ta_features as taf
 import numpy as np
 np.seterr(divide='ignore', invalid='ignore')
@@ -10,6 +8,7 @@ np.seterr(divide='ignore', invalid='ignore')
 class interface:
     __key = '종가'
     __ohlcv, __rel, __perf, __fiftytwo = pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+    __pivot = pd.DataFrame()
     __ta, __namebook = pd.DataFrame(), pd.DataFrame()
     def __init__(self, ticker:str, period:int=5):
         self.ticker, self.period = ticker, period
@@ -135,6 +134,22 @@ class interface:
         return self.__fiftytwo
 
     @property
+    def pivot(self) -> pd.DataFrame:
+        """
+        가격 피벗 지점
+        """
+        if self.__pivot.empty:
+            _, maxima = getExtrema(h=self.ohlcv.고가, accuracy=2)
+            minima, _ = getExtrema(h=self.ohlcv.저가, accuracy=2)
+            self.__pivot = pd.concat(
+                objs={
+                    '저점': self.ohlcv.저가.iloc[minima],
+                    '고점': self.ohlcv.고가.iloc[maxima]
+                }, axis=1
+            )
+        return self.__pivot
+
+    @property
     def bollinger(self) -> pd.DataFrame:
         """
         볼린저밴드(Bollinger Band)
@@ -205,3 +220,7 @@ class interface:
         TRIX
         """
         return self.ta.trend_trix
+
+if __name__ == "__main__":
+    t_interface = interface(ticker='000660', period=3)
+    print(t_interface.pivot)

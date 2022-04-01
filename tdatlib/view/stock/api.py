@@ -96,6 +96,19 @@ class analyze(stock):
         return fig
 
     @property
+    def fig_tline(self) -> go.Figure:
+        """
+        직선 추세선 차트
+        """
+        fig = self.get_base(row_width=[0.15, 0.85], vertical_spacing=0.02)
+
+        for col in self.pivot.columns:
+            color = 'red' if col == '고점' else 'royalblue'
+            fig.add_trace(trace=traceScatter(data=self.pivot[col], unit=self.currency, color=color), row=1, col=1)
+        fig.update_layout(title=f'{self.name}({self.ticker}) 직선 추세 차트')
+        return fig
+
+    @property
     def fig_bb(self) -> go.Figure:
         """
         볼린저 밴드: 밴드, 폭, 신호
@@ -169,7 +182,21 @@ class analyze(stock):
 
     @property
     def fig_vortex(self) -> go.Figure:
-        return
+        """
+        VORTEX
+        """
+        fig = self.get_base(row_width=[0.15, 0.35, 0.1, 0.4])
+
+        fig.add_trace(trace=traceLine(data=self.vortex['VORTEX(+)'], name='TRIX(+)', color='red'), row=3, col=1)
+        fig.add_trace(trace=traceLine(data=self.vortex['VORTEX(-)'], name='TRIX(-)', color='royalblue'), row=3, col=1)
+        fig.add_trace(trace=traceLine(data=self.vortex['VORTEX-Diff'], name='TRIX-Sig', color='brown'), row=4, col=1)
+        fig.add_hline(y=0, line_width=0.5, line_dash="dash", line_color="black", row=4, col=1)
+        fig.update_layout(
+            title=f'{self.name}({self.ticker}) VORTEX',
+            xaxis3=setXaxis(title=str(), label=False, xranger=False), yaxis3=setYaxis(title='VORTEX'),
+            xaxis4=setXaxis(title='날짜', label=True, xranger=False), yaxis4=setYaxis(title='VORTEX-Sig'),
+        )
+        return fig
 
     @property
     def fig_stc(self) -> go.Figure:
@@ -200,12 +227,14 @@ class analyze(stock):
         return fig
 
 if __name__ == "__main__":
+    from pykrx import stock as krx
     import random, os, datetime
 
     tickers = krx.get_index_portfolio_deposit_file(ticker='1028')
     ticker = random.sample(tickers, 1)[0]
+    # ticker = 'COKE'
 
-    t_analyze = analyze(ticker=ticker, period=1)
+    t_analyze = analyze(ticker=ticker, period=3)
 
     # t_analyze.fig_pv.show()
     # t_analyze.fig_bb.show()
@@ -213,13 +242,18 @@ if __name__ == "__main__":
     # t_analyze.fig_macd.show()
     # t_analyze.fig_cci.show()
     # t_analyze.fig_stc.show()
-    t_analyze.fig_trix.show()
+    # t_analyze.fig_trix.show()
 
 
-    # path = rf'C:\Users\Administrator\Desktop\tdat\{datetime.datetime.today().strftime("%Y-%m-%d")}'
-    # if not os.path.isdir(path):
-    #     os.makedirs(path)
+    path = rf'C:\Users\Administrator\Desktop\tdat\{datetime.datetime.today().strftime("%Y-%m-%d")}'
+    if not os.path.isdir(path):
+        os.makedirs(path)
+    # t_analyze.save(t_analyze.fig_pv, title='가격', path=path)
+    t_analyze.save(t_analyze.fig_tline, title='직선추세', path=path)
     # t_analyze.save(t_analyze.fig_bb, title='볼린저밴드', path=path)
     # t_analyze.save(t_analyze.fig_macd, title='MACD', path=path)
     # t_analyze.save(t_analyze.fig_rsi, title='RSI', path=path)
-    # t_analyze.save(t_analyze.overtrade, title='과매매')
+    # t_analyze.save(t_analyze.fig_cci, title='CCI', path=path)
+    # t_analyze.save(t_analyze.fig_stc, title='STC', path=path)
+    # t_analyze.save(t_analyze.fig_trix, title='TRIX', path=path)
+    # t_analyze.save(t_analyze.fig_vortex, title='VORTEX', path=path)
