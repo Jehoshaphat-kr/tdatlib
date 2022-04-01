@@ -1,3 +1,5 @@
+import pandas as pd
+
 from .fnguide import *
 from .timeseries import *
 from ta import add_all_ta_features as taf
@@ -148,7 +150,6 @@ class interface:
     def rsi(self) -> pd.Series:
         """
         RSI: Relative Strength Index 데이터프레임
-        :return:
         """
         return pd.concat(
             objs={
@@ -162,7 +163,6 @@ class interface:
     def macd(self) -> pd.DataFrame:
         """
         MACD: Moving Average Convergence & Divergence 데이터프레임
-        :return:
         """
         return pd.concat(
             objs={
@@ -173,9 +173,35 @@ class interface:
         )
 
     @property
+    def vortex(self) -> pd.DataFrame:
+        """
+        Vortex
+        """
+        return pd.concat(
+            objs={
+                'VORTEX(+)': self.ta.trend_vortex_ind_pos,
+                'VORTEX(-)': self.ta.trend_vortex_ind_neg,
+                'VORTEX-Diff': self.ta.trend_vortex_ind_diff
+            }, axis=1
+        )
+
+    @property
     def cci(self) -> pd.Series:
         """
         CCI: Commodity
-        :return:
         """
         return self.ta.trend_cci
+
+    @property
+    def stc(self) -> pd.Series:
+        """
+        STC: Schaff Trend Cycle
+        """
+        return self.ta.trend_stc
+
+    @property
+    def trix(self) -> pd.Series:
+        """
+        TRIX
+        """
+        return self.ta.trend_trix

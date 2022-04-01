@@ -43,18 +43,6 @@ def reform(span) -> list:
     """
     return [f'{d.year}/{d.month}/{d.day}' for d in span]
 
-def traceCandle(ohlcv:pd.DataFrame, gap:str='일봉') -> go.Candlestick:
-    """
-    캔들 차트 오브젝트
-    :param ohlcv: 가격 데이터프레임
-    :param gap: 캔들명 - 일봉/주봉/월봉...
-    """
-    return go.Candlestick(
-        name=gap, x=ohlcv.index, open=ohlcv.시가, high=ohlcv.고가, low=ohlcv.저가, close=ohlcv.종가,
-        increasing_line=dict(color='red'), decreasing_line=dict(color='royalblue'),
-        visible=True, showlegend=True,
-    )
-
 def traceLine(
         data:pd.Series,
         unit:str,
@@ -97,19 +85,6 @@ def traceBar(data:pd.Series, name:str, color:str or list or pd.Series) -> go.Bar
         visible=True, showlegend=True,
         meta=reform(span=data.index),
         hovertemplate='날짜: %{meta}<br>' + name + ': %{y:.2f}<extra></extra>'
-    )
-
-def traceVolume(volume:pd.Series) -> go.Bar:
-    """
-    거래량 바 차트
-    :param volume: [pd.Series] 거래량
-    """
-    return go.Bar(
-        name='거래량', x=volume.index, y=volume,
-        marker=dict(color=['blue' if d < 0 else 'red' for d in volume.pct_change().fillna(1)]),
-        visible=True, showlegend=True,
-        meta=reform(span=volume.index),
-        hovertemplate='날짜:%{meta}<br>거래량:%{y:,d}<extra></extra>'
     )
 
 
