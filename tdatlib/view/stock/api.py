@@ -97,20 +97,25 @@ class analyze(stock):
         return fig
 
     @property
-    def fig_tline(self) -> go.Figure:
+    def fig_basic(self) -> go.Figure:
         """
         직선 추세선 차트
         """
         fig = self.get_base(row_width=[0.15, 0.85], vertical_spacing=0.02)
 
-        for col in self.pivot.columns:
-            color = 'red' if col == '고점' else 'royalblue'
-            fig.add_trace(trace=traceScatter(data=self.pivot[col], unit=self.currency, color=color), row=1, col=1)
-
+        # for col in self.pivot.columns:
+        #     color = 'red' if col == '고점' else 'royalblue'
+        #     fig.add_trace(trace=traceScatter(data=self.pivot[col], unit=self.currency, color=color), row=1, col=1)
+        for col in self.sma.columns:
+            fig.add_trace(traceLine(data=self.sma[col], name=col, visible='legendonly'))
         for gap in ['2M', '3M', '6M', '1Y']:
             t, n = self.avg_trend(gap=gap), f'{gap}평균'
             fig.add_trace(traceLine(data=t.resist, name=n, visible='legendonly', legendgroup=n, showlegend=False))
             fig.add_trace(traceLine(data=t.support, name=n, visible='legendonly', legendgroup=n))
+
+            b, m = self.bound(gap=gap), f'{gap}지지/저항'
+            fig.add_trace(traceLine(data=b.resist, name=m, visible='legendonly', legendgroup=m, showlegend=False))
+            fig.add_trace(traceLine(data=b.support, name=m, visible='legendonly', legendgroup=m))
         fig.update_layout(title=f'{self.name}({self.ticker}) 직선 추세 차트')
         return fig
 
@@ -232,24 +237,59 @@ class analyze(stock):
         )
         return fig
 
+    # -------------------------------------------------------------------------------------------------------------- #
+
+    @property
+    def fig_overview(self) -> go.Figure:
+        """
+        제품 구성, 자산 및 부채, 연간 실적, 분기 실적
+        """
+        fig = make_subplots(
+            rows=2, cols=2, vertical_spacing=0.12, horizontal_spacing=0.1,
+            subplot_titles=("제품 구성", "자산", "연간 실적", "분기 실적"),
+            specs=[[{"type": "pie"}, {"type": "xy"}], [{"type": "xy"}, {"type": "xy"}]]
+        )
+
+        product = self.product.copy()
+        fig.add_trace(go.Pie(
+            name='Product', labels=product.index, values=product,
+            textinfo='label+percent', insidetextorientation='radial',
+            visible=True, showlegend=False,
+            hoverinfo='label+percent'
+        ), row=1, col=1)
+
+        fig.update_layout(dict(
+            title=f'{self.name}[{self.ticker}] : 제품, 자산 및 실적',
+            plot_bgcolor='white',
+            margin=dict(l=0)
+        ))
+        fig.update_yaxes(title_text="억원", gridcolor='lightgrey', row=1, col=2)
+        fig.update_yaxes(title_text="억원", gridcolor='lightgrey', row=2, col=1)
+        fig.update_yaxes(title_text="억원", gridcolor='lightgrey', row=2, col=2)
+
+        return fig
+
 if __name__ == "__main__":
     from pykrx import stock as krx
     import random, os, datetime
 
-    tickers = krx.get_index_portfolio_deposit_file(ticker='1028')
-    ticker = random.sample(tickers, 1)[0]
+    # tickers = krx.get_index_portfolio_deposit_file(ticker='1028')
+    # ticker = random.sample(tickers, 1)[0]
     # ticker = 'COKE'
+    ticker = '005380'
 
     t_analyze = analyze(ticker=ticker, period=3)
 
     # t_analyze.fig_pv.show()
-    t_analyze.fig_tline.show()
+    # t_analyze.fig_basic.show()
     # t_analyze.fig_bb.show()
     # t_analyze.fig_rsi.show()
     # t_analyze.fig_macd.show()
     # t_analyze.fig_cci.show()
     # t_analyze.fig_stc.show()
     # t_analyze.fig_trix.show()
+
+    t_analyze.fig_overview.show()
 
 
     # path = rf'C:\Users\Administrator\Desktop\tdat\{datetime.datetime.today().strftime("%Y-%m-%d")}'

@@ -36,7 +36,7 @@ def getMainTables(ticker:str) -> list:
 
 def getCorpTables(ticker:str) -> list:
     """
-    FnGuide 기업개요 페이지 HTML Table 발췌
+    FnGuide 기업 개요 페이지 HTML Table 발췌
     """
     head = f"http://comp.fnguide.com/SVO2/ASP/SVD_Corp.asp?pGB=1&gicode=A{ticker}"
     tail = f"&cID=&MenuYn=Y&ReportGB=&NewMenuID=102&stkGb=701"
@@ -274,11 +274,11 @@ def getProductsPie(ticker:str, products=None) -> pd.Series:
     """
     if not isinstance(products, pd.DataFrame) or not products:
         products = getProducts(ticker=ticker)
-    df = products.iloc[-1].T.dropna().astype(float)
+    i = -1 if products.iloc[-1].astype(float).sum() > 10 else -2
+    df = products.iloc[i].T.dropna().astype(float)
     df.drop(index=df[df < 0].index, inplace=True)
-    df[df.index[-1]] += (100 - df.sum())
-    df.name = '비중'
-    return df
+    df[df.index[i]] += (100 - df.sum())
+    return df[df.values != 0]
 
 def getCosts(ticker:str, htmls=None) -> pd.DataFrame:
     """

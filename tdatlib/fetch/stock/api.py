@@ -1,14 +1,17 @@
 from tdatlib.fetch.stock.fnguide import *
 from tdatlib.fetch.stock.timeseries import *
 from ta import add_all_ta_features as taf
-import numpy as np
+from scipy.signal import butter, filtfilt
 np.seterr(divide='ignore', invalid='ignore')
 
 
 class interface:
     __key = '종가'
     __ohlcv, __rel, __perf, __fiftytwo = pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
-    __pivot, __ta, __namebook, __trend = pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), dict()
+    __pivot, __ta, __namebook = pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+    __sma, __ema, __iir, __trend = pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), dict()
+
+    __summary, __html1, __html2 = str(), list(), list()
     def __init__(self, ticker:str, period:int=5):
         self.ticker, self.period = ticker, period
         return
@@ -148,6 +151,44 @@ class interface:
             )
         return self.__pivot
 
+    @property
+    def sma(self) -> pd.DataFrame:
+        """
+        Simple Moving Average
+        """
+        if self.__sma.empty:
+            self.__sma = pd.concat(
+                objs={f'SMA{win}D': self.ohlcv[self.__key].rolling(window=win).mean() for win in [5, 10, 20, 60, 120]},
+                axis=1
+            )
+        return self.__sma
+
+    @property
+    def ema(self) -> pd.DataFrame:
+        """
+        Exponential Moving Average
+        """
+        if self.__ema.empty:
+            self.__ema = pd.concat(
+                objs={f'EMA{win}D': self.ohlcv[self.__key].ewm(span=win).mean() for win in [5, 10, 20, 60, 120]},
+                axis=1
+            )
+        return self.__ema
+
+    @property
+    def iir(self) -> pd.DataFrame:
+        """
+        Infinite-Impulse Response Filter: 반응 조정형(BUTTERWORTH)
+        """
+        if self.__iir.empty:
+            objs, price = dict(), self.ohlcv[self.__key]
+            for win in [5, 10, 20, 60, 120]:
+                cutoff = (252 / win) / (252 / 2)
+                a, b = butter(N=1, Wn=cutoff, btype='lowpass', analog=False, output='ba')
+                objs[f'IIR{win}D'] = pd.Series(data=filtfilt(a, b, price), index=price.index)
+            self.__iir = pd.concat(objs=objs, axis=1)
+        return self.__iir
+
     def avg_trend(self, gap:str=str()) -> pd.DataFrame:
         """
         평균 추세
@@ -158,26 +199,59 @@ class interface:
         t = self.__trend[gap]
         return t.avg
 
-    def bound(self, gap=None, days=None):
+    def bound(self, gap=None):
         """
         기간별 지지선/저항선
         :param gap: 기간
-        :param days: 일수
         """
-        # if isinstance(gap, str):
-        #     gap2day = {'2M':61, '3M':92, '6M':183, '1Y':365}
-        #     if not gap in list(gap2day.keys()):
-        #         raise KeyError
-        #     days = gap2day[gap]
-        #
-        # since = self.ohlcv.index[-1] - timedelta(days)
-        # ohlcv = self.ohlcv[self.ohlcv.index >= since]
-        # span = pd.Series(data=np.arange(len(ohlcv)) + 1, index=ohlcv.index)
-        # pivot = self.pivot[self.pivot.index >= since]
-        return
+        if not gap in self.__trend.keys():
+            self.__trend[gap] = trend(ohlcv=self.ohlcv, pivot=self.pivot, gap=gap)
+        t = self.__trend[gap]
+        return t.bound
+
+    # -------------------------------------------------------------------------------------------------------------- #
+
+    @property
+    def summary(self) -> str:
+        """
+        기업 개요 Summary (Text)
+        """
+        if not self.__summary:
+            self.__summary = getCorpSummary(ticker=self.ticker)
+        return self.__summary
+
+    @property
+    def product(self) -> pd.Series:
+        """
+        제품 구성
+        """
+        return getProductsPie(ticker=self.ticker)
+
+    @property
+    def annual_statement(self) -> pd.DataFrame:
+        """
+        연간 재무 요약
+        """
+        if not self.__html1:
+            self.__html1 = getMainTables(ticker=self.ticker)
+        return getAnnualStatement(ticker=self.ticker, htmls=self.__html1)
+
+    @property
+    def quarter_statement(self) -> pd.DataFrame:
+        """
+        분기 재무 요약
+        """
+        if not self.__html1:
+            self.__html1 = getMainTables(ticker=self.ticker)
+        return getQuarterStatement(ticker=self.ticker, htmls=self.__html1)
 
 
 if __name__ == "__main__":
-    t_interface = interface(ticker='000660', period=3)
+    t_interface = interface(ticker='005380', period=3)
+    print(t_interface.name)
     # print(t_interface.pivot)
-
+    # print(t_interface.bound(gap='2M'))
+    # print(t_interface.summary)
+    # print(t_interface.product)
+    # print(t_interface.annual_statement)
+    # print(t_interface.quarter_statement)

@@ -1,3 +1,4 @@
+import math
 import yfinance as yf
 import pandas as pd
 import numpy as np
@@ -132,8 +133,10 @@ class trend:
     def __init__(self, ohlcv: pd.DataFrame, pivot: pd.DataFrame, gap: str = str()):
         days = {'2M': 61, '3M': 92, '6M': 183, '1Y': 365}[gap]
         since = ohlcv.index[-1] - timedelta(days)
-        price = ohlcv[ohlcv.index >= since]
-        self.span = pd.Series(data=np.arange(len(price)) + 1, index=price.index)
+
+        self.price = ohlcv[ohlcv.index >= since].reset_index(level=0).copy()
+        self.price['N'] = (self.price.날짜.diff()).dt.days.fillna(1).astype(int).cumsum()
+        self.price.set_index(keys='날짜', inplace=True)
         self.pivot = pivot[pivot.index >= since]
         return
 
@@ -143,13 +146,13 @@ class trend:
         평균 선형 회귀
         """
         y_l, y_h = self.pivot.저점.dropna(), self.pivot.고점.dropna()
-        x_l, x_h = self.span[self.span.index.isin(y_l.index)], self.span[self.span.index.isin(y_h.index)]
+        x_l, x_h = self.price[self.price.index.isin(y_l.index)]['N'], self.price[self.price.index.isin(y_h.index)]['N']
 
         self.__avg_slope_low, i_l, _, _, _ = linregress(x=x_l, y=y_l)
-        lo = self.__avg_slope_low * self.span + i_l
+        lo = self.__avg_slope_low * self.price['N'] + i_l
 
         self.__avg_slope_high, i_h, _, _, _ = linregress(x=x_h, y=y_h)
-        hi = self.__avg_slope_high * self.span + i_h
+        hi = self.__avg_slope_high * self.price['N'] + i_h
         return pd.concat(objs={'support': lo, 'resist': hi}, axis=1)
 
     @property
@@ -163,6 +166,44 @@ class trend:
         if not self.__avg_slope_low:
             _ = self.avg
         return self.__avg_slope_low
+
+    @property
+    def bound(self) -> pd.DataFrame:
+        objs = {'resist': self.calcEdgeLine(key='고가'), 'support': self.calcEdgeLine(key='저가')}
+        return pd.concat(objs=objs, axis=1)
+
+    def calcEdgeLine(self, key:str) -> pd.Series:
+        tip_v = self.price[key].max() if key == '고가' else self.price[key].min()
+        tip = self.price[self.price[key] == tip_v]
+        tip_i, tip_n = tip.index[-1], tip['N'].values[-1]
+        regression = lambda x, y: ((y - tip_v) / (x - tip_n), y - ((y - tip_v) / (x - tip_n)) * x)
+
+        r_cond, l_cond = self.price.index > tip_i, self.price.index < tip_i
+        r_side = self.price[r_cond].drop_duplicates(keep='last').sort_values(by=key, ascending=not key == '고가')
+        l_side = self.price[l_cond].drop_duplicates(keep='first').sort_values(by=key, ascending=not key == '고가')
+
+        r_regress, l_regress = pd.Series(dtype=float), pd.Series(dtype=float)
+        for n, side in enumerate((r_side, l_side)):
+            n_prev = len(self.price)
+            for x, y in zip(side.N, side[key]):
+                slope, intercept = regression(x=x, y=y)
+                regress = slope * self.price.N + intercept
+                cond = self.price[key] >= regress if key == '고가' else self.price[key] <= regress
+
+                n_curr = len(self.price[cond])
+                if n_curr < n_prev and n_curr < 3:
+                    if n: l_regress = regress
+                    else: r_regress = regress
+                    break
+                n_prev = n_curr
+
+        if r_regress.empty:
+            return l_regress
+        if l_regress.empty:
+            return r_regress
+        r_error = math.sqrt((r_regress - self.price[key]).pow(2).sum())
+        l_error = math.sqrt((l_regress - self.price[key]).pow(2).sum())
+        return r_regress if r_error < l_error else l_regress
 
 
 if __name__ == "__main__":
