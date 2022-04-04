@@ -313,16 +313,16 @@ def getCosts(ticker:str, htmls=None) -> pd.DataFrame:
 if __name__ == '__main__':
     pd.set_option('display.expand_frame_repr', False)
 
-    _ticker = '005930'
+    _ticker = '002380'
     # print(getCorpSummary(ticker=_ticker))
     # print(getForeignRate(ticker=_ticker))
     # print(getConsensus(ticker=_ticker))
     # print(getShorts(ticker=_ticker))
     # print(getShortBalance(ticker=_ticker))
-    # print(getMultiFactor(ticker=_ticker))
+    print(getMultiFactor(ticker=_ticker))
     # print(getRelativeReturns(ticker=_ticker))
     # print(getRelativeMultiples(ticker=_ticker))
     # print(getProducts(ticker=_ticker))
     # print(getAnnualStatement(ticker=_ticker))
     # print(getQuarterStatement(ticker=_ticker))
-    print(getCosts(ticker=_ticker))
+    # print(getCosts(ticker=_ticker))

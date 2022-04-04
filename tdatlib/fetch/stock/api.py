@@ -12,6 +12,9 @@ class interface:
     __sma, __ema, __iir, __trend = pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), dict()
 
     __summary, __html1, __html2 = str(), list(), list()
+    __multi_factor, __benchmark_relative, __multiple_relative = pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+    __consensus, __foreigner, __short, __short_balance = pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+
     def __init__(self, ticker:str, period:int=5):
         self.ticker, self.period = ticker, period
         return
@@ -184,7 +187,7 @@ class interface:
             objs, price = dict(), self.ohlcv[self.__key]
             for win in [5, 10, 20, 60, 120]:
                 cutoff = (252 / win) / (252 / 2)
-                a, b = butter(N=1, Wn=cutoff, btype='lowpass', analog=False, output='ba')
+                a, b = butter(N=1, Wn=cutoff)
                 objs[f'IIR{win}D'] = pd.Series(data=filtfilt(a, b, price), index=price.index)
             self.__iir = pd.concat(objs=objs, axis=1)
         return self.__iir
@@ -245,9 +248,66 @@ class interface:
             self.__html1 = getMainTables(ticker=self.ticker)
         return getQuarterStatement(ticker=self.ticker, htmls=self.__html1)
 
+    @property
+    def multi_factor(self) -> pd.DataFrame:
+        """
+        멀티 팩터
+        """
+        if self.__multi_factor.empty:
+            self.__multi_factor = getMultiFactor(ticker=self.ticker)
+        return self.__multi_factor
+
+    @property
+    def benchmark_relative(self) -> pd.DataFrame:
+        """
+        벤치마크 지표와 수익률 비교
+        """
+        if self.__benchmark_relative.empty:
+            self.__benchmark_relative = getRelReturnsBMark(ticker=self.ticker)
+        return self.__benchmark_relative
+
+    @property
+    def multiple_relative(self) -> pd.DataFrame:
+        """
+        기초 배수 상대 지표
+        """
+        if self.__multiple_relative.empty:
+            self.__multiple_relative = getRelMultiples(ticker=self.ticker)
+        return self.__multiple_relative
+
+    @property
+    def consensus(self) -> pd.DataFrame:
+        """
+        컨센서스
+        """
+        if self.__consensus.empty:
+            self.__consensus = getConsensus(ticker=self.ticker)
+        return self.__consensus
+
+    @property
+    def foreigner(self) -> pd.DataFrame:
+        """
+        외국인 보유율
+        """
+        if self.__foreigner.empty:
+            self.__foreigner = getForeignRate(ticker=self.ticker)
+        return self.__foreigner
+
+    @property
+    def short(self) -> pd.DataFrame:
+        if self.__short.empty:
+            self.__short = getShorts(ticker=self.ticker)
+        return self.__short
+
+    @property
+    def short_balance(self) -> pd.DataFrame:
+        if self.__short_balance.empty:
+            self.__short_balance = getShortBalance(ticker=self.ticker)
+        return self.__short_balance
+
 
 if __name__ == "__main__":
-    t_interface = interface(ticker='005380', period=3)
+    t_interface = interface(ticker='002380', period=3)
     print(t_interface.name)
     # print(t_interface.pivot)
     # print(t_interface.bound(gap='2M'))
@@ -255,3 +315,10 @@ if __name__ == "__main__":
     # print(t_interface.product)
     # print(t_interface.annual_statement)
     # print(t_interface.quarter_statement)
+    # print(t_interface.multi_factor)
+    # print(t_interface.benchmark_relative)
+    # print(t_interface.multiple_relative)
+    print(t_interface.consensus)
+    print(t_interface.foreigner)
+    print(t_interface.short)
+    print(t_interface.short_balance)
