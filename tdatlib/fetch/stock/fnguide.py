@@ -310,19 +310,53 @@ def getCosts(ticker:str, htmls=None) -> pd.DataFrame:
         r_n_d.drop(index=['관련 데이터가 없습니다.'], inplace=True)
     return pd.concat(objs=[sales_cost.T, sg_n_a.T, r_n_d], axis=1).sort_index(ascending=True)
 
+def getPerPbrBand(ticker:str) -> (pd.DataFrame, pd.DataFrame):
+    """
+                  수정주가      9.30X     11.78X     14.26X     16.73X     19.21X
+    날짜
+    2017/12/01  493000  310022.57  392611.91  475201.26   557790.6  640379.95
+    2018/01/01  515000  305848.49  387325.87  468803.25  550280.63  631758.01
+    2018/02/01  512000  301674.41  382039.82  462405.23  542770.65  623136.06
+    2018/03/01  479000  297500.33  376753.77  456007.22  535260.67  614514.12
+    2018/04/01  433500  293326.25  371467.73  449609.21  527750.69  605892.17
+    ...            ...        ...        ...        ...        ...        ...
+    2024/08/01       -  400141.49  506738.32  613335.15  719931.99  826528.82
+    2024/09/01       -  396636.12  502299.13  607962.14  713625.15  819288.15
+    2024/10/01       -  393130.75  497859.93  602589.12   707318.3  812047.49
+    2024/11/01       -  389625.38  493420.74   597216.1  701011.46  804806.82
+    2024/12/01       -     386120  488981.54  591843.08  694704.62  797566.16
+    """
+    url = f"http://cdn.fnguide.com/SVO2/json/chart/01_06/chart_A{ticker}_D.json"
+    src = json.loads(urlopen(url).read().decode('utf-8-sig', 'replace'))
+    per_header = pd.DataFrame(src['CHART_E'])[['ID', 'NAME']].set_index(keys='ID')
+    pbr_header = pd.DataFrame(src['CHART_B'])[['ID', 'NAME']].set_index(keys='ID')
+    per_header, pbr_header = per_header.to_dict()['NAME'], pbr_header.to_dict()['NAME']
+    per_header.update({'GS_YM': '날짜'})
+    pbr_header.update({'GS_YM': '날짜'})
+
+    df = pd.DataFrame(src['CHART'])
+    per, pbr = df[per_header.keys()].replace('-', np.NaN), df[pbr_header.keys()].replace('-', np.NaN)
+    return per.rename(columns=per_header).set_index(keys='날짜'), pbr.rename(columns=pbr_header).set_index(keys='날짜')
+
+
 if __name__ == '__main__':
     pd.set_option('display.expand_frame_repr', False)
 
-    _ticker = '002380'
+    _ticker = '010130'
+    html1 = getMainTables(ticker=_ticker)
     # print(getCorpSummary(ticker=_ticker))
     # print(getForeignRate(ticker=_ticker))
     # print(getConsensus(ticker=_ticker))
     # print(getShorts(ticker=_ticker))
     # print(getShortBalance(ticker=_ticker))
-    print(getMultiFactor(ticker=_ticker))
+    # print(getMultiFactor(ticker=_ticker))
     # print(getRelativeReturns(ticker=_ticker))
     # print(getRelativeMultiples(ticker=_ticker))
     # print(getProducts(ticker=_ticker))
-    # print(getAnnualStatement(ticker=_ticker))
+    # print(getAnnualStatement(ticker=_ticker, htmls=html1))
     # print(getQuarterStatement(ticker=_ticker))
     # print(getCosts(ticker=_ticker))
+
+    # perBand, pbrBand = getPerPbrBand(ticker=_ticker)
+    # print(perBand)
+    # print(pbrBand)

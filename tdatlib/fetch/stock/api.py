@@ -12,6 +12,7 @@ class interface:
     __sma, __ema, __iir, __trend = pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), dict()
 
     __summary, __html1, __html2 = str(), list(), list()
+    __annual_statement, __quarter_statement = pd.DataFrame(), pd.DataFrame()
     __multi_factor, __benchmark_relative, __multiple_relative = pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
     __consensus, __foreigner, __short, __short_balance = pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
 
@@ -237,7 +238,9 @@ class interface:
         """
         if not self.__html1:
             self.__html1 = getMainTables(ticker=self.ticker)
-        return getAnnualStatement(ticker=self.ticker, htmls=self.__html1)
+        if self.__annual_statement.empty:
+            self.__annual_statement = getAnnualStatement(ticker=self.ticker, htmls=self.__html1)
+        return self.__annual_statement
 
     @property
     def quarter_statement(self) -> pd.DataFrame:
@@ -246,7 +249,9 @@ class interface:
         """
         if not self.__html1:
             self.__html1 = getMainTables(ticker=self.ticker)
-        return getQuarterStatement(ticker=self.ticker, htmls=self.__html1)
+        if self.__quarter_statement.empty:
+            self.__quarter_statement = getQuarterStatement(ticker=self.ticker, htmls=self.__html1)
+        return self.__quarter_statement
 
     @property
     def multi_factor(self) -> pd.DataFrame:
@@ -295,15 +300,30 @@ class interface:
 
     @property
     def short(self) -> pd.DataFrame:
+        """
+        공매도 비중
+        """
         if self.__short.empty:
             self.__short = getShorts(ticker=self.ticker)
         return self.__short
 
     @property
     def short_balance(self) -> pd.DataFrame:
+        """
+        대차 잔고
+        """
         if self.__short_balance.empty:
             self.__short_balance = getShortBalance(ticker=self.ticker)
         return self.__short_balance
+
+    @property
+    def cost(self) -> pd.DataFrame:
+        """
+        각 종 비용
+        """
+        if not self.__html2:
+            self.__html2 = getCorpTables(ticker=self.ticker)
+        return getCosts(ticker=self.ticker, htmls=self.__html2)
 
 
 if __name__ == "__main__":
@@ -318,7 +338,8 @@ if __name__ == "__main__":
     # print(t_interface.multi_factor)
     # print(t_interface.benchmark_relative)
     # print(t_interface.multiple_relative)
-    print(t_interface.consensus)
-    print(t_interface.foreigner)
-    print(t_interface.short)
-    print(t_interface.short_balance)
+    # print(t_interface.consensus)
+    # print(t_interface.foreigner)
+    # print(t_interface.short)
+    # print(t_interface.short_balance)
+    print(t_interface.cost)

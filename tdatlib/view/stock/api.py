@@ -356,19 +356,45 @@ class analyze(stock):
                    [{"type": "xy", "secondary_y": True}, {"type": "xy", 'secondary_y': True}]]
         )
 
-        consen = self.consensus[['목표주가', '종가']].astype(int).copy()
-        fig.add_trace(trace=traceLine(data=consen.목표주가, name='컨센서스: 목표가', unit='원', dtype='int'), row=1, col=1)
-        fig.add_trace(trace=traceLine(data=consen.종가, name='컨센서스: 종가', unit='원', dtype='int'), row=1, col=1)
+        consen = self.consensus.copy()
+        fig.add_trace(
+            trace=traceLine(data=consen.목표주가.dropna().astype(int), name='컨센서스: 목표가', unit='원', dtype='int'),
+            row=1, col=1
+        )
+        fig.add_trace(
+            trace=traceLine(data=consen.종가.astype(int), name='컨센서스: 종가', unit='원', dtype='int'),
+            row=1, col=1
+        )
 
         foreign = self.foreigner.copy()
         for m, col in enumerate(['3M', '1Y', '3Y']):
             df = foreign[col].dropna()
+            df = df[df != '']
             for n, c in enumerate(df.columns):
                 data = df[c].astype(float) if n else df[c].astype(int)
-                name, unit, visible = f'외인비중: {col}', '%' if n else '원', 'legendonly' if m else True
+                name, unit, visible = f'외인비중: {col}' if n else '종가', '%' if n else '원', 'legendonly' if m else True
                 showlegend, dtype = True if n else False, 'float' if n else 'int'
-                trace = traceLine(data=data, name=name, unit=unit, legendgroup=name, showlegend=showlegend, dtype=dtype)
+                trace = traceLine(
+                    data=data, name=name, unit=unit, legendgroup=name, visible=visible, showlegend=showlegend, dtype=dtype
+                )
                 fig.add_trace(trace=trace, row=1, col=2, secondary_y=False if n else True)
+
+        shorts = self.short.copy()
+        for n, col in enumerate(shorts.columns):
+            data = shorts[col].astype(int) if n else shorts[col].astype(float)
+            name, unit = f'공매도: {col}' if n else col, '원' if n else '%'
+            dtype, s_y = 'int' if n else 'float', True if n else False
+            fig.add_trace(traceLine(data=data, name=name, unit=unit, dtype=dtype), row=2, col=1, secondary_y=s_y)
+
+        balance = self.short_balance.copy()
+        for n, col in enumerate(balance.columns):
+            data = balance[col].astype(int) if n else balance[col].astype(float)
+            name, unit, showlegend = col if n else col, '원' if n else '%', False if n else True
+            dtype, s_y = 'int' if n else 'float', True if n else False
+            fig.add_trace(
+                trace=traceLine(data=data, name=name, unit=unit, dtype=dtype, showlegend=showlegend),
+                row=2, col=2, secondary_y=s_y
+            )
 
         fig.update_layout(dict(title=f'{self.name}[{self.ticker}] : 수급 현황', plot_bgcolor='white'))
         fig.update_yaxes(title_text="주가[원]", showgrid=True, gridcolor='lightgrey', row=1, col=1)
@@ -378,15 +404,47 @@ class analyze(stock):
             fig.update_yaxes(title_text="비중[%]", showgrid=False, row=row, col=col, secondary_y=False)
         return fig
 
+    @property
+    def fig_cost(self) -> go.Figure:
+        """
+        지출 비용
+        """
+        fig = make_subplots(
+            rows=2, cols=2, vertical_spacing=0.11, horizontal_spacing=0.1,
+            subplot_titles=("매출 원가", "판관비", "R&D투자 비중", "부채율"),
+            specs=[[{"type": "xy", "secondary_y": True}, {"type": "xy", "secondary_y": True}],
+                   [{"type": "xy", "secondary_y": True}, {"type": "xy", 'secondary_y': True}]]
+        )
+
+        cost = self.cost.copy()
+        for n, col in enumerate(['매출원가율', '판관비율', 'R&D투자비중']):
+            df = cost[col].dropna().astype(float) if n < 2 else cost[col].fillna(0).astype(float)
+            fig.add_trace(go.Bar(
+                x=df.index, y=df, name=col,
+                hovertemplate='%{x}<br>' + col + ': %{y:.2f}%<extra></extra>'
+            ), row = n // 2 + 1, col=n % 2 + 1)
+
+        a_stat = self.annual_statement.copy()
+        fig.add_trace(go.Bar(
+            x=a_stat.index, y=a_stat['부채비율'].astype(float), name='부채비율',
+            hovertemplate='%{x}<br>부채비율: %{y:.2f}%<extra></extra>'
+       ), row=2, col=2)
+
+        fig.update_layout(dict(title=f'{self.name}[{self.ticker}]: 비용과 부채', plot_bgcolor='white'))
+        for row, col in ((1, 1), (1, 2), (2, 1), (2, 2)):
+            fig.update_yaxes(title_text="비율[%]", showgrid=True, gridcolor='lightgrey', row=row, col=col)
+        return fig
+
 
 if __name__ == "__main__":
+    from tdatlib import archive
     from pykrx import stock as krx
     import random, os, datetime
 
-    # tickers = krx.get_index_portfolio_deposit_file(ticker='1028')
-    # ticker = random.sample(tickers, 1)[0]
+    tickers = krx.get_index_portfolio_deposit_file(ticker='1028')
+    ticker = random.sample(tickers, 1)[0]
     # ticker = 'COKE'
-    ticker = '000240'
+    # ticker = '093370'
 
     t_analyze = analyze(ticker=ticker, period=3)
     print(t_analyze.name, ticker)
@@ -403,7 +461,7 @@ if __name__ == "__main__":
     # t_analyze.fig_overview.show()
 
 
-    path = rf'C:\Users\Administrator\Desktop\tdat\{datetime.datetime.today().strftime("%Y-%m-%d")}'
+    path = os.path.join(archive.desktop, f'tdat/{datetime.datetime.today().strftime("%Y-%m-%d")}')
     if not os.path.isdir(path):
         os.makedirs(path)
     # t_analyze.save(t_analyze.fig_pv, title='가격', path=path)
@@ -419,3 +477,4 @@ if __name__ == "__main__":
     t_analyze.save(t_analyze.fig_overview, title='Overview', path=path)
     t_analyze.save(t_analyze.fig_relative, title='Relative', path=path)
     t_analyze.save(t_analyze.fig_supply, title='Supply', path=path)
+    t_analyze.save(t_analyze.fig_cost, title='Cost', path=path)
