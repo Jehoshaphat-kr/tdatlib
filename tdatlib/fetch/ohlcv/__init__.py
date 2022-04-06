@@ -44,7 +44,7 @@ class ohlcv:
         """
         if self.__ohlcv.empty:
             ohlcv = getOhlcv(ticker=self.ticker, period=self.period)
-            if 0 in ohlcv['시가'].tolist():
+            if self.currency == 'KRW' and 0 in ohlcv['시가']:
                 prices = zip(ohlcv.시가, ohlcv.종가, ohlcv.저가, ohlcv.고가, ohlcv.거래량)
                 data = [[c, c, c, c, v] if o == 0 else [o, c, l, h, v] for o, c, l, h, v in prices]
                 self.__ohlcv = pd.DataFrame(data=data, columns=ohlcv.columns, index=ohlcv.index)
@@ -197,17 +197,17 @@ class ohlcv:
 
 
 if __name__ == "__main__":
-    # ticker = '005930'
+    ticker = '035720'
     # ticker = '1028'
-    ticker = 'TSLA'
+    # ticker = 'TSLA'
 
     app = ohlcv(ticker=ticker, period=3)
     print(app.ohlcv)
     print(app.perf)
-    print(app.rel)
-    print(app.pivot)
-    print(app.sma)
-    print(app.ema)
-    print(app.iir)
-    print(app.get_trend(gap='3M'))
-    print(app.get_bound(gap='3M'))
+    # print(app.rel)
+    # print(app.pivot)
+    # print(app.sma)
+    # print(app.ema)
+    # print(app.iir)
+    # print(app.get_trend(gap='3M'))
+    # print(app.get_bound(gap='3M'))

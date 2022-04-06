@@ -215,18 +215,18 @@ class trend:
 
 
 if __name__ == "__main__":
-    # ticker = '005930'
-    ticker = '1028'
+    ticker = '035720'
+    # ticker = '1028'
     # ticker = 'TSLA'
 
     ohlcv = getOhlcv(ticker=ticker)
-    # print(ohlcv)
+    print(ohlcv)
 
     # rel_returns = getRelReturns(ohlcv=ohlcv, key='종가')
     # print(rel_returns)
 
-    # performance = getPerf(ohlcv=ohlcv)
-    # print(performance)
+    performance = getPerf(ohlcv=ohlcv)
+    print(performance)
 
     # fifty_two = getFiftyTwo(ohlcv=ohlcv)
     # print(fifty_two)

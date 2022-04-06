@@ -260,7 +260,7 @@ def calcPost(frame:pd.DataFrame, category:str, kosdaq:list=None):
         frame['PER'] = frame['PER'].apply(lambda val: val if not val == 0 else 'N/A')
     return frame
 
-def isETFLatest() -> bool:
+def isETFLatest(run:bool=True) -> bool:
     """
     ETF 관리 파일(Excel) 최신화 여부 :: openpyxl 필요 / Local 사용 권장
     """
@@ -276,8 +276,8 @@ def isETFLatest() -> bool:
             if not frm.empty:
                 print("-" * 70, f"\n▷ ETF 분류 {kind} 필요 항목: {'없음' if frm.empty else '있음'}")
                 print(frm)
-
-        os.startfile(archive.etf_xl)
+        if run:
+            os.startfile(archive.etf_xl)
         return False
 
 def convertETFExcel2Csv():

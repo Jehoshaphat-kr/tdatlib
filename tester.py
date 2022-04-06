@@ -1,12 +1,7 @@
-import tdatlib
-from pykrx import stock as krx
-from datetime import datetime, timedelta
-from pytz import timezone
-from tqdm import tqdm
-import pandas as pd
+from datetime import datetime
 import time as t
 import pyautogui as pya
-
+import tdatlib
 
 def auto_mouse(t_gap:int=50, due:int=0):
     """
@@ -26,14 +21,7 @@ def auto_mouse(t_gap:int=50, due:int=0):
 
 
 if __name__ == "__main__":
-    # auto_mouse(t_gap=90)
-    #
-    # pd.set_option('display.expand_frame_repr', False)
-    # kst = datetime.now(timezone('Asia/Seoul'))
-    # t_today = kst.strftime("%Y%m%d")
-    # t_stamp = [(kst - timedelta(days)).strftime("%Y%m%d") for days in [7, 30, 91, 183, 365]]
-    #
-    # if tl.is_etf_latest():
-    #     tl.convert_etf_excel2csv()
+    auto_mouse(t_gap=90)
 
-    print(tdatlib.kmarket.wics)
+    if tdatlib.is_etf_latest(run=False):
+        tdatlib.etf_excel_to_csv()

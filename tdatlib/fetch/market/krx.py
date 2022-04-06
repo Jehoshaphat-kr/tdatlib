@@ -5,11 +5,11 @@ from tdatlib import archive
 from tqdm import tqdm
 from pytz import timezone
 from datetime import datetime, timedelta
-from pykrx import stock as krx
+from pykrx import stock
 
 
 kst = datetime.now(timezone('Asia/Seoul'))
-tdt = krx.get_nearest_business_day_in_a_week(date=kst.strftime("%Y%m%d"))
+tdt = stock.get_nearest_business_day_in_a_week(date=kst.strftime("%Y%m%d"))
 def getWiseDate() -> str:
     """
     WISE INDEX 산업 분류 기준 날짜
@@ -66,7 +66,7 @@ def getCorpIPO() -> pd.DataFrame:
     331660  한국미라클피플사 2019-10-28
     212310            휴벡셀 2016-07-26
     """
-    link = 'http://kind.krx.co.kr/corpgeneral/corpList.do?method=download&searchType=13'
+    link = 'http://kind.stock.co.kr/corpgeneral/corpList.do?method=download&searchType=13'
     ipo = pd.read_html(io=link, header=0)[0][['회사명', '종목코드', '상장일']]
     ipo = ipo.rename(columns={'회사명': '종목명', '상장일': 'IPO'}).set_index(keys='종목코드')
     ipo.index = ipo.index.astype(str).str.zfill(6)
@@ -160,7 +160,7 @@ def getTradingDate() -> dict:
     td = datetime.strptime(tdt, "%Y%m%d")
     dm = lambda x:(td - timedelta(x)).strftime("%Y%m%d")
     iter = [('1D', 1), ('1W', 7), ('1M', 30), ('3M', 91), ('6M', 183), ('1Y', 365)]
-    return {l:krx.get_nearest_business_day_in_a_week(date=dm(d)) for l, d in iter}
+    return {l:stock.get_nearest_business_day_in_a_week(date=dm(d)) for l, d in iter}
 
 def getEvenShares(date:str=str()) -> list:
     """
@@ -168,13 +168,13 @@ def getEvenShares(date:str=str()) -> list:
     :param date: 기준 날짜, 미입력 시 1Y 전 거래일 생성
     ['005930', '000660', '005935', ..., '344860', '000325', '001529']
     """
-    date = krx.get_nearest_business_day_in_a_week(
+    date = stock.get_nearest_business_day_in_a_week(
         date=(datetime.strptime(tdt, "%Y%m%d") - timedelta(365)).strftime("%Y%m%d")
     ) if not date else date
 
     shares = pd.concat(objs={
-        'prev': krx.get_market_cap_by_ticker(date=date, market='ALL')['상장주식수'],
-        'curr': krx.get_market_cap_by_ticker(date=tdt, market='ALL')['상장주식수']
+        'prev': stock.get_market_cap_by_ticker(date=date, market='ALL')['상장주식수'],
+        'curr': stock.get_market_cap_by_ticker(date=tdt, market='ALL')['상장주식수']
     }, axis=1)
     return shares[shares.prev == shares.curr].index.tolist()
 
@@ -194,14 +194,14 @@ def getCorpPerformance(even_tickers:list=None, tds:dict=None, key:str='종가') 
     037440  0.44  0.11 -10.20  18.35  43.35  113.52
     238490  0.00 -3.17  -2.07  -0.84  -6.24  -27.43
     """
-    if not isinstance(even_tickers, list) or not even_tickers:
+    if not even_tickers:
         even_tickers = getEvenShares()
-    if not isinstance(tds, dict) and not tds:
+    if not tds:
         tds = getTradingDate()
 
-    objs = {'TD0D': krx.get_market_ohlcv_by_ticker(date=tdt, market='ALL', prev=False)[key]}
+    objs = {'TD0D': stock.get_market_ohlcv_by_ticker(date=tdt, market='ALL', prev=False)[key]}
     for k, date, in tqdm(tds.items(), desc='기간별 수익률 계산(주식)'):
-        objs[f'TD{k}'] = krx.get_market_ohlcv_by_ticker(date=date, market='ALL', prev=False)[key]
+        objs[f'TD{k}'] = stock.get_market_ohlcv_by_ticker(date=date, market='ALL', prev=False)[key]
     prices = pd.concat(objs=objs, axis=1)
 
     perf = pd.concat(objs={f'R{k}': round(100 * (prices.TD0D/prices[f'TD{k}'] - 1), 2) for k in tds.keys()}, axis=1)
@@ -227,9 +227,9 @@ def getEtfPerformance(tds:dict=None, key:str='종가') -> pd.DataFrame:
     if not isinstance(tds, dict) and not tds:
         tds = getTradingDate()
 
-    objs = {'TD0D': krx.get_etf_ohlcv_by_ticker(date=tdt)[key]}
+    objs = {'TD0D': stock.get_etf_ohlcv_by_ticker(date=tdt)[key]}
     for k, date in tqdm(tds.items(), desc='기간별 수익률 계산(ETF)'):
-        objs[f'TD{k}'] = krx.get_etf_ohlcv_by_ticker(date=date)[key]
+        objs[f'TD{k}'] = stock.get_etf_ohlcv_by_ticker(date=date)[key]
     prices = pd.concat(objs=objs, axis=1)
 
     perf = pd.concat(objs={f'R{k}': round(100 * (prices.TD0D/prices[f'TD{k}'] - 1), 2) for k in tds.keys()}, axis=1)
@@ -250,12 +250,12 @@ def getIndexGroup(market:str) -> pd.DataFrame:
     1244     코스피200제외 코스피지수      KOSPI
     1894            코스피 200 TOP 10      KOSPI
     """
-    if not market.lower() in ['kospi', 'kosdaq', 'krx', 'theme']:
+    if not market.lower() in ['kospi', 'kosdaq', 'stock', 'theme']:
         raise KeyError(f'Argument {market} not in [KOSPI, KOSDAQ, KRX, THEME]')
-    tickers = krx.get_index_ticker_list(market='테마' if market == 'THEME' else market)
+    tickers = stock.get_index_ticker_list(market='테마' if market == 'THEME' else market)
     return pd.DataFrame(data={
         '종목코드': tickers,
-        '종목명': [krx.get_index_ticker_name(ticker) for ticker in tickers],
+        '종목명': [stock.get_index_ticker_name(ticker) for ticker in tickers],
         '지수분류': [market] * len(tickers)
     }).set_index(keys='종목코드')
 
