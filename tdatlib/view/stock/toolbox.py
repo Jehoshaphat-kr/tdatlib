@@ -94,7 +94,11 @@ def traceLine(
         scatter['legendgroup'] = legendgroup
     return scatter
 
-def traceBar(data:pd.Series, name:str, color:str or list or pd.Series) -> go.Bar:
+def traceBar(
+        data:pd.Series,
+        name:str,
+        color:str or list or pd.Series
+) -> go.Bar:
     """
     1-D 시계열 막대 차트
     :param data: [pd.Series] 데이터

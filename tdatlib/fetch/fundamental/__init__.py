@@ -1,4 +1,5 @@
 from tdatlib.fetch.fundamental.fnguide import *
+from pykrx import stock
 
 
 class kr_fundamental:
@@ -8,9 +9,15 @@ class kr_fundamental:
     __multi_factor, __benchmark_relative, __multiple_relative = pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
     __consensus, __foreigner, __short, __short_balance = pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
 
-    def __init__(self, ticker:str):
-        self.ticker = ticker
+    def __init__(self, ticker:str, name:str=str()):
+        self.ticker, self.__name = ticker, name
         return
+
+    @property
+    def name(self) -> str:
+        if not self.__name:
+            self.__name = stock.get_market_ticker_name(ticker=self.ticker)
+        return self.__name
 
     @property
     def summary(self) -> str:

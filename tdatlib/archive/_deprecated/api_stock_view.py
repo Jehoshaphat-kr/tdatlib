@@ -1,4 +1,4 @@
-from tdatlib.view.stock.raw import *
+from tdatlib.view.stock.toolbox import *
 from tdatlib import stock, archive
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
