@@ -1,11 +1,11 @@
 import time, os
 import pandas as pd
-from tdatlib import archive, market, stock
+from tdatlib import archive, kr_market, ohlcv
 from pykrx import stock as krx
 from tqdm import tqdm
 
 
-market = market()
+market = kr_market()
 def __getCategory(category:str) -> pd.DataFrame:
     """
     분류에 따른 데이터 수집
@@ -49,7 +49,7 @@ def __getPerformance(tickers) -> pd.DataFrame:
             done = False
             while not done:
                 try:
-                    other = stock(ticker=ticker, period=2).perf
+                    other = ohlcv(ticker=ticker, period=2).perf
                     perf = pd.concat(objs=[perf, other], axis=0, ignore_index=False)
                     done = True
                 except ConnectionError as e:

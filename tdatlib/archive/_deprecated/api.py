@@ -1,4 +1,4 @@
-from tdatlib.view.treemap.tools import *
+from tdatlib.view.treemap.toolbox import *
 from datetime import datetime
 from pytz import timezone
 import plotly.graph_objects as go
