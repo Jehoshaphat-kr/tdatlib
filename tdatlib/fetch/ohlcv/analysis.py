@@ -70,7 +70,7 @@ def getRelReturns(ohlcv:pd.DataFrame, key:str='종가') -> pd.DataFrame:
     v = ohlcv[key].copy()
     objs = {
         label: 100 * (v[v.index >= v.index[-1] - timedelta(dt)].pct_change().fillna(0) + 1).cumprod() - 100
-        for label, dt in [('3M', 92), ('6M', 183), ('1Y', 365), ('2Y', 730), ('3Y', 1095)]
+        for label, dt in [('3M', 92), ('6M', 183), ('1Y', 365), ('2Y', 730), ('3Y', 1095), ('5Y', 1825)]
     }
     return pd.concat(objs=objs, axis=1)
 

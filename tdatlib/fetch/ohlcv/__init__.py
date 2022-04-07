@@ -9,7 +9,7 @@ class ohlcv:
     __key, __name, __namebook = '종가', str(), pd.DataFrame()
     __ohlcv, __ta = pd.DataFrame(), pd.DataFrame()
     __rel, __perf, __fiftytwo, __pivot = pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
-    __sma, __ema, __iir, __trend = pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), dict()
+    __sma, __ema, __iir = pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
 
     def __init__(self, ticker:str, period:int=5):
         self.ticker, self.period = ticker, period
@@ -180,20 +180,18 @@ class ohlcv:
         평균 추세
         :param gap: 기간
         """
-        if not gap in self.__trend.keys():
-            self.__trend[gap] = trend(ohlcv=self.ohlcv, pivot=self.pivot, gap=gap)
-        t = self.__trend[gap]
-        return t.avg
+        if not hasattr(self, f'trend_{gap}'):
+            setattr(self, f'trend_{gap}', trend(ohlcv=self.ohlcv, pivot=self.pivot, gap=gap))
+        return getattr(self, f'trend_{gap}').avg
 
     def get_bound(self, gap: str = str()):
         """
         기간별 지지선/저항선
         :param gap: 기간
         """
-        if not gap in self.__trend.keys():
-            self.__trend[gap] = trend(ohlcv=self.ohlcv, pivot=self.pivot, gap=gap)
-        t = self.__trend[gap]
-        return t.bound
+        if not hasattr(self, f'trend_{gap}'):
+            setattr(self, f'trend_{gap}', trend(ohlcv=self.ohlcv, pivot=self.pivot, gap=gap))
+        return getattr(self, f'trend_{gap}').bound
 
 
 if __name__ == "__main__":

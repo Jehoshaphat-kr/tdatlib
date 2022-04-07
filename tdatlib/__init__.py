@@ -1,7 +1,7 @@
 import tdatlib.archive as archive
 from tdatlib.fetch import (
-    kr_fundamental,
-    kr_market,
+    fundamental_kr,
+    market_kr,
     ohlcv
 )
 from tdatlib.view import (

@@ -1,11 +1,11 @@
 import time, os
 import pandas as pd
-from tdatlib import archive, kr_market, ohlcv
+from tdatlib import archive, market_kr, ohlcv
 from pykrx import stock as krx
 from tqdm import tqdm
 
 
-market = kr_market()
+market = market_kr()
 def __getCategory(category:str) -> pd.DataFrame:
     """
     분류에 따른 데이터 수집

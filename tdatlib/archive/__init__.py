@@ -13,7 +13,8 @@ wi26 = os.path.join(root, 'market/classify/wi26.csv')
 map_js = os.path.join(root, 'market/map/map-suffix.js')
 deposit = os.path.join(root, 'market/general/deposit.csv')
 icm = os.path.join(root, 'market/general/icm.csv')
-performance = os.path.join(root, f'market/performance/{kst.strftime("%Y%m%d")}perf.csv')
+perf = lambda x: os.path.join(root, f'market/performance/{x if x else kst.strftime("%Y%m%d")}perf.csv')
+
 
 # noinspection PyBroadException
 try:

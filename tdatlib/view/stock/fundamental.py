@@ -1,11 +1,11 @@
 from tdatlib.view.stock.toolbox import *
-from tdatlib import kr_fundamental
+from tdatlib import fundamental_kr
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 import plotly.offline as of
 
 
-class fundamental(kr_fundamental):
+class fundamental(fundamental_kr):
 
     def __init__(self, ticker:str, name:str=str()):
         super().__init__(ticker=ticker, name=name)
