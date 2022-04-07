@@ -143,11 +143,11 @@ class fundamental(kr_fundamental):
 
         consen = self.consensus.copy()
         fig.add_trace(
-            trace=traceLine(data=consen.목표주가.dropna().astype(int), name='컨센서스: 목표가', unit='원', dtype='int'),
+            trace=traceLine(data=consen.목표주가.dropna(), name='컨센서스: 목표가', unit='원', dtype='int'),
             row=1, col=1
         )
         fig.add_trace(
-            trace=traceLine(data=consen.종가.astype(int), name='컨센서스: 종가', unit='원', dtype='int'),
+            trace=traceLine(data=consen.종가, name='컨센서스: 종가', unit='원', dtype='int'),
             row=1, col=1
         )
 

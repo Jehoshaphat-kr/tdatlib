@@ -4,3 +4,8 @@ from tdatlib.view.treemap import (
     isETFLatest as is_etf_latest,
     convertETFExcel2Csv as etf_excel_to_csv
 )
+
+from tdatlib.view.stock import (
+    view_technical,
+    view_fundamental
+)

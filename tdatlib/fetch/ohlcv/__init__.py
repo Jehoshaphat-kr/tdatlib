@@ -44,10 +44,10 @@ class ohlcv:
         """
         if self.__ohlcv.empty:
             ohlcv = getOhlcv(ticker=self.ticker, period=self.period)
-            if self.currency == 'KRW' and 0 in ohlcv['시가']:
-                prices = zip(ohlcv.시가, ohlcv.종가, ohlcv.저가, ohlcv.고가, ohlcv.거래량)
-                data = [[c, c, c, c, v] if o == 0 else [o, c, l, h, v] for o, c, l, h, v in prices]
-                self.__ohlcv = pd.DataFrame(data=data, columns=ohlcv.columns, index=ohlcv.index)
+            if self.currency == 'KRW':
+                trade_stop = ohlcv[ohlcv.시가 == 0].copy()
+                ohlcv.loc[trade_stop.index, ['시가', '고가', '저가']] = trade_stop['종가']
+                self.__ohlcv = ohlcv
             else:
                 self.__ohlcv = ohlcv
         return self.__ohlcv

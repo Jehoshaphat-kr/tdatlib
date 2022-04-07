@@ -92,6 +92,8 @@ class kr_fundamental:
         """
         if self.__consensus.empty:
             self.__consensus = getConsensus(ticker=self.ticker)
+            for col in self.__consensus.columns:
+                self.__consensus[col] = self.__consensus[col].apply(lambda x:int(float(x)) if x else np.NaN)
         return self.__consensus
 
     @property
@@ -152,7 +154,7 @@ class kr_fundamental:
 if __name__ == "__main__":
     ticker = '005930'
 
-    app = fundamental_krx(ticker=ticker)
+    app = kr_fundamental(ticker=ticker)
     print(app.summary)
     print(app.product)
     print(app.annual_statement)
