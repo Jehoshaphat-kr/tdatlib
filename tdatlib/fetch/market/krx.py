@@ -66,7 +66,7 @@ def getCorpIPO() -> pd.DataFrame:
     331660  한국미라클피플사 2019-10-28
     212310            휴벡셀 2016-07-26
     """
-    link = 'http://kind.stock.co.kr/corpgeneral/corpList.do?method=download&searchType=13'
+    link = 'http://kind.krx.co.kr/corpgeneral/corpList.do?method=download'
     ipo = pd.read_html(io=link, header=0)[0][['회사명', '종목코드', '상장일']]
     ipo = ipo.rename(columns={'회사명': '종목명', '상장일': 'IPO'}).set_index(keys='종목코드')
     ipo.index = ipo.index.astype(str).str.zfill(6)

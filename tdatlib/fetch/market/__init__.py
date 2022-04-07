@@ -34,7 +34,7 @@ class kr_market:
         if not self.__icm.empty:
             return self.__icm.drop(columns=['날짜'])
 
-        today = krx.get_nearest_business_day_in_a_week(date=kst.strftime("%Y%m%d"))
+        today = stock.get_nearest_business_day_in_a_week(date=kst.strftime("%Y%m%d"))
         self.__icm = pd.read_csv(archive.icm, index_col='종목코드', encoding='utf-8')
         self.__icm.index = self.__icm.index.astype(str).str.zfill(6)
 
@@ -44,8 +44,8 @@ class kr_market:
             self.__icm = pd.concat(
                 objs=[
                     getCorpIPO(),
-                    krx.get_market_cap_by_ticker(date=today, market="ALL"),
-                    krx.get_market_fundamental(date=today, market='ALL')
+                    stock.get_market_cap_by_ticker(date=today, market="ALL"),
+                    stock.get_market_fundamental(date=today, market='ALL')
                 ], axis=1
             )
             self.__icm['날짜'] = icm_date if is_ongoing else today
@@ -204,6 +204,6 @@ class kr_market:
 
 
 if __name__ == "__main__":
-    market = market_krx()
+    market = kr_market()
     print(market.wics)
     print(market.wi26)
