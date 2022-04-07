@@ -8,6 +8,7 @@ class kr_fundamental:
     __annual_statement, __quarter_statement = pd.DataFrame(), pd.DataFrame()
     __multi_factor, __benchmark_relative, __multiple_relative = pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
     __consensus, __foreigner, __short, __short_balance = pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+    __multiples, __multiple_band = pd.DataFrame(), pd.DataFrame()
 
     def __init__(self, ticker:str, name:str=str()):
         self.ticker, self.__name = ticker, name
@@ -128,6 +129,24 @@ class kr_fundamental:
         if not self.__html2:
             self.__html2 = getCorpTables(ticker=self.ticker)
         return getCosts(ticker=self.ticker, htmls=self.__html2)
+
+    @property
+    def multiples(self) -> pd.DataFrame:
+        """
+        시계열 멀티플
+        """
+        if self.__multiples.empty:
+            self.__multiples = getMultipleSeries(ticker=self.ticker)
+        return self.__multiples
+
+    @property
+    def multiple_band(self) -> pd.DataFrame:
+        """
+        멀티플 밴드
+        """
+        if self.__multiple_band.empty:
+            self.__multiple_band = getMultipleBand(ticker=self.ticker)
+        return self.__multiple_band
 
 
 if __name__ == "__main__":

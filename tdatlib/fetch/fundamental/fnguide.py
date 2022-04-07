@@ -1,8 +1,10 @@
 import requests, json
 import pandas as pd
 import numpy as np
+from datetime import datetime, timedelta
 from urllib.request import urlopen
 from bs4 import BeautifulSoup as Soup
+from pykrx import stock
 
 
 def getCorpSummary(ticker:str):
@@ -310,9 +312,9 @@ def getCosts(ticker:str, htmls=None) -> pd.DataFrame:
         r_n_d.drop(index=['관련 데이터가 없습니다.'], inplace=True)
     return pd.concat(objs=[sales_cost.T, sg_n_a.T, r_n_d], axis=1).sort_index(ascending=True)
 
-def getPerPbrBand(ticker:str) -> (pd.DataFrame, pd.DataFrame):
+def getMultipleBand(ticker:str) -> (pd.DataFrame, pd.DataFrame):
     """
-                  수정주가      9.30X     11.78X     14.26X     16.73X     19.21X
+              수정주가      9.30X     11.78X     14.26X     16.73X     19.21X
     날짜
     2017/12/01  493000  310022.57  392611.91  475201.26   557790.6  640379.95
     2018/01/01  515000  305848.49  387325.87  468803.25  550280.63  631758.01
@@ -335,8 +337,31 @@ def getPerPbrBand(ticker:str) -> (pd.DataFrame, pd.DataFrame):
     pbr_header.update({'GS_YM': '날짜'})
 
     df = pd.DataFrame(src['CHART'])
-    per, pbr = df[per_header.keys()].replace('-', np.NaN), df[pbr_header.keys()].replace('-', np.NaN)
+    per = df[per_header.keys()].replace('-', np.NaN).replace('', np.NaN)
+    pbr = df[pbr_header.keys()].replace('-', np.NaN).replace('', np.NaN)
+    per['GS_YM'], pbr['GS_YM'] = pd.to_datetime(per['GS_YM']), pd.to_datetime(pbr['GS_YM'])
     return per.rename(columns=per_header).set_index(keys='날짜'), pbr.rename(columns=pbr_header).set_index(keys='날짜')
+
+def getMultipleSeries(ticker:str) -> pd.DataFrame:
+    """
+                   BPS    PER   PBR    EPS   DIV    DPS
+    날짜
+    2020-04-07  331214  12.95  1.17  29841  2.85  11000
+    2020-04-08  331214  12.94  1.17  29841  2.85  11000
+    2020-04-09  331214  13.09  1.18  29841  2.82  11000
+    2020-04-10  331214  12.92  1.16  29841  2.85  11000
+    2020-04-13  331214  12.82  1.15  29841  2.88  11000
+    ...            ...    ...   ...    ...   ...    ...
+    2022-04-01  369358  18.20  1.60  32418  2.54  15000
+    2022-04-04  369358  18.57  1.63  32418  2.49  15000
+    2022-04-05  369358  18.66  1.64  32418  2.48  15000
+    2022-04-06  369358  19.46  1.71  32418  2.38  15000
+    2022-04-07  369358  19.31  1.69  32418  2.40  15000
+    """
+    todate = datetime.today().strftime("%Y%m%d")
+    fromdate = (datetime.today() - timedelta(3 * 365)).strftime("%Y%m%d")
+    df = stock.get_market_fundamental(fromdate, todate, ticker)
+    return df
 
 
 if __name__ == '__main__':
@@ -360,3 +385,4 @@ if __name__ == '__main__':
     # perBand, pbrBand = getPerPbrBand(ticker=_ticker)
     # print(perBand)
     # print(pbrBand)
+    print(getMultipleSeries(ticker=_ticker))

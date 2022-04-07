@@ -220,6 +220,45 @@ class fundamental(kr_fundamental):
             fig.update_yaxes(title_text="비율[%]", showgrid=True, gridcolor='lightgrey', row=row, col=col)
         return fig
 
+    @property
+    def fig_multiple(self) -> go.Figure:
+        """
+
+        """
+        fig = make_subplots(
+            rows=2, cols=2, vertical_spacing=0.11, horizontal_spacing=0.1,
+            subplot_titles=("EPS / PER(3Y)", "BPS / PBR(3Y)", "PER BAND", "PBR BAND"),
+            specs=[[{"type": "xy", "secondary_y": True}, {"type": "xy", "secondary_y": True}],
+                   [{"type": "xy", "secondary_y": False}, {"type": "xy", 'secondary_y': False}]]
+        )
+        fa = fig.add_trace
+
+        multiples = self.multiples.copy()
+        for n, c in enumerate(['PER', 'EPS']):
+            data, dtype, unit = multiples[c].astype(int if n else float), 'int' if n else 'float', '원' if n else ''
+            fa(trace=traceLine(data=data, name=c, unit=unit, dtype=dtype), row=1, col=1, secondary_y=False if n else True)
+        for n, c in enumerate(['PBR', 'BPS']):
+            data, dtype, unit = multiples[c].astype(int if n else float), 'int' if n else 'float', '원' if n else ''
+            fa(trace=traceLine(data=data, name=c, unit=unit, dtype=dtype), row=1, col=2, secondary_y=False if n else True)
+
+        per, pbr = self.multiple_band
+        for n, c in enumerate(per.columns):
+            data, dtype, unit = per[c].dropna().astype(float if n else int), 'float' if n else 'int', '' if n else '원'
+            fa(trace=traceLine(data=data, name=c, unit=unit, dtype=dtype), row=2, col=1)
+        for n, c in enumerate(pbr.columns):
+            data, dtype, unit = pbr[c].dropna().astype(float if n else int), 'float' if n else 'int', '' if n else '원'
+            fa(trace=traceLine(data=data, name=c, unit=unit, dtype=dtype), row=2, col=2)
+
+        fig.update_layout(dict(
+            title=f'<b>{self.name}[{self.ticker}]</b> : PER / PBR',
+            plot_bgcolor='white'
+        ))
+        for row, col in ((1, 1), (1, 2), (2, 1), (2, 2)):
+            fig.update_yaxes(title_text="KRW[원]", showgrid=True, gridcolor='lightgrey', row=row, col=col,
+                             secondary_y=False)
+            fig.update_yaxes(title_text="배수[-]", showgrid=False, row=row, col=col, secondary_y=True)
+        return fig
+
 
 if __name__ == "__main__":
     from tdatlib import archive
@@ -235,6 +274,7 @@ if __name__ == "__main__":
     print(t_analyze.name, ticker)
 
     # t_analyze.fig_overview.show()
+    # t_analyze.fig_multiple.show()
 
 
     path = os.path.join(archive.desktop, f'tdat/{datetime.datetime.today().strftime("%Y-%m-%d")}')
@@ -245,3 +285,4 @@ if __name__ == "__main__":
     t_analyze.save(t_analyze.fig_relative, title='Relative', path=path)
     t_analyze.save(t_analyze.fig_supply, title='Supply', path=path)
     t_analyze.save(t_analyze.fig_cost, title='Cost', path=path)
+    t_analyze.save(t_analyze.fig_multiple, title='Multiples', path=path)
