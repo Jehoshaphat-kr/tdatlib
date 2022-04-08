@@ -14,10 +14,27 @@ np.seterr(divide='ignore', invalid='ignore')
 
 class _ohlcv:
 
-    def __init__(self, ticker:str, period:int=5, namebook:pd.DataFrame=pd.DataFrame()):
-        self.ticker, self.period, self.namebook = ticker, period, namebook
-        self.__setattr__('key', '종가')
+    def __init__(self, ticker:str, period:int=5, key:str='종가', namebook:pd.DataFrame=pd.DataFrame()):
+        self.ticker, self.period, self.key, self.namebook = ticker, period, key, namebook
+        self._ohlcv = self.__fetch_ohlcv()
         return
+
+    def __fetch_ohlcv(self) -> pd.DataFrame:
+        """ 주가 시계열 데이터 """
+        curr = datetime.now(timezone('Asia/Seoul' if self.ticker.isdigit() else 'US/Eastern'))
+        prev = curr - timedelta(365 * self.period)
+        if self.ticker.isdigit():
+            func = krx.get_index_ohlcv_by_date if len(self.ticker) == 4 else krx.get_market_ohlcv_by_date
+            ohlcv = func(fromdate=prev.strftime("%Y%m%d"), todate=curr.strftime("%Y%m%d"), ticker=self.ticker)
+            trade_stop = ohlcv[ohlcv.시가 == 0].copy()
+            ohlcv.loc[trade_stop.index, ['시가', '고가', '저가']] = trade_stop['종가']
+        else:
+            o_names = ['Open', 'High', 'Low', 'Close', 'Volume']
+            c_names = ['시가', '고가', '저가', '종가', '거래량']
+            ohlcv = yf.Ticker(self.ticker).history(period=f'{self.period}y')[o_names]
+            ohlcv.index.name = '날짜'
+            ohlcv = ohlcv.rename(columns=dict(zip(o_names, c_names)))
+        return ohlcv
 
     def _get_name(self) -> str:
         """
@@ -35,60 +52,35 @@ class _ohlcv:
                 return krx.get_etf_ticker_name(ticker=self.ticker)
             return name
 
-    def _get_ohlcv(self) -> pd.DataFrame:
-        """ 주가 시계열 데이터 """
-        curr = datetime.now(timezone('Asia/Seoul' if self.ticker.isdigit() else 'US/Eastern'))
-        prev = curr - timedelta(365 * self.period)
-        if self.ticker.isdigit():
-            func = krx.get_index_ohlcv_by_date if len(self.ticker) == 4 else krx.get_market_ohlcv_by_date
-            ohlcv = func(fromdate=prev.strftime("%Y%m%d"), todate=curr.strftime("%Y%m%d"), ticker=self.ticker)
-            trade_stop = ohlcv[ohlcv.시가 == 0].copy()
-            ohlcv.loc[trade_stop.index, ['시가', '고가', '저가']] = trade_stop['종가']
-        else:
-            o_names = ['Open', 'High', 'Low', 'Close', 'Volume']
-            c_names = ['시가', '고가', '저가', '종가', '거래량']
-            ohlcv = yf.Ticker(self.ticker).history(period=f'{self.period}y')[o_names]
-            ohlcv.index.name = '날짜'
-            ohlcv = ohlcv.rename(columns=dict(zip(o_names, c_names)))
-        self.__setattr__('_ohlcv', ohlcv)
-        return ohlcv
-
     def _get_ta(self) -> pd.DataFrame:
         """ Technical Analysis """
-        if not hasattr(self, '_ohlcv'):
-            self._get_ohlcv()
-        ohlcv = self.__getattribute__('_ohlcv')
-        return taf(ohlcv.copy(), open='시가', close='종가', low='저가', high='고가', volume='거래량')
+        return taf(self._ohlcv.copy(), open='시가', close='종가', low='저가', high='고가', volume='거래량')
 
     def _get_relative_return(self) -> pd.DataFrame:
         """ 상대 수익률 """
-        if not hasattr(self, '_ohlcv'):
-            self._get_ohlcv()
-        ohlcv, key = self.__getattribute__('_ohlcv'), self.__getattribute__('key')
-
-        v = ohlcv[key].copy()
+        v = self._ohlcv[self.key].copy()
         objs = {
             label: 100 * (v[v.index >= v.index[-1] - timedelta(dt)].pct_change().fillna(0) + 1).cumprod() - 100
             for label, dt in [('3M', 92), ('6M', 183), ('1Y', 365), ('2Y', 730), ('3Y', 1095), ('5Y', 1825)]
         }
         return pd.concat(objs=objs, axis=1)
 
+    def _get_drawdown(self) -> pd.DataFrame:
+        """ 시계열 낙폭 """
+        val, objs = self._ohlcv[self.key].copy(), dict()
+        for label, dt in [('3M', 92), ('6M', 183), ('1Y', 365), ('2Y', 730), ('3Y', 1095), ('5Y', 1825)]:
+            sampled = val[val.index >= val.index[-1] - timedelta(dt)]
+            objs[label] = 100 * (sampled / sampled.cummax()).sub(1)
+        return pd.concat(objs=objs, axis=1)
+
     def _get_perf(self) -> pd.DataFrame:
         """ 기간별 수익률 """
-        if not hasattr(self, '_ohlcv'):
-            self._get_ohlcv()
-        ohlcv, key = self.__getattribute__('_ohlcv'), self.__getattribute__('key')
-
-        data = [round(100 * ohlcv[key].pct_change(periods=dt)[-1], 2) for dt in [1, 5, 21, 63, 126, 252]]
+        data = [round(100 * self._ohlcv[self.key].pct_change(periods=dt)[-1], 2) for dt in [1, 5, 21, 63, 126, 252]]
         return pd.DataFrame(data=data, columns=[self.ticker], index=['R1D', 'R1W', 'R1M', 'R3M', 'R6M', 'R1Y']).T
 
     def _get_fiftytwo(self) -> pd.DataFrame:
         """ 52주 최고/최저 가격 및 대비 수익률 """
-        if not hasattr(self, '_ohlcv'):
-            self._get_ohlcv()
-        ohlcv, key = self.__getattribute__('_ohlcv'), self.__getattribute__('key')
-
-        frame = ohlcv[ohlcv.index >= (ohlcv.index[-1] - timedelta(365))][key]
+        frame = self._ohlcv[self._ohlcv.index >= (self._ohlcv.index[-1] - timedelta(365))][self.key]
         close, _max, _min = frame[-1], frame.max(), frame.min()
         by_max, by_min = round(100 * (close/_max - 1), 2), round(100 * (close/_min - 1), 2)
         return pd.DataFrame(
@@ -97,42 +89,45 @@ class _ohlcv:
             index=['52H', '52L', 'pct52H', 'pct52L']
         ).T
 
+    def _get_cagr(self, days:int=-1):
+        """ CAGR """
+        val = self._ohlcv[self.key].copy()
+        if days == -1:
+            return 100 * ((val[-1] / val[0]) ** (1 / self.period) - 1)
+        sampled = val[val.index >= val.index[-1] - timedelta(days)]
+        return 100 * ((sampled[-1] / sampled[0]) ** (1 / (days / 365)) - 1)
+
+    def _get_volatility(self, days:int=-1):
+        """ Volatility """
+        val = self._ohlcv[self.key].copy()
+        if days == -1:
+            return 100 * (np.log(val / val.shift(1)).std() * (252 ** 0.5))
+        sampled = val[val.index >= val.index[-1] - timedelta(days)]
+        return 100 * (np.log(sampled / sampled.shift(1)).std() * (252 ** 0.5))
+
     def _get_pivot(self) -> pd.DataFrame:
         """ 피벗 지점 """
-        if not hasattr(self, '_ohlcv'):
-            self._get_ohlcv()
-        ohlcv = self.__getattribute__('_ohlcv')
-
-        _, maxima = self.calc_extrema(h=ohlcv.고가, accuracy=2)
-        minima, _ = self.calc_extrema(h=ohlcv.저가, accuracy=2)
-        return pd.concat(objs={'저점': ohlcv.저가.iloc[minima],'고점': ohlcv.고가.iloc[maxima]}, axis=1)
+        _, maxima = self.calc_extrema(h=self._ohlcv.고가, accuracy=2)
+        minima, _ = self.calc_extrema(h=self._ohlcv.저가, accuracy=2)
+        return pd.concat(objs={'저점': self._ohlcv.저가.iloc[minima],'고점': self._ohlcv.고가.iloc[maxima]}, axis=1)
 
     def _get_sma(self) -> pd.DataFrame:
         """ 이동 평균선 """
-        if not hasattr(self, '_ohlcv'):
-            self._get_ohlcv()
-        ohlcv, key = self.__getattribute__('_ohlcv'), self.__getattribute__('key')
         return pd.concat(
-            objs={f'SMA{win}D': ohlcv[key].rolling(window=win).mean() for win in [5, 10, 20, 60, 120]},
+            objs={f'SMA{win}D': self._ohlcv[self.key].rolling(window=win).mean() for win in [5, 10, 20, 60, 120]},
             axis=1
         )
 
     def _get_ema(self) -> pd.DataFrame:
         """ 지수 이동 평균선 """
-        if not hasattr(self, '_ohlcv'):
-            self._get_ohlcv()
-        ohlcv, key = self.__getattribute__('_ohlcv'), self.__getattribute__('key')
         return pd.concat(
-            objs={f'EMA{win}D': ohlcv[key].ewm(span=win).mean() for win in [5, 10, 20, 60, 120]},
+            objs={f'EMA{win}D': self._ohlcv[self.key].ewm(span=win).mean() for win in [5, 10, 20, 60, 120]},
             axis=1
         )
 
     def _get_iir(self) -> pd.DataFrame:
         """ IIR 필터선 """
-        if not hasattr(self, '_ohlcv'):
-            self._get_ohlcv()
-        ohlcv, key = self.__getattribute__('_ohlcv'), self.__getattribute__('key')
-        objs, price = dict(), ohlcv[key]
+        objs, price = dict(), self._ohlcv[self.key]
         for win in [5, 10, 20, 60, 120]:
             cutoff = (252 / win) / (252 / 2)
             a, b = butter(N=1, Wn=cutoff)

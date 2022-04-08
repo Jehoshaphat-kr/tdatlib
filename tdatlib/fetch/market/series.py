@@ -17,15 +17,13 @@ class series:
         """
         상대수익률 비교 데이터
         """
-        if not hasattr(self, f'__{inner().f_code.co_name}'):
-            objs = dict()
-            for ticker in self.tickers:
-                attr = self.__getattribute__(f'__{ticker}')
-                rel = attr.relative_return.copy()
-                for col in rel.columns:
-                    objs[(col, attr.name)] = rel[col]
-            self.__setattr__(f'__{inner().f_code.co_name}', pd.concat(objs=objs, axis=1))
-        return self.__getattribute__(f'__{inner().f_code.co_name}')
+        objs = dict()
+        for ticker in self.tickers:
+            attr = self.__getattribute__(f'__{ticker}')
+            rel = attr.relative_return.copy()
+            for col in rel.columns:
+                objs[(col, attr.name)] = rel[col]
+        return pd.concat(objs=objs, axis=1)
 
 
 if __name__ == "__main__":

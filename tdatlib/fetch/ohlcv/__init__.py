@@ -5,13 +5,8 @@ import pandas as pd
 
 class ohlcv(_ohlcv):
 
-    __key, __name, __namebook = '종가', str(), pd.DataFrame()
-    __ohlcv, __ta = pd.DataFrame(), pd.DataFrame()
-    __rel, __perf, __fiftytwo, __pivot = pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
-    __sma, __ema, __iir = pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
-
-    def __init__(self, ticker:str, period:int=5, namebook:pd.DataFrame=pd.DataFrame()):
-        super().__init__(ticker=ticker, period=period, namebook=namebook)
+    def __init__(self, ticker:str, period:int=5, key:str='종가', namebook:pd.DataFrame=pd.DataFrame()):
+        super().__init__(ticker=ticker, period=period, key=key, namebook=namebook)
         return
 
     def __checkattr__(self, name:str) -> str:
@@ -20,12 +15,13 @@ class ohlcv(_ohlcv):
             self.__setattr__(f'__{name}', _func())
         return f'__{name}'
 
-    # def set_key(self, key:str):
-    #     if not key in ['시가', '저가', '고가', '종가']:
-    #         raise KeyError(f"key 값: {key}은 유효하지 않습니다. 입력 가능: ['시가', '저가', '고가', '종가'] ")
-    #     self.__key = key
-    #     self.__rel, self.__perf = pd.DataFrame(), pd.DataFrame()
-    #     return
+    def set_key(self, key:str):
+        """ key값 변경 """
+        if not key in ['시가', '저가', '고가', '종가']:
+            raise KeyError
+        self.key = key
+        self.__delattr__('__relative_return')
+        return
 
     @property
     def name(self) -> str:
@@ -41,7 +37,7 @@ class ohlcv(_ohlcv):
     def ohlcv(self) -> pd.DataFrame:
         """
         가격 정보 시가/고가/저가/종가/거래량
-
+        :return:
                       시가    고가    저가    종가   거래량
         날짜
         2019-04-09   20473   20473   20071   20172   383038
@@ -52,7 +48,7 @@ class ohlcv(_ohlcv):
         2022-04-07  103000  103500   99900   99900  2885845
         2022-04-08  100000  100500   97100   97300  1517817
         """
-        return self.__getattribute__(self.__checkattr__(inner().f_code.co_name))
+        return self._ohlcv
 
     @property
     def ta(self) -> pd.DataFrame:
@@ -89,7 +85,7 @@ class ohlcv(_ohlcv):
     def relative_return(self) -> pd.DataFrame:
         """
         시계열 상대 수익률
-
+        :return:
                      3M         6M         1Y          2Y          3Y          5Y
         날짜
         2019-04-09  NaN        NaN        NaN         NaN    0.000000    0.000000
@@ -103,10 +99,27 @@ class ohlcv(_ohlcv):
         return self.__getattribute__(self.__checkattr__(inner().f_code.co_name))
 
     @property
+    def drawdown(self) -> pd.DataFrame:
+        """
+        시계열 낙폭
+        :return:
+                          3M         6M         1Y         2Y         3Y         5Y
+        날짜
+        2019-04-09       NaN        NaN        NaN        NaN   0.000000   0.000000
+        2019-04-10       NaN        NaN        NaN        NaN   0.000000   0.000000
+        2019-04-11       NaN        NaN        NaN        NaN   0.000000   0.000000
+        ...              ...        ...        ...        ...        ...        ...
+        2022-04-06 -3.225806 -19.230769 -38.053097 -38.053097 -38.053097 -38.053097
+        2022-04-07 -7.926267 -23.153846 -41.061947 -41.061947 -41.061947 -41.061947
+        2022-04-08 -9.677419 -24.615385 -42.182891 -42.182891 -42.182891 -42.182891
+        """
+        return self.__getattribute__(self.__checkattr__(inner().f_code.co_name))
+
+    @property
     def perf(self) -> pd.DataFrame:
         """
         기간별 수익률
-
+        :return:
                 R1D  R1W  R1M    R3M    R6M   R1Y
         035720 -2.8 -8.4 -2.9 -12.91 -12.52 -3.05
         """
@@ -116,7 +129,7 @@ class ohlcv(_ohlcv):
     def fiftytwo(self) -> pd.DataFrame:
         """
         52주 가격 및 대비 수익률
-
+        :return:
                      52H      52L  pct52H  pct52L
         035720  169500.0  82600.0  -42.77   17.43
         """
@@ -126,7 +139,7 @@ class ohlcv(_ohlcv):
     def pivot(self) -> pd.DataFrame:
         """
         고/저점 피벗
-
+        :return:
                           저점     고점
         날짜
         2019-04-10       NaN   20673.0
@@ -143,7 +156,7 @@ class ohlcv(_ohlcv):
     def sma(self) -> pd.DataFrame:
         """
         이동 평균선
-
+        :return:
                        SMA5D    SMA10D    SMA20D        SMA60D        SMA120D
         날짜
         2019-04-09       NaN       NaN       NaN           NaN            NaN
@@ -160,7 +173,7 @@ class ohlcv(_ohlcv):
     def ema(self) -> pd.DataFrame:
         """
         지수 이동 평균선
-
+        :return:
                             EMA5D         EMA10D  ...         EMA60D        EMA120D
         날짜                                        ...
         2019-04-09   20172.000000   20172.000000  ...   20172.000000   20172.000000
@@ -177,7 +190,7 @@ class ohlcv(_ohlcv):
     def iir(self) -> pd.DataFrame:
         """
         Infinite-Impulse Response Filter: 반응 조정형(BUTTERWORTH)
-
+        :return:
                             IIR5D         IIR10D  ...         IIR60D       IIR120D
         날짜                                        ...
         2019-04-09   20171.999172   20171.183818  ...   20350.155891  20585.714808
@@ -194,7 +207,7 @@ class ohlcv(_ohlcv):
         """
         기간 내 평균 직선 추세
         :param gap: 기간
-
+        :return:
                           support         resist
         날짜
         2022-01-06   81523.386164   87977.053862
@@ -213,7 +226,7 @@ class ohlcv(_ohlcv):
         """
         기간 내 지지선/저항선
         :param gap: 기간
-
+        :return:
                            resist       support
         날짜
         2022-01-06  103000.000000  78025.641026
@@ -228,13 +241,25 @@ class ohlcv(_ohlcv):
             self.__setattr__(f'trend_{gap}', _trend(ohlcv=self.ohlcv, pivot=self.pivot, gap=gap))
         return self.__getattribute__(f'trend_{gap}').bound
 
+    def cagr(self, days:int=-1):
+        """ CAGR """
+        return self._get_cagr(days=days)
+
+    def volatility(self, days:int=-1):
+        """ Volatility """
+        return self._get_volatility(days=days)
+
+    def sharpe_ratio(self, days:int=-1):
+        """ Sharpe Ratio """
+        return round(self.cagr(days=days) / self.volatility(days=days), 2)
+
 
 if __name__ == "__main__":
     ticker = '035720'
     # ticker = '1028'
     # ticker = 'TSLA'
 
-    app = ohlcv(ticker=ticker, period=3)
+    app = ohlcv(ticker=ticker, period=5)
     print(app.name)
 
     # print(app.ohlcv)
@@ -243,8 +268,14 @@ if __name__ == "__main__":
     # print(app.ema)
     # print(app.iir)
     # print(app.relative_return)
+    # print(app.drawdown)
     # print(app.perf)
     # print(app.fiftytwo)
+    print(app.cagr())
+    print(app.cagr(days=365 * 2))
+    print(app.cagr(days=365))
+    print(app.cagr(days=183))
+    print(app.volatility())
     # print(app.pivot)
-    # print(app.get_trend(gap='3M'))
     # print(app.get_bound(gap='3M'))
+    # print(app.get_trend(gap='3M'))
