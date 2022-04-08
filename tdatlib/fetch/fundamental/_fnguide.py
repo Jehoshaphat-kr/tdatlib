@@ -17,6 +17,7 @@ class fnguide:
         return
 
     def _get_name(self) -> str:
+        """ 종목명 """
         # noinspection PyBroadException
         try:
             return stock.get_market_ticker_name(ticker=self.ticker)
@@ -26,6 +27,7 @@ class fnguide:
             return book.loc[self.ticker, '종목명']
 
     def _get_summary(self) -> str:
+        """ 기업개요 요약 다운로드 """
         html = requests.get(self.u1 % self.ticker).content
         texts = Soup(html, 'lxml').find('ul', id='bizSummaryContent').find_all('li')
         text = '\n\n '.join([text.text for text in texts])
@@ -39,6 +41,7 @@ class fnguide:
         return ' ' + text[0] + ''.join(words) + text[-2] + text[-1]
 
     def _get_products(self) -> pd.DataFrame:
+        """ 매출 제품 구성 다운로드 """
         url = f"http://cdn.fnguide.com/SVO2//json/chart/02/chart_A{self.ticker}_01_N.json"
         src = json.loads(urlopen(url).read().decode('utf-8-sig', 'replace'))
         header = pd.DataFrame(src['chart_H'])[['ID', 'NAME']].set_index(keys='ID').to_dict()['NAME']
@@ -52,6 +55,7 @@ class fnguide:
         return df[df.values != 0]
 
     def _get_stat_annual(self) -> pd.DataFrame:
+        """ 연간 재무 요약 다운로드 """
         if not hasattr(self, 'table1'):
             self.__setattr__('table1', pd.read_html(self.u1 % self.ticker, encoding='utf-8'))
         htmls = self.__getattribute__('table1')
@@ -64,6 +68,7 @@ class fnguide:
         return statement.T
 
     def _get_stat_quarter(self) -> pd.DataFrame:
+        """ 분기 재무 요약 다운로드 """
         if not hasattr(self, 'table1'):
             self.__setattr__('table1', pd.read_html(self.u1 % self.ticker, encoding='utf-8'))
 
@@ -76,6 +81,7 @@ class fnguide:
         return statement.T
 
     def _get_multifactor(self) -> pd.DataFrame:
+        """ 멀티팩터 데이터 다운로드 """
         url = f"http://cdn.fnguide.com/SVO2/json/chart/05_05/A{self.ticker}.json"
         data = json.loads(urlopen(url).read().decode('utf-8-sig', 'replace'))
         header = pd.DataFrame(data['CHART_H'])['NAME'].tolist()
@@ -84,6 +90,7 @@ class fnguide:
         ).set_index(keys='팩터')
 
     def _get_benchmark_return(self) -> pd.DataFrame:
+        """ 벤치마크 대비 수익률 다운로드 """
         objs = {}
         for period in ['3M', '1Y']:
             url = f"http://cdn.fnguide.com/SVO2/json/chart/01_01/chart_A{self.ticker}_{period}.json"
@@ -98,6 +105,7 @@ class fnguide:
         return pd.concat(objs=objs, axis=1)
 
     def _get_benchmark_multiple(self) -> pd.DataFrame:
+        """ 벤치마크 대비 투자배수 다운로드 """
         url = f"http://cdn.fnguide.com/SVO2/json/chart/01_04/chart_A{self.ticker}_D.json"
         data = json.loads(urlopen(url).read().decode('utf-8-sig', 'replace'))
         objs = {}
@@ -115,6 +123,7 @@ class fnguide:
         return pd.concat(objs=objs, axis=1)
 
     def _get_consensus(self) -> pd.DataFrame:
+        """ 투자의견 다운로드 """
         url = f"http://cdn.fnguide.com/SVO2/json/chart/01_02/chart_A{self.ticker}.json"
         data = json.loads(urlopen(url).read().decode('utf-8-sig', 'replace'))
         consensus = pd.DataFrame(data['CHART']).rename(columns={
@@ -126,6 +135,7 @@ class fnguide:
         return consensus
 
     def _get_foreign_rate(self) -> pd.DataFrame:
+        """ 외국인소진율 다운로드 """
         objs = dict()
         for dt in ['3M', '1Y', '3Y']:
             url = f"http://cdn.fnguide.com/SVO2/json/chart/01_01/chart_A{self.ticker}_{dt}.json"
@@ -138,6 +148,7 @@ class fnguide:
         return pd.concat(objs=objs, axis=1)
 
     def _get_short_sell(self) -> pd.DataFrame:
+        """ 공매도 비율 다운로드 """
         url = f"http://cdn.fnguide.com/SVO2/json/chart/11_01/chart_A{self.ticker}_SELL1Y.json"
         data = json.loads(urlopen(url).read().decode('utf-8-sig', 'replace'))
         shorts = pd.DataFrame(data['CHART']).rename(columns={
@@ -147,6 +158,7 @@ class fnguide:
         return shorts
 
     def _get_short_balance(self) -> pd.DataFrame:
+        """ 대차 잔고 비율 다운로드 """
         url = f"http://cdn.fnguide.com/SVO2/json/chart/11_01/chart_A{self.ticker}_BALANCE1Y.json"
         data = json.loads(urlopen(url).read().decode('utf-8-sig', 'replace'))
         balance = pd.DataFrame(data['CHART'])[['TRD_DT', 'BALANCE_RT', 'ADJ_PRC']].rename(columns={
@@ -156,6 +168,7 @@ class fnguide:
         return balance
 
     def _get_expenses(self) -> pd.DataFrame:
+        """ 비용처리 데이터 다운로드 """
         if not hasattr(self, 'table2'):
             self.__setattr__('table2', pd.read_html(self.u2 % self.ticker, encoding='utf-8'))
         htmls = self.__getattribute__('table2')
@@ -179,12 +192,14 @@ class fnguide:
         return pd.concat(objs=[sales_cost.T, sg_n_a.T, r_n_d], axis=1).sort_index(ascending=True)
 
     def _get_multiple_series(self) -> pd.DataFrame:
+        """ 시계열 투자배수 다운로드 """
         todate = datetime.today().strftime("%Y%m%d")
         fromdate = (datetime.today() - timedelta(3 * 365)).strftime("%Y%m%d")
         df = stock.get_market_fundamental(fromdate, todate, self.ticker)
         return df
 
     def _get_multiple_band(self) -> (pd.DataFrame, pd.DataFrame):
+        """ PER / PBR 밴드 데이터 다운로드 """
         url = f"http://cdn.fnguide.com/SVO2/json/chart/01_06/chart_A{self.ticker}_D.json"
         src = json.loads(urlopen(url).read().decode('utf-8-sig', 'replace'))
         per_header = pd.DataFrame(src['CHART_E'])[['ID', 'NAME']].set_index(keys='ID')

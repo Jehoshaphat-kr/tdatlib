@@ -1,48 +1,70 @@
-from tdatlib.view.treemap.toolbox import *
+from tdatlib.view.treemap.toolbox import market, toolbox
+from tdatlib import archive
 from datetime import datetime
 from pytz import timezone
+from inspect import currentframe as inner
+from pykrx import stock
+import pandas as pd
 import plotly.graph_objects as go
 import plotly.offline as of
-import codecs, jsmin
+import codecs, jsmin, os
 
 
-class treemap:
-    __baseline, __reduced, __colored = pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
-    __frame, __bar = pd.DataFrame(), list()
+class treemap(toolbox):
     def __init__(self, category:str, sub_category:str=str(), kq:list=None):
-        self.cat, self.sub = category, sub_category
-        self.kq = kq if kq else krx.get_index_portfolio_deposit_file(ticker='2001')
+        super().__init__(category=category, sub_category=sub_category, kq=kq)
         return
+
+    def __checkattr__(self, name:str) -> str:
+        if not hasattr(self, f'__{name}'):
+            _func = self.__getattribute__(f'_get_{name}')
+            self.__setattr__(f'__{name}', _func())
+        return f'__{name}'
+
+    @property
+    def mapname(self) -> str:
+        return self.__getattribute__(self.__checkattr__(inner().f_code.co_name))
 
     @property
     def baseline(self) -> pd.DataFrame:
-        if self.__baseline.empty:
-            self.__baseline = getBaseline(category=self.cat, sub_category=self.sub)
-        return self.__baseline
+        """
+        :return:
+                         종목명      섹터        IPO    종가  ...    R1M    R3M    R6M     R1Y
+        종목코드                                              ...
+        096770     SK이노베이션    에너지 2007-07-25  209000  ...   0.96  -0.94 -12.29    4.21
+        010950            S-Oil    에너지 1987-05-27   87800  ...   6.81   0.57 -13.50    9.48
+        267250   현대중공업지주    에너지 2017-05-10   52700  ...   6.45  -8.65 -20.00   -6.38
+        ...                 ...       ...        ...     ...  ...    ...    ...    ...     ...
+        017390         서울가스  유틸리티 1995-08-18  186000  ...  -3.13  14.15   9.12  108.90
+        117580       대성에너지  유틸리티 2010-12-24   12100  ...  23.08  17.65  31.29  124.30
+        071320     지역난방공사  유틸리티 2010-01-29   36300  ...   4.46  -5.84 -13.78   -4.10
+        """
+        return self.__getattribute__(self.__checkattr__(inner().f_code.co_name))
 
     @property
-    def reduced(self) -> pd.DataFrame:
-        if self.__reduced.empty:
-            self.__reduced, self.__bar = calcReduction(baseline=self.baseline, category=self.cat, sub_category=self.sub)
-        return self.__reduced
-
-    @property
-    def colored(self) -> pd.DataFrame:
-        if self.__colored.empty:
-            self.__colored = calcColors(frame=self.reduced, category=self.cat)
-        return self.__colored
-
-    @property
-    def frame(self) -> pd.DataFrame:
-        if self.__frame.empty:
-            self.__frame = calcPost(frame=self.colored, category=self.cat, kosdaq=self.kq)
-        return self.__frame
+    def mapframe(self) -> pd.DataFrame:
+        """
+        :return:
+                          종목코드          종목명    분류  ...     CPER     CDIV              ID
+        0                   096770    SK이노베이션  에너지  ...      NaN      NaN    SK이노베이션
+        1                   010950          S-Oil   에너지  ...      NaN      NaN           S-Oil
+        2                   267250  현대중공업지주  에너지  ...      NaN  #30CC5A  현대중공업지주
+        ..                     ...            ...      ...  ...      ...      ...             ...
+        748  화장품,의류_WI26_전체     화장품,의류    전체  ...  #F63538  #414554     화장품,의류
+        749         화학_WI26_전체            화학    전체  ...  #F63538  #8B444E            화학
+        750              WI26_전체            전체          ...  #C8C8C8  #C8C8C8            전체
+        """
+        return self.__getattribute__(self.__checkattr__(inner().f_code.co_name))
 
     @property
     def bar(self) -> pd.DataFrame:
-        if not self.__bar:
-            self.__reduced, self.__bar = calcReduction(baseline=self.baseline, category=self.cat, sub_category=self.sub)
-        return self.__bar
+        """
+        :return:
+        ['IT가전_WI26_전체', 'IT하드웨어_WI26_전체', ... , '화장품,의류_WI26_전체', '화학_WI26_전체']
+        """
+        if not hasattr(self, '_bar'):
+            _ = self.mapframe
+        return self.__getattribute__('_bar')
 
     def show(self, key:str='R1D', save:bool=False):
         """
@@ -50,7 +72,7 @@ class treemap:
         :param save: 저장 여부
         :return:
         """
-        frame = self.frame.copy()
+        frame = self.mapframe.copy()
         fig = go.Figure()
         unit = '%' if not key in ['PER', 'PBR'] else ''
         fig.add_trace(go.Treemap(
@@ -61,11 +83,10 @@ class treemap:
             branchvalues='total', opacity=0.9,
             hovertemplate='%{label}<br>시총: %{meta}<br>종가: %{customdata}<br>' + key + ': %{text}' + unit + '<extra></extra>'
         ))
-        tdt = krx.get_nearest_business_day_in_a_week(date=datetime.today().strftime("%Y%m%d"))
-        title = f'[{self.cat} / {getMapName(category=self.cat, sub_category=self.sub)}]: {tdt} 종가 기준 {key}'
+        title = f'[{self.cat} / {self.mapname}]: {market.tddate} 종가 기준 {key}'
         fig.update_layout(title=title)
         if save:
-            of.plot(fig, filename=rf'./{self.cat}_{self.sub}.html', auto_open=False)
+            of.plot(fig, filename=rf'./{self.cat}_{self.mapname}.html', auto_open=False)
         fig.show()
         return
 
@@ -84,15 +105,16 @@ class treemap_deploy:
             ["ETF", '', "etfful"],
             ["THEME", '', "thmful"]
         ]
-        kq = krx.get_index_portfolio_deposit_file(ticker='2001')
+        kq = stock.get_index_portfolio_deposit_file(ticker='2001')
         for n, (c, s, var) in enumerate(categories):
-            print(f'[{n + 1}/{len(categories)}] {c} / {getMapName(category=c, sub_category=s)}')
-            t_map = treemap(category=c, sub_category=s, kq=kq)
-            frame = t_map.frame.copy()
+            tmap = treemap(category=c, sub_category=s, kq=kq)
+            print(f'[{n + 1}/{len(categories)}] {c} / {tmap.mapname}')
+
+            frame = tmap.mapframe.copy()
             self.__labels[var] = frame['종목코드'].tolist()
             self.__covers[var] = frame['분류'].tolist()
             self.__ids[var] = frame['ID'].tolist()
-            self.__bars[var] = t_map.bar
+            self.__bars[var] = tmap.bar
 
             self.__datum = pd.concat(
                 objs=[self.__datum, frame[~frame['종목코드'].isin(self.__datum['종목코드'])]],
@@ -159,14 +181,13 @@ if __name__ == "__main__":
     # t_treemap = treemap(category='ETF')
 
     print(t_treemap.baseline)
-    print(t_treemap.reduced)
+    print(t_treemap.mapframe)
+    print(t_treemap.bar)
 
-    t_treemap.show()
+    t_treemap.show(save=True)
     # t_treemap.show(key='PER')
     # t_treemap.show(key='PBR')
     # t_treemap.show(key='DIV')
 
-    # from tdatlib import archive
-    # from os import path
-    # t_treemap.frame.to_csv(path.join(archive.desktop, f'test.csv'), encoding='euc-kr', index=False)
+
 

@@ -1,56 +1,58 @@
-from tdatlib.fetch.ohlcv.analysis import *
-from ta import add_all_ta_features as taf
-from scipy.signal import butter, filtfilt
-np.seterr(divide='ignore', invalid='ignore')
+from tdatlib.fetch.ohlcv._ohlcv import _ohlcv, _trend
+from inspect import currentframe as inner
+import pandas as pd
 
 
-class ohlcv:
+class ohlcv(_ohlcv):
 
     __key, __name, __namebook = '종가', str(), pd.DataFrame()
     __ohlcv, __ta = pd.DataFrame(), pd.DataFrame()
     __rel, __perf, __fiftytwo, __pivot = pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
     __sma, __ema, __iir = pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
 
-    def __init__(self, ticker:str, period:int=5):
-        self.ticker, self.period = ticker, period
+    def __init__(self, ticker:str, period:int=5, namebook:pd.DataFrame=pd.DataFrame()):
+        super().__init__(ticker=ticker, period=period, namebook=namebook)
         return
 
-    def set_key(self, key:str):
-        if not key in ['시가', '저가', '고가', '종가']:
-            raise KeyError(f"key 값: {key}은 유효하지 않습니다. 입력 가능: ['시가', '저가', '고가', '종가'] ")
-        self.__key = key
-        self.__rel, self.__perf = pd.DataFrame(), pd.DataFrame()
-        return
+    def __checkattr__(self, name:str) -> str:
+        if not hasattr(self, f'__{name}'):
+            _func = self.__getattribute__(f'_get_{name}')
+            self.__setattr__(f'__{name}', _func())
+        return f'__{name}'
 
-    def set_namebook(self, namebook:pd.DataFrame):
-        self.__namebook = namebook.copy()
-        self.__name = str()
-        return
+    # def set_key(self, key:str):
+    #     if not key in ['시가', '저가', '고가', '종가']:
+    #         raise KeyError(f"key 값: {key}은 유효하지 않습니다. 입력 가능: ['시가', '저가', '고가', '종가'] ")
+    #     self.__key = key
+    #     self.__rel, self.__perf = pd.DataFrame(), pd.DataFrame()
+    #     return
 
     @property
     def name(self) -> str:
-        if not self.__name:
-            self.__name = getName(ticker=self.ticker, namebook=self.__namebook)
-        return self.__name
+        """ 종목명 """
+        return self.__getattribute__(self.__checkattr__(inner().f_code.co_name))
 
     @property
     def currency(self) -> str:
+        """ 통화 단위 """
         return 'USD' if self.ticker.isalpha() else 'KRW'
 
     @property
     def ohlcv(self) -> pd.DataFrame:
         """
         가격 정보 시가/고가/저가/종가/거래량
+
+                      시가    고가    저가    종가   거래량
+        날짜
+        2019-04-09   20473   20473   20071   20172   383038
+        2019-04-10   20272   20673   20172   20573   263334
+        2019-04-11   20673   20673   20372   20573   253796
+        ...            ...     ...     ...     ...      ...
+        2022-04-06  105500  106500  104000  105000  1529617
+        2022-04-07  103000  103500   99900   99900  2885845
+        2022-04-08  100000  100500   97100   97300  1517817
         """
-        if self.__ohlcv.empty:
-            ohlcv = getOhlcv(ticker=self.ticker, period=self.period)
-            if self.currency == 'KRW':
-                trade_stop = ohlcv[ohlcv.시가 == 0].copy()
-                ohlcv.loc[trade_stop.index, ['시가', '고가', '저가']] = trade_stop['종가']
-                self.__ohlcv = ohlcv
-            else:
-                self.__ohlcv = ohlcv
-        return self.__ohlcv
+        return self.__getattribute__(self.__checkattr__(inner().f_code.co_name))
 
     @property
     def ta(self) -> pd.DataFrame:
@@ -58,140 +60,173 @@ class ohlcv:
         Technical Analysis
         https://technical-analysis-library-in-python.readthedocs.io/en/latest/ta.html#trend-indicators
 
-       'volume_adi', 'volume_obv', 'volume_cmf', 'volume_fi',
-       'volume_em', 'volume_sma_em', 'volume_vpt', 'volume_vwap',
-       'volume_mfi', 'volume_nvi',
+       'volume_adi', 'volume_obv', 'volume_cmf', 'volume_fi', 'volume_em', 'volume_sma_em', 'volume_vpt',
+       'volume_vwap', 'volume_mfi', 'volume_nvi',
 
-       'volatility_bbm', 'volatility_bbh',
-       'volatility_bbl', 'volatility_bbw', 'volatility_bbp', 'volatility_bbhi',
-       'volatility_bbli', 'volatility_kcc', 'volatility_kch', 'volatility_kcl',
-       'volatility_kcw', 'volatility_kcp', 'volatility_kchi',
-       'volatility_kcli', 'volatility_dcl', 'volatility_dch', 'volatility_dcm',
-       'volatility_dcw', 'volatility_dcp', 'volatility_atr', 'volatility_ui',
+       'volatility_bbm', 'volatility_bbh', 'volatility_bbl', 'volatility_bbw', 'volatility_bbp', 'volatility_bbhi',
+       'volatility_bbli', 'volatility_kcc', 'volatility_kch', 'volatility_kcl', 'volatility_kcw', 'volatility_kcp',
+       'volatility_kchi', 'volatility_kcli', 'volatility_dcl', 'volatility_dch', 'volatility_dcm', 'volatility_dcw',
+       'volatility_dcp', 'volatility_atr', 'volatility_ui',
 
-       'trend_macd', 'trend_macd_signal', 'trend_macd_diff', 'trend_sma_fast',
-       'trend_sma_slow', 'trend_ema_fast', 'trend_ema_slow',
-       'trend_vortex_ind_pos', 'trend_vortex_ind_neg', 'trend_vortex_ind_diff',
-       'trend_trix', 'trend_mass_index', 'trend_dpo', 'trend_kst',
-       'trend_kst_sig', 'trend_kst_diff', 'trend_ichimoku_conv',
-       'trend_ichimoku_base', 'trend_ichimoku_a', 'trend_ichimoku_b',
-       'trend_stc', 'trend_adx', 'trend_adx_pos', 'trend_adx_neg', 'trend_cci',
-       'trend_visual_ichimoku_a', 'trend_visual_ichimoku_b', 'trend_aroon_up',
-       'trend_aroon_down', 'trend_aroon_ind', 'trend_psar_up',
-       'trend_psar_down', 'trend_psar_up_indicator',
+       'trend_macd', 'trend_macd_signal', 'trend_macd_diff', 'trend_sma_fast', 'trend_sma_slow', 'trend_ema_fast',
+       'trend_ema_slow', 'trend_vortex_ind_pos', 'trend_vortex_ind_neg', 'trend_vortex_ind_diff', 'trend_trix',
+       'trend_mass_index', 'trend_dpo', 'trend_kst', 'trend_kst_sig', 'trend_kst_diff', 'trend_ichimoku_conv',
+       'trend_ichimoku_base', 'trend_ichimoku_a', 'trend_ichimoku_b', 'trend_stc', 'trend_adx', 'trend_adx_pos',
+       'trend_adx_neg', 'trend_cci', 'trend_visual_ichimoku_a', 'trend_visual_ichimoku_b', 'trend_aroon_up',
+       'trend_aroon_down', 'trend_aroon_ind', 'trend_psar_up', 'trend_psar_down', 'trend_psar_up_indicator',
        'trend_psar_down_indicator',
 
-       'momentum_rsi', 'momentum_stoch_rsi',
-       'momentum_stoch_rsi_k', 'momentum_stoch_rsi_d', 'momentum_tsi',
-       'momentum_uo', 'momentum_stoch', 'momentum_stoch_signal', 'momentum_wr',
-       'momentum_ao', 'momentum_roc', 'momentum_ppo', 'momentum_ppo_signal',
-       'momentum_ppo_hist', 'momentum_kama', 'others_dr', 'others_dlr',
+       'momentum_rsi', 'momentum_stoch_rsi', 'momentum_stoch_rsi_k', 'momentum_stoch_rsi_d', 'momentum_tsi',
+       'momentum_uo', 'momentum_stoch', 'momentum_stoch_signal', 'momentum_wr', 'momentum_ao', 'momentum_roc',
+       'momentum_ppo', 'momentum_ppo_signal', 'momentum_ppo_hist', 'momentum_kama', 'others_dr', 'others_dlr',
        'others_cr'
         """
-        if self.__ta.empty:
-            o, h, l, c, v = '시가', '고가', '저가', '종가', '거래량'
-            if len(self.ohlcv) > 20:
-                self.__ta = taf(self.ohlcv.copy(), open=o, close=c, low=l, high=h, volume=v)
-        return self.__ta
+        if len(self.ohlcv) <= 20:
+            raise ReferenceError(f'{self.name}({self.ticker}) length is below 20.')
+        return self.__getattribute__(self.__checkattr__(inner().f_code.co_name))
 
     @property
-    def rel(self) -> pd.DataFrame:
+    def relative_return(self) -> pd.DataFrame:
         """
-        기간별 상대 수익률 (시계열, 벤치마크X)
+        시계열 상대 수익률
+
+                     3M         6M         1Y          2Y          3Y          5Y
+        날짜
+        2019-04-09  NaN        NaN        NaN         NaN    0.000000    0.000000
+        2019-04-10  NaN        NaN        NaN         NaN    1.987904    1.987904
+        2019-04-11  NaN        NaN        NaN         NaN    1.987904    1.987904
+        ...         ...        ...        ...         ...         ...         ...
+        2022-04-06  5.0 -12.133891  -4.538512  231.094504  420.523498  420.523498
+        2022-04-07 -0.1 -16.401674  -9.175213  215.012771  395.240928  395.240928
+        2022-04-08 -2.9 -18.744770 -11.720852  206.183584  381.360301  381.360301
         """
-        if self.__rel.empty:
-            self.__rel = getRelReturns(ohlcv=self.ohlcv, key=self.__key)
-        return self.__rel
+        return self.__getattribute__(self.__checkattr__(inner().f_code.co_name))
 
     @property
     def perf(self) -> pd.DataFrame:
         """
         기간별 수익률
+
+                R1D  R1W  R1M    R3M    R6M   R1Y
+        035720 -2.8 -8.4 -2.9 -12.91 -12.52 -3.05
         """
-        if self.__perf.empty:
-            self.__perf = getPerf(ohlcv=self.ohlcv, key=self.__key, name=self.ticker)
-        return self.__perf
+        return self.__getattribute__(self.__checkattr__(inner().f_code.co_name))
 
     @property
     def fiftytwo(self) -> pd.DataFrame:
         """
         52주 가격 및 대비 수익률
+
+                     52H      52L  pct52H  pct52L
+        035720  169500.0  82600.0  -42.77   17.43
         """
-        if self.__fiftytwo.empty:
-            self.__fiftytwo = getFiftyTwo(ohlcv=self.ohlcv, key=self.__key, name=self.name)
-        return self.__fiftytwo
+        return self.__getattribute__(self.__checkattr__(inner().f_code.co_name))
 
     @property
     def pivot(self) -> pd.DataFrame:
         """
-        가격 피벗 지점
+        고/저점 피벗
+
+                          저점     고점
+        날짜
+        2019-04-10       NaN   20673.0
+        2019-04-18       NaN   23983.0
+        2019-04-19   23081.0       NaN
+        ...              ...       ...
+        2022-03-30       NaN  108000.0
+        2022-04-04  104000.0       NaN
+        2022-04-05       NaN  108000.0
         """
-        if self.__pivot.empty:
-            _, maxima = getExtrema(h=self.ohlcv.고가, accuracy=2)
-            minima, _ = getExtrema(h=self.ohlcv.저가, accuracy=2)
-            self.__pivot = pd.concat(
-                objs={
-                    '저점': self.ohlcv.저가.iloc[minima],
-                    '고점': self.ohlcv.고가.iloc[maxima]
-                }, axis=1
-            )
-        return self.__pivot
+        return self.__getattribute__(self.__checkattr__(inner().f_code.co_name))
 
     @property
     def sma(self) -> pd.DataFrame:
         """
-        Simple Moving Average
+        이동 평균선
+
+                       SMA5D    SMA10D    SMA20D        SMA60D        SMA120D
+        날짜
+        2019-04-09       NaN       NaN       NaN           NaN            NaN
+        2019-04-10       NaN       NaN       NaN           NaN            NaN
+        2019-04-11       NaN       NaN       NaN           NaN            NaN
+        ...              ...       ...       ...           ...            ...
+        2022-04-06  106100.0  105750.0  105125.0  96043.333333  109042.500000
+        2022-04-07  104780.0  105240.0  105120.0  96041.666667  108900.000000
+        2022-04-08  102980.0  104440.0  104895.0  95991.666667  108695.833333
         """
-        if self.__sma.empty:
-            self.__sma = pd.concat(
-                objs={f'SMA{win}D': self.ohlcv[self.__key].rolling(window=win).mean() for win in [5, 10, 20, 60, 120]},
-                axis=1
-            )
-        return self.__sma
+        return self.__getattribute__(self.__checkattr__(inner().f_code.co_name))
 
     @property
     def ema(self) -> pd.DataFrame:
         """
-        Exponential Moving Average
+        지수 이동 평균선
+
+                            EMA5D         EMA10D  ...         EMA60D        EMA120D
+        날짜                                        ...
+        2019-04-09   20172.000000   20172.000000  ...   20172.000000   20172.000000
+        2019-04-10   20412.600000   20392.550000  ...   20375.841667   20374.170833
+        2019-04-11   20488.578947   20465.089701  ...   20443.763726   20441.554871
+        ...                   ...            ...  ...            ...            ...
+        2022-04-06  105922.401394  105624.752249  ...  102239.662010  107419.829099
+        2022-04-07  103914.934263  104583.888204  ...  102162.951780  107295.533865
+        2022-04-08  101609.956175  103204.999439  ...  101993.674673  107125.359027
         """
-        if self.__ema.empty:
-            self.__ema = pd.concat(
-                objs={f'EMA{win}D': self.ohlcv[self.__key].ewm(span=win).mean() for win in [5, 10, 20, 60, 120]},
-                axis=1
-            )
-        return self.__ema
+        return self.__getattribute__(self.__checkattr__(inner().f_code.co_name))
 
     @property
     def iir(self) -> pd.DataFrame:
         """
         Infinite-Impulse Response Filter: 반응 조정형(BUTTERWORTH)
+
+                            IIR5D         IIR10D  ...         IIR60D       IIR120D
+        날짜                                        ...
+        2019-04-09   20171.999172   20171.183818  ...   20350.155891  20585.714808
+        2019-04-10   20451.424350   20511.387923  ...   20618.116655  20756.449706
+        2019-04-11   20635.478325   20869.834379  ...   20887.678860  20927.963272
+        ...                   ...            ...  ...            ...           ...
+        2022-04-06  104004.452804  102585.000283  ...   99545.463195  99104.652456
+        2022-04-07  100498.864533   99964.669830  ...   99062.635938  98966.873400
+        2022-04-08   97100.001699   97103.394156  ...   98564.249289  98824.955002
         """
-        if self.__iir.empty:
-            objs, price = dict(), self.ohlcv[self.__key]
-            for win in [5, 10, 20, 60, 120]:
-                cutoff = (252 / win) / (252 / 2)
-                a, b = butter(N=1, Wn=cutoff)
-                objs[f'IIR{win}D'] = pd.Series(data=filtfilt(a, b, price), index=price.index)
-            self.__iir = pd.concat(objs=objs, axis=1)
-        return self.__iir
+        return self.__getattribute__(self.__checkattr__(inner().f_code.co_name))
 
     def get_trend(self, gap: str = str()) -> pd.DataFrame:
         """
-        평균 추세
+        기간 내 평균 직선 추세
         :param gap: 기간
+
+                          support         resist
+        날짜
+        2022-01-06   81523.386164   87977.053862
+        2022-01-07   81753.561918   88199.209023
+        2022-01-10   82444.089181   88865.674506
+        ...                   ...            ...
+        2022-04-06  102239.204055  107971.018341
+        2022-04-07  102469.379809  108193.173502
+        2022-04-08  102699.555564  108415.328663
         """
         if not hasattr(self, f'trend_{gap}'):
-            setattr(self, f'trend_{gap}', trend(ohlcv=self.ohlcv, pivot=self.pivot, gap=gap))
-        return getattr(self, f'trend_{gap}').avg
+            self.__setattr__(f'trend_{gap}', _trend(ohlcv=self.ohlcv, pivot=self.pivot, gap=gap))
+        return self.__getattribute__(f'trend_{gap}').avg
 
     def get_bound(self, gap: str = str()):
         """
-        기간별 지지선/저항선
+        기간 내 지지선/저항선
         :param gap: 기간
+
+                           resist       support
+        날짜
+        2022-01-06  103000.000000  78025.641026
+        2022-01-07  103094.594595  78215.384615
+        2022-01-10  103378.378378  78784.615385
+        ...                   ...           ...
+        2022-04-06  111513.513514  95102.564103
+        2022-04-07  111608.108108  95292.307692
+        2022-04-08  111702.702703  95482.051282
         """
         if not hasattr(self, f'trend_{gap}'):
-            setattr(self, f'trend_{gap}', trend(ohlcv=self.ohlcv, pivot=self.pivot, gap=gap))
-        return getattr(self, f'trend_{gap}').bound
+            self.__setattr__(f'trend_{gap}', _trend(ohlcv=self.ohlcv, pivot=self.pivot, gap=gap))
+        return self.__getattribute__(f'trend_{gap}').bound
 
 
 if __name__ == "__main__":
@@ -200,12 +235,16 @@ if __name__ == "__main__":
     # ticker = 'TSLA'
 
     app = ohlcv(ticker=ticker, period=3)
-    print(app.ohlcv)
-    print(app.perf)
-    # print(app.rel)
-    # print(app.pivot)
+    print(app.name)
+
+    # print(app.ohlcv)
+    # print(app.ta)
     # print(app.sma)
     # print(app.ema)
     # print(app.iir)
+    # print(app.relative_return)
+    # print(app.perf)
+    # print(app.fiftytwo)
+    # print(app.pivot)
     # print(app.get_trend(gap='3M'))
     # print(app.get_bound(gap='3M'))
