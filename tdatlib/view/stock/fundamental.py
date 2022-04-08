@@ -8,7 +8,7 @@ import plotly.offline as of
 class fundamental(fundamental_kr):
 
     def __init__(self, ticker:str, name:str=str()):
-        super().__init__(ticker=ticker, name=name)
+        super().__init__(ticker=ticker)
         return
 
     def save(self, fig:go.Figure, title:str, path:str=str()):
@@ -36,14 +36,14 @@ class fundamental(fundamental_kr):
         )
         fa = fig.add_trace
 
-        product, a_stat = self.product.copy(), self.annual_statement.copy()
+        product, a_stat = self.products.copy(), self.stat_annual.copy()
         fa(go.Pie(
             name='Product', labels=product.index, values=product,
             visible=True, showlegend=False,
             textinfo='label+percent', insidetextorientation='radial', hoverinfo='label+percent'
         ), row=1, col=1)
 
-        multi_factor = self.multi_factor.copy()
+        multi_factor = self.multifactor.copy()
         for n, col in enumerate(multi_factor.columns):
             fa(go.Scatterpolar(
                 name=col, r=multi_factor[col].astype(float), theta=multi_factor.index,
@@ -98,7 +98,7 @@ class fundamental(fundamental_kr):
             specs=[[{"type": "xy"}, {"type": "bar"}], [{"type": "bar"}, {"type": "bar"}]]
         )
 
-        benchmark = self.benchmark_relative.copy()
+        benchmark = self.benchmark_return.copy()
         for col in ['3M', '1Y']:
             df = benchmark[col].dropna()
             for n, c in enumerate(df.columns):
@@ -109,7 +109,7 @@ class fundamental(fundamental_kr):
                     hovertemplate='날짜: %{meta}<br>' + f'{c}: ' + '%{y:.2f}%<extra></extra>'
                 ), row=1, col=1)
 
-        mul_rel = self.multiple_relative.copy()
+        mul_rel = self.benchmark_multiple.copy()
         for m, col in enumerate(['PER', 'EV/EBITA', 'ROE']):
             df = mul_rel[col]
             for n, c in enumerate(df.columns):
@@ -151,30 +151,33 @@ class fundamental(fundamental_kr):
             row=1, col=1
         )
 
-        foreign = self.foreigner.copy()
+        foreign = self.foreign_rate.copy()
         for m, col in enumerate(['3M', '1Y', '3Y']):
             df = foreign[col].dropna()
             df = df[df != '']
             for n, c in enumerate(df.columns):
                 data = df[c].astype(float) if n else df[c].astype(int)
-                name, unit, visible = f'외인비중: {col}' if n else '종가', '%' if n else '원', 'legendonly' if m else True
-                showlegend, dtype = True if n else False, 'float' if n else 'int'
+                name, unit, v = f'외인비중: {col}' if n else '종가', '%' if n else '원', 'legendonly' if m else True
+                s, dtype = True if n else False, 'float' if n else 'int'
                 trace = traceLine(
-                    data=data, name=name, unit=unit, legendgroup=name, visible=visible, showlegend=showlegend, dtype=dtype
+                    data=data, name=name, unit=unit, legendgroup=col, visible=v, showlegend=s, dtype=dtype
                 )
                 fig.add_trace(trace=trace, row=1, col=2, secondary_y=False if n else True)
 
-        shorts = self.short.copy()
+        shorts = self.short_sell.copy()
         for n, col in enumerate(shorts.columns):
             data = shorts[col].astype(int) if n else shorts[col].astype(float)
-            name, unit = f'공매도: {col}' if n else col, '원' if n else '%'
+            name, unit, showlegend = col, '원' if n else '%', False if n else True
             dtype, s_y = 'int' if n else 'float', True if n else False
-            fig.add_trace(traceLine(data=data, name=name, unit=unit, dtype=dtype), row=2, col=1, secondary_y=s_y)
+            fig.add_trace(
+                traceLine(data=data, name=name, unit=unit, dtype=dtype, showlegend=showlegend),
+                row=2, col=1, secondary_y=s_y
+            )
 
         balance = self.short_balance.copy()
         for n, col in enumerate(balance.columns):
             data = balance[col].astype(int) if n else balance[col].astype(float)
-            name, unit, showlegend = col if n else col, '원' if n else '%', False if n else True
+            name, unit, showlegend = col, '원' if n else '%', False if n else True
             dtype, s_y = 'int' if n else 'float', True if n else False
             fig.add_trace(
                 trace=traceLine(data=data, name=name, unit=unit, dtype=dtype, showlegend=showlegend),
@@ -201,7 +204,7 @@ class fundamental(fundamental_kr):
                    [{"type": "xy", "secondary_y": True}, {"type": "xy", 'secondary_y': True}]]
         )
 
-        cost = self.cost.copy()
+        cost = self.expenses.copy()
         for n, col in enumerate(['매출원가율', '판관비율', 'R&D투자비중']):
             df = cost[col].dropna().astype(float) if n < 2 else cost[col].fillna(0).astype(float)
             fig.add_trace(go.Bar(
@@ -209,7 +212,7 @@ class fundamental(fundamental_kr):
                 hovertemplate='%{x}<br>' + col + ': %{y:.2f}%<extra></extra>'
             ), row = n // 2 + 1, col=n % 2 + 1)
 
-        a_stat = self.annual_statement.copy()
+        a_stat = self.stat_annual.copy()
         fig.add_trace(go.Bar(
             x=a_stat.index, y=a_stat['부채비율'].astype(float), name='부채비율',
             hovertemplate='%{x}<br>부채비율: %{y:.2f}%<extra></extra>'
@@ -233,7 +236,7 @@ class fundamental(fundamental_kr):
         )
         fa = fig.add_trace
 
-        multiples = self.multiples.copy()
+        multiples = self.multiple_series.copy()
         for n, c in enumerate(['PER', 'EPS']):
             data, dtype, unit = multiples[c].astype(int if n else float), 'int' if n else 'float', '원' if n else ''
             fa(trace=traceLine(data=data, name=c, unit=unit, dtype=dtype), row=1, col=1, secondary_y=False if n else True)

@@ -1,3 +1,4 @@
+from inspect import currentframe as inner
 from tdatlib import ohlcv
 import pandas as pd
 import numpy as np
@@ -5,38 +6,26 @@ import numpy as np
 
 class series:
 
-    __key = '종가'
-    __rel_return = pd.DataFrame()
-    
     def __init__(self, tickers:list or np.array, period:int=5):
         self.tickers, self.period = tickers, period
         for ticker in tickers:
             setattr(self, f'__{ticker}', ohlcv(ticker=ticker, period=period))
         return
 
-    def set_key(self, key:str):
-        self.__key = key
-        return
-    
     @property
     def rel_yield(self):
         """
         상대수익률 비교 데이터
         """
-        if self.__rel_return.empty:
+        if not hasattr(self, f'__{inner().f_code.co_name}'):
             objs = dict()
             for ticker in self.tickers:
-                attr = getattr(self, f'__{ticker}')
-                if not self.__key == '종가':
-                    attr.set_key(key=self.__key)
-
-                rel = attr.rel.copy()
+                attr = self.__getattribute__(f'__{ticker}')
+                rel = attr.relative_return.copy()
                 for col in rel.columns:
                     objs[(col, attr.name)] = rel[col]
-            self.__rel_return = pd.concat(objs=objs, axis=1)
-        return self.__rel_return
-
-        
+            self.__setattr__(f'__{inner().f_code.co_name}', pd.concat(objs=objs, axis=1))
+        return self.__getattribute__(f'__{inner().f_code.co_name}')
 
 
 if __name__ == "__main__":
