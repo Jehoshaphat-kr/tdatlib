@@ -8,5 +8,6 @@ from tdatlib.view import (
     treemap,
     treemap_deploy,
     view_fundamental,
-    view_technical
+    view_technical,
+    stock_analysis
 )

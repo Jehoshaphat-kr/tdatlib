@@ -7,7 +7,7 @@ import plotly.offline as of
 
 class fundamental(fundamental_kr):
 
-    def __init__(self, ticker:str, name:str=str()):
+    def __init__(self, ticker:str):
         super().__init__(ticker=ticker)
         return
 
