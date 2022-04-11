@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 
 
-class raw:
+class datum:
 
     def __init__(self, tickers:list or np.array, period:int=5):
         self.tickers, self.period = tickers, period
@@ -16,6 +16,27 @@ class raw:
     def names(self) -> list:
         """ 종목명 리스트 """
         return [self.__getattribute__(f'__{ticker}t').name for ticker in self.tickers]
+    
+    @property
+    def price(self) -> pd.DataFrame:
+        """
+        가격[종가] 데이터
+        :return:
+                 삼성전자  SK하이닉스  리노공업  DB하이텍
+        날짜
+        2021-04-12  83200      137500    158200     55000
+        2021-04-13  84000      139500    160100     55200
+        2021-04-14  84000      137000    159900     54700
+        ...           ...         ...       ...       ...
+        2022-04-07  68000      113500    174600     70000
+        2022-04-08  67800      112000    175500     69700
+        2022-04-11  67800      112000    175100     69700
+        """
+        objs = dict()
+        for ticker in self.tickers:
+            attr = self.__getattribute__(f'__{ticker}t')
+            objs[attr.name] = attr.ohlcv.종가
+        return pd.concat(objs=objs, axis=1)
 
     @property
     def icm(self) -> pd.DataFrame:
@@ -100,16 +121,55 @@ class raw:
             objs[attr.name] = attr.ta.momentum_rsi
         return pd.concat(objs=objs, axis=1)
 
+    @property
+    def rel_cci(self) -> pd.DataFrame:
+        """
+        상대 CCI 데이터
+        :return:
+                      삼성전자  SK하이닉스    리노공업    DB하이텍
+        날짜
+        2021-04-12         NaN         NaN         NaN        NaN
+        2021-04-13         NaN         NaN         NaN        NaN
+        2021-04-14         NaN         NaN         NaN        NaN
+        ...                ...         ...         ...        ...
+        2022-04-07 -211.335862 -130.311615 -200.256566 -77.915152
+        2022-04-08 -191.160809 -129.144852 -129.746884 -93.428571
+        2022-04-11 -166.514042 -124.137931 -132.607754 -97.206166
+        """
+        objs = dict()
+        for ticker in self.tickers:
+            attr = self.__getattribute__(f'__{ticker}t')
+            objs[attr.name] = attr.ta.trend_cci
+        return pd.concat(objs=objs, axis=1)
+
+    @property
+    def rel_sharpe_ratio(self) -> pd.DataFrame:
+        """
+        샤프 비율 데이터
+        :return:
+        """
+        objs = dict()
+        for ticker in self.tickers:
+            cap = np.log(self.icm.loc[ticker, '시가총액'])
+            attr = self.__getattribute__(f'__{ticker}t')
+            data = [
+                {f'cagr': attr.cagr(days=days), f'risk': attr.volatility(days=days), 'term':term, 'cap':cap}
+                for term, days in [('3M', 92), ('6M', 183), ('1Y', 365), ('2Y', 730), ('3Y', 1095), ('5Y', 1825)]
+            ]
+            objs[attr.name] = pd.DataFrame(data=data).set_index(keys='term')
+        return pd.concat(objs, axis=1)
+
 
 if __name__ == "__main__":
     # t_tickers = ['TSLA', 'MSFT', 'GOOG', 'ZM']
     t_tickers = ['005930', '000660', '058470', '000990']
 
-    t_series = series(tickers=t_tickers, period=5)
-    print(t_series.icm)
+    t_series = datum(tickers=t_tickers, period=1)
+    # print(t_series.price)
+    # print(t_series.icm)
     # print(t_series.rel_yield)
     # print(t_series.rel_yield['1Y'].dropna())
     # print(t_series.rel_mfi)
     # print(t_series.rel_rsi)
-
-
+    # print(t_series.rel_cci)
+    print(t_series.sharpe_ratio)
