@@ -44,7 +44,7 @@ class compare(datum):
         :param tag: 티커 종류 표시 유무
         """
         if tag:
-            title += f"_{'_'.join(self.tickers)}"
+            title += f"-{'_'.join(self.names)}"
         if path:
             of.plot(fig, filename=f'{path}/{title}.html', auto_open=False)
         else:
@@ -93,10 +93,51 @@ class compare(datum):
         return fig
 
     @property
-    def fig_rsi_cci(self) -> go.Figure:
-        """ RSI / CCI 비교 """
+    def fig_drawdown(self) -> go.Figure:
+        """ 기간별 낙폭 비교 """
+        fig = go.Figure()
+
+        gaps = ['3M', '6M', '1Y', '2Y', '3Y', '5Y']
+        tags = ['3개월', '6개월', '1년', '2년', '3년', '5년']
+        names, data, price = self.names, self.rel_drawdown.copy(), self.price.copy()
+        for c, col in enumerate(gaps):
+            _data = data[col].dropna()
+            meta = [f'{d.year}/{d.month}/{d.day}' for d in _data.index]
+            for n, name in enumerate(names):
+                p = price[price.index >= _data.index[0]][name]
+                fig.add_trace(go.Scatter(
+                    name=name, x=_data.index, y=_data[name], visible=False if c else True, showlegend=True,
+                    mode='lines', line=dict(color=colors[n]), meta=meta, customdata=p,
+                    hovertemplate='날짜: %{meta}<br>' + name + ': %{y:.2f}%<br>가격: %{customdata:,}원<extra></extra>'
+                ))
+
+        steps = []
+        for i in range(len(gaps)):
+            step = dict(
+                method="update",
+                args=[{"visible": [False] * len(fig.data)}, {"title": f"{tags[i]}({gaps[i]}) 낙폭 비교"}],
+                label=tags[i]
+            )
+            for j in range(len(self.tickers)):
+                step["args"][0]["visible"][len(self.tickers) * i + j] = True
+            steps.append(step)
+        sliders = [dict(active=0, currentvalue={"prefix": "비교 기간: "}, pad={"t": 50}, steps=steps)]
+
+        fig.update_layout(
+            title=f'{tags[0]}({gaps[0]}) 낙폭 비교',
+            plot_bgcolor='white',
+            sliders=sliders,
+            xaxis=dict(title='날짜', showgrid=True, gridcolor='lightgrey', autorange=True),
+            yaxis=dict(title='낙폭[%]', showgrid=True, gridcolor='lightgrey', autorange=True,
+                       zeroline=True, zerolinecolor='grey', zerolinewidth=1)
+        )
+        return fig
+
+    @property
+    def fig_rsi(self) -> go.Figure:
+        """ RSI / STOCH-RSI 비교 """
         fig = make_subplots(
-            rows=2, cols=1, vertical_spacing=0.11, subplot_titles=("RSI", "CCI"), shared_xaxes=True,
+            rows=2, cols=1, vertical_spacing=0.11, subplot_titles=("RSI", "Stochastic-RSI"), shared_xaxes=True,
             specs=[[{"type": "xy"}], [{"type": "xy"}]]
         )
 
@@ -111,18 +152,16 @@ class compare(datum):
         fig.add_hrect(y0=70, y1=80, line_width=0, fillcolor='red', opacity=0.2, row=1, col=1)
         fig.add_hrect(y0=20, y1=30, line_width=0, fillcolor='green', opacity=0.2, row=1, col=1)
 
-        data = self.rel_cci.copy()
+        data = self.rel_stoch.copy()
         for n, col in enumerate(data.columns):
             d = data[col].dropna()
             fig.add_trace(go.Scatter(
-                name=f'CCI: {col}', x=d.index, y=d, mode='lines', line=dict(color=colors[n]),
+                name=f'S-RSI: {col}', x=d.index, y=d, mode='lines', line=dict(color=colors[n]),
                 meta=[f'{_.year}/{_.month}/{_.day}' for _ in d.index],
-                hovertemplate='날짜: %{meta}<br>' + col + ': %{y:.2f}[-]<extra></extra>'
+                hovertemplate='날짜: %{meta}<br>' + col + ': %{y:.2f}[%]<extra></extra>'
             ), row=2, col=1)
-        fig.add_hrect(y0=200, y1=400, line_width=0, fillcolor='red', opacity=0.2, row=2, col=1)
-        fig.add_hrect(y0=100, y1=200, line_width=0, fillcolor='brown', opacity=0.2, row=2, col=1)
-        fig.add_hrect(y0=-200, y1=-100, line_width=0, fillcolor='lightgreen', opacity=0.4, row=2, col=1)
-        fig.add_hrect(y0=-400, y1=-200, line_width=0, fillcolor='green', opacity=0.2, row=2, col=1)
+        fig.add_hrect(y0=80, y1=100, line_width=0, fillcolor='red', opacity=0.2, row=2, col=1)
+        fig.add_hrect(y0=0, y1=20, line_width=0, fillcolor='green', opacity=0.2, row=2, col=1)
 
         fig.update_layout(
             title=f'RSI 비교',
@@ -130,7 +169,92 @@ class compare(datum):
             xaxis=dict(title='', showgrid=True, gridcolor='lightgrey', autorange=True, rangeselector=rangeselector),
             xaxis2=dict(title='날짜', showgrid=True, gridcolor='lightgrey', autorange=True),
             yaxis=dict(title='RSI[%]', showgrid=True, gridcolor='lightgrey', autorange=True),
-            yaxis2=dict(title='CCI[-]', showgrid=True, gridcolor='lightgrey', autorange=True)
+            yaxis2=dict(title='S-RSI[-]', showgrid=True, gridcolor='lightgrey', autorange=True)
+        )
+        return fig
+
+    @property
+    def fig_cci_vortex(self) -> go.Figure:
+        """ CCI / VORTEX 비교 """
+        fig = make_subplots(
+            rows=2, cols=1, vertical_spacing=0.11, subplot_titles=("CCI", "VORTEX"), shared_xaxes=True,
+            specs=[[{"type": "xy"}], [{"type": "xy"}]]
+        )
+
+        data = self.rel_cci.copy()
+        for n, col in enumerate(data.columns):
+            d = data[col].dropna()
+            fig.add_trace(go.Scatter(
+                name=f'CCI: {col}', x=d.index, y=d, mode='lines', line=dict(color=colors[n]),
+                meta=[f'{_.year}/{_.month}/{_.day}' for _ in d.index],
+                hovertemplate='날짜: %{meta}<br>' + col + ': %{y:.2f}[-]<extra></extra>'
+            ), row=1, col=1)
+        fig.add_hrect(y0=200, y1=400, line_width=0, fillcolor='red', opacity=0.2, row=1, col=1)
+        fig.add_hrect(y0=100, y1=200, line_width=0, fillcolor='brown', opacity=0.2, row=1, col=1)
+        fig.add_hrect(y0=-200, y1=-100, line_width=0, fillcolor='lightgreen', opacity=0.4, row=1, col=1)
+        fig.add_hrect(y0=-400, y1=-200, line_width=0, fillcolor='green', opacity=0.2, row=1, col=1)
+
+        data = self.rel_vortex.copy()
+        for n, col in enumerate(data.columns):
+            d = data[col].dropna()
+            fig.add_trace(go.Scatter(
+                name=f'VORTEX: {col}', x=d.index, y=d, mode='lines', line=dict(color=colors[n]),
+                meta=[f'{_.year}/{_.month}/{_.day}' for _ in d.index],
+                hovertemplate='날짜: %{meta}<br>' + col + ': %{y:.2f}[-]<extra></extra>'
+            ), row=2, col=1)
+
+        fig.update_layout(
+            title=f'CCI / Vortex',
+            plot_bgcolor='white',
+            xaxis=dict(title='', showgrid=True, gridcolor='lightgrey', autorange=True, rangeselector=rangeselector),
+            xaxis2=dict(title='날짜', showgrid=True, gridcolor='lightgrey', autorange=True),
+            yaxis=dict(title='CCI[%]', showgrid=True, gridcolor='lightgrey', autorange=True,
+                       zeroline=True, zerolinecolor='grey', zerolinewidth=0.5),
+            yaxis2=dict(title='Vortex[-]', showgrid=True, gridcolor='lightgrey', autorange=True,
+                        zeroline=True, zerolinecolor='grey', zerolinewidth=0.5)
+        )
+        return fig
+
+    @property
+    def fig_mfi_bb(self) -> go.Figure:
+        """ MFI / Bollinger 비교 """
+        fig = make_subplots(
+            rows=2, cols=1, vertical_spacing=0.11, subplot_titles=("MFI", "Bollinger Signal"), shared_xaxes=True,
+            specs=[[{"type": "xy"}], [{"type": "xy"}]]
+        )
+
+        data = self.rel_mfi.copy()
+        for n, col in enumerate(data.columns):
+            d = data[col].dropna()
+            fig.add_trace(go.Scatter(
+                name=f'MFI: {col}', x=d.index, y=d, mode='lines', line=dict(color=colors[n]),
+                meta=[f'{_.year}/{_.month}/{_.day}' for _ in d.index],
+                hovertemplate='날짜: %{meta}<br>' + col + ': %{y:.2f}[%]<extra></extra>'
+            ), row=1, col=1)
+        fig.add_hrect(y0=80, y1=100, line_width=0, fillcolor='red', opacity=0.2, row=1, col=1)
+        fig.add_hline(y=90, line_width=0.5, line_dash="dash", line_color="black", row=1, col=1)
+        fig.add_hrect(y0=0, y1=20, line_width=0, fillcolor='lightgreen', opacity=0.4, row=1, col=1)
+        fig.add_hline(y=10, line_width=0.5, line_dash="dash", line_color="black", row=1, col=1)
+
+        data = self.rel_bb.copy()
+        for n, col in enumerate(data.columns):
+            d = data[col].dropna()
+            fig.add_trace(go.Scatter(
+                name=f'BB-Sig: {col}', x=d.index, y=d, mode='lines', line=dict(color=colors[n]),
+                meta=[f'{_.year}/{_.month}/{_.day}' for _ in d.index],
+                hovertemplate='날짜: %{meta}<br>' + col + ': %{y:.2f}[-]<extra></extra>'
+            ), row=2, col=1)
+        fig.add_hrect(y0=1, y1=1.5, line_width=0, fillcolor='red', opacity=0.2, row=2, col=1)
+        fig.add_hrect(y0=-0.5, y1=0, line_width=0, fillcolor='lightgreen', opacity=0.4, row=2, col=1)
+
+        fig.update_layout(
+            title=f'MFI / Bollinger-Signal',
+            plot_bgcolor='white',
+            xaxis=dict(title='', showgrid=True, gridcolor='lightgrey', autorange=True, rangeselector=rangeselector),
+            xaxis2=dict(title='날짜', showgrid=True, gridcolor='lightgrey', autorange=True),
+            yaxis=dict(title='MFI[%]', showgrid=True, gridcolor='lightgrey', autorange=True,
+                       zeroline=True, zerolinecolor='grey', zerolinewidth=0.5),
+            yaxis2=dict(title='BB-Sig[-]', showgrid=True, gridcolor='lightgrey', autorange=True)
         )
         return fig
 
@@ -152,8 +276,8 @@ class compare(datum):
                     hovertemplate=name + '<br>변동성: %{x:.2f}%<br>CAGR: %{y:.2f}%<br><extra></extra>'
                 ))
 
-            loc = data.loc[gap]
-            x = [0.8*loc.min(), 1.2 * loc.max()]
+            loc = [data[name].loc[gap, 'risk'] for name in self.names]
+            x = [0.8*min(loc), 1.2 * max(loc)]
             fig.add_trace(go.Scatter(
                 name='기준선', x=x, y=[0.8 * x[0], 0.8 * x[1]], mode='lines',
                 line=dict(color='black', dash='dot', width=0.5), hoverinfo='skip',
@@ -201,5 +325,8 @@ if __name__ == "__main__":
         os.makedirs(path)
 
     # t_compare.save(t_compare.fig_returns, title='수익률 비교', path=path)
-    # t_compare.save(t_compare.fig_rsi_cci, title='RSI / CCI 비교', path=path)
-    t_compare.save(t_compare.fig_sharpe_ratio, title='샤프비율 비교', path=path)
+    # t_compare.save(t_compare.fig_drawdown, title='낙폭 비교', path=path)
+    # t_compare.save(t_compare.fig_rsi, title='RSI 비교', path=path)
+    # t_compare.save(t_compare.fig_cci_vortex, title='CCI_VORTEX', path=path)
+    t_compare.save(t_compare.fig_mfi_bb, title='MFI_B-Sig', path=path)
+    # t_compare.save(t_compare.fig_sharpe_ratio, title='샤프비율 비교', path=path)

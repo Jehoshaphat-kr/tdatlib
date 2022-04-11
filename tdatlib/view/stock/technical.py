@@ -162,6 +162,24 @@ class technical(ohlcv):
         return fig
 
     @property
+    def fig_mfi(self) -> go.Figure:
+        """
+        MFI: Money Flow Index
+        """
+        fig = self.get_base(row_width=[0.3, 0.1, 0.6])
+
+        fig.add_trace(trace=traceLine(data=self.ta.volume_mfi, name='MFI', unit='%'), row=3, col=1)
+        fig.add_hrect(y0=80, y1=100, line_width=0, fillcolor='red', opacity=0.2, row=3, col=1)
+        fig.add_hline(y=90, line_width=0.5, line_dash="dash", line_color="black", row=3, col=1)
+        fig.add_hrect(y0=0, y1=20, line_width=0, fillcolor='lightgreen', opacity=0.4, row=3, col=1)
+        fig.add_hline(y=10, line_width=0.5, line_dash="dash", line_color="black", row=3, col=1)
+        fig.update_layout(
+            title=f'{self.name}({self.ticker}) MFI',
+            xaxis3=setXaxis(title='날짜', label=True, xranger=False), yaxis3=setYaxis(title='MFI'),
+        )
+        return fig
+
+    @property
     def fig_cci(self) -> go.Figure:
         """
         CCI: Commodity Channel Index
@@ -246,6 +264,7 @@ if __name__ == "__main__":
     # t_analyze.fig_cci.show()
     # t_analyze.fig_stc.show()
     # t_analyze.fig_trix.show()
+    t_analyze.fig_mfi.show()
 
 
     path = os.path.join(archive.desktop, f'tdat/{datetime.datetime.today().strftime("%Y-%m-%d")}')

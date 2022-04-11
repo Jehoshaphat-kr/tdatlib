@@ -10,13 +10,9 @@ class datum:
         for ticker in tickers:
             setattr(self, f'__{ticker}t', ohlcv(ticker=ticker, period=period))
             setattr(self, f'__{ticker}f', fundamental_kr(ticker=ticker))
+        self.names = [self.__getattribute__(f'__{ticker}t').name for ticker in self.tickers]
         return
 
-    @property
-    def names(self) -> list:
-        """ 종목명 리스트 """
-        return [self.__getattribute__(f'__{ticker}t').name for ticker in self.tickers]
-    
     @property
     def price(self) -> pd.DataFrame:
         """
@@ -32,11 +28,10 @@ class datum:
         2022-04-08  67800      112000    175500     69700
         2022-04-11  67800      112000    175100     69700
         """
-        objs = dict()
-        for ticker in self.tickers:
-            attr = self.__getattribute__(f'__{ticker}t')
-            objs[attr.name] = attr.ohlcv.종가
-        return pd.concat(objs=objs, axis=1)
+        return pd.concat(
+            objs={n: self.__getattribute__(f'__{t}t').ohlcv.종가 for n, t in zip(self.names, self.tickers)},
+            axis=1
+        )
 
     @property
     def icm(self) -> pd.DataFrame:
@@ -72,11 +67,33 @@ class datum:
         2022-04-08 -11.833550 -5.307263 -19.952774  ...   -45.771144  109.615385   498.901099
         """
         objs = dict()
-        for ticker in self.tickers:
-            attr = self.__getattribute__(f'__{ticker}t')
-            rel = attr.relative_return.copy()
+        for name, ticker in zip(self.names, self.tickers):
+            rel = self.__getattribute__(f'__{ticker}t').relative_return.copy()
             for col in rel.columns:
-                objs[(col, attr.name)] = rel[col]
+                objs[(col, name)] = rel[col]
+        return pd.concat(objs=objs, axis=1)
+
+    @property
+    def rel_drawdown(self) -> pd.DataFrame:
+        """
+        상대 낙폭 비교 데이터
+        :return:
+                           3M         6M         1Y  ...         2Y         3Y         5Y
+                     삼성전자   삼성전자   삼성전자  ...   DB하이텍   DB하이텍   DB하이텍
+        날짜                                         ...
+        2021-04-12        NaN        NaN   0.000000  ...   0.000000   0.000000   0.000000
+        2021-04-13        NaN        NaN   0.000000  ...   0.000000   0.000000   0.000000
+        2021-04-14        NaN        NaN   0.000000  ...  -0.905797  -0.905797  -0.905797
+        ...               ...        ...        ...  ...        ...        ...        ...
+        2022-04-07 -13.814956 -15.527950 -19.143876  ... -17.550059 -17.550059 -17.550059
+        2022-04-08 -14.068441 -15.776398 -19.381688  ... -17.903416 -17.903416 -17.903416
+        2022-04-11 -13.941698 -15.652174 -19.262782  ... -19.199058 -19.199058 -19.199058
+        """
+        objs = dict()
+        for name, ticker in zip(self.names, self.tickers):
+            rel = self.__getattribute__(f'__{ticker}t').drawdown.copy()
+            for col in rel.columns:
+                objs[(col, name)] = rel[col]
         return pd.concat(objs=objs, axis=1)
 
     @property
@@ -94,11 +111,10 @@ class datum:
         2022-04-07  16.810691   29.891098  35.076959  52.413128
         2022-04-08  16.514520   29.648873  35.755695  42.692124
         """
-        objs = dict()
-        for ticker in self.tickers:
-            attr = self.__getattribute__(f'__{ticker}t')
-            objs[attr.name] = attr.ta.volume_mfi
-        return pd.concat(objs=objs, axis=1)
+        return pd.concat(
+            objs={n:self.__getattribute__(f'__{t}t').ta.volume_mfi for n, t in zip(self.names, self.tickers)},
+            axis=1
+        )
 
     @property
     def rel_rsi(self) -> pd.DataFrame:
@@ -115,11 +131,30 @@ class datum:
         2022-04-07  32.860383    38.468218    37.962012    50.258491
         2022-04-08  31.924316    36.358833    39.814255    49.052700
         """
-        objs = dict()
-        for ticker in self.tickers:
-            attr = self.__getattribute__(f'__{ticker}t')
-            objs[attr.name] = attr.ta.momentum_rsi
-        return pd.concat(objs=objs, axis=1)
+        return pd.concat(
+            objs={n: self.__getattribute__(f'__{t}t').ta.momentum_rsi for n, t in zip(self.names, self.tickers)},
+            axis=1
+        )
+
+    @property
+    def rel_stoch(self) -> pd.DataFrame:
+        """
+        상대 RSI Stochastic 비교 데이터
+        :return:
+                    삼성전자  SK하이닉스   리노공업   DB하이텍
+        날짜
+        2017-04-12        NaN        NaN        NaN        NaN
+        2017-04-13        NaN        NaN        NaN        NaN
+        2017-04-14        NaN        NaN        NaN        NaN
+        ...               ...        ...        ...        ...
+        2022-04-07   0.000000  21.428571  23.834197   5.555556
+        2022-04-08   2.857143  10.714286  29.729730  12.000000
+        2022-04-11  13.157895   7.142857  21.081081   1.000000
+        """
+        return pd.concat(
+            objs={n: self.__getattribute__(f'__{t}t').ta.momentum_stoch for n, t in zip(self.names, self.tickers)},
+            axis=1
+        )
 
     @property
     def rel_cci(self) -> pd.DataFrame:
@@ -136,27 +171,75 @@ class datum:
         2022-04-08 -191.160809 -129.144852 -129.746884 -93.428571
         2022-04-11 -166.514042 -124.137931 -132.607754 -97.206166
         """
-        objs = dict()
-        for ticker in self.tickers:
-            attr = self.__getattribute__(f'__{ticker}t')
-            objs[attr.name] = attr.ta.trend_cci
-        return pd.concat(objs=objs, axis=1)
+        return pd.concat(
+            objs={n: self.__getattribute__(f'__{t}t').ta.trend_cci for n, t in zip(self.names, self.tickers)},
+            axis=1
+        )
+
+    @property
+    def rel_vortex(self) -> pd.DataFrame:
+        """
+        상대 VORTEX 비교 데이터
+        :return:
+                    삼성전자  SK하이닉스  리노공업   DB하이텍
+        날짜
+        2017-04-12       NaN         NaN       NaN       NaN
+        2017-04-13       NaN         NaN       NaN       NaN
+        2017-04-14       NaN         NaN       NaN       NaN
+        ...              ...         ...       ...       ...
+        2022-04-07 -0.391753   -0.426966 -0.574737  0.013072
+        2022-04-08 -0.445652   -0.426966 -0.500000 -0.178451
+        2022-04-11 -0.440860   -0.443182 -0.518828 -0.119048
+        """
+        return pd.concat(
+            objs={n: self.__getattribute__(f'__{t}t').ta.trend_vortex_ind_diff for n, t in zip(self.names, self.tickers)},
+            axis=1
+        )
+
+    @property
+    def rel_bb(self) -> pd.DataFrame:
+        """
+        상대 볼린저밴드 신호 비교 데이터
+        :return:
+                    삼성전자  SK하이닉스  리노공업   DB하이텍
+        날짜
+        2017-04-12       NaN         NaN       NaN       NaN
+        2017-04-13       NaN         NaN       NaN       NaN
+        2017-04-14       NaN         NaN       NaN       NaN
+        ...              ...         ...       ...       ...
+        2022-04-07 -0.120035    0.146258  0.009188  0.255423
+        2022-04-08 -0.059921    0.088902  0.111689  0.230855
+        2022-04-11  0.044824    0.097454  0.077344  0.129972
+        """
+        return pd.concat(
+            objs={n: self.__getattribute__(f'__{t}t').ta.volatility_bbp for n, t in zip(self.names, self.tickers)},
+            axis=1
+        )
 
     @property
     def rel_sharpe_ratio(self) -> pd.DataFrame:
         """
         샤프 비율 데이터
         :return:
+                                     삼성전자  ...                         DB하이텍
+                   cagr       risk        cap  ...       cagr       risk        cap
+        term                                   ...
+        3M   -42.314782  17.496205  33.637239  ... -39.919069  38.646100  28.744766
+        6M    -3.154487  19.205607  33.637239  ...  84.220739  41.831750  28.744766
+        1Y   -18.389423  18.531063  33.637239  ...  24.727273  40.790418  28.744766
+        2Y    18.566315  23.887624  33.637239  ...  75.786521  46.544911  28.744766
+        3Y    13.167067  25.856999  33.637239  ...  72.348076  49.691325  28.744766
+        5Y    10.136469  25.942737  33.637239  ...  26.353973  48.032697  28.744766
         """
         objs = dict()
-        for ticker in self.tickers:
+        for name, ticker in zip(self.names, self.tickers):
             cap = np.log(self.icm.loc[ticker, '시가총액'])
             attr = self.__getattribute__(f'__{ticker}t')
             data = [
                 {f'cagr': attr.cagr(days=days), f'risk': attr.volatility(days=days), 'term':term, 'cap':cap}
                 for term, days in [('3M', 92), ('6M', 183), ('1Y', 365), ('2Y', 730), ('3Y', 1095), ('5Y', 1825)]
             ]
-            objs[attr.name] = pd.DataFrame(data=data).set_index(keys='term')
+            objs[name] = pd.DataFrame(data=data).set_index(keys='term')
         return pd.concat(objs, axis=1)
 
 
@@ -164,12 +247,17 @@ if __name__ == "__main__":
     # t_tickers = ['TSLA', 'MSFT', 'GOOG', 'ZM']
     t_tickers = ['005930', '000660', '058470', '000990']
 
-    t_series = datum(tickers=t_tickers, period=1)
+    t_series = datum(tickers=t_tickers, period=5)
     # print(t_series.price)
     # print(t_series.icm)
+    # print(t_series.icm.columns)
     # print(t_series.rel_yield)
     # print(t_series.rel_yield['1Y'].dropna())
+    # print(t_series.rel_drawdown)
     # print(t_series.rel_mfi)
     # print(t_series.rel_rsi)
+    # print(t_series.rel_stoch)
     # print(t_series.rel_cci)
-    print(t_series.sharpe_ratio)
+    # print(t_series.rel_vortex)
+    print(t_series.rel_bb)
+    # print(t_series.rel_sharpe_ratio)
