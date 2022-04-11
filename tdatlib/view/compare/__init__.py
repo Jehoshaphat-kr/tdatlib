@@ -151,8 +151,11 @@ class compare(datum):
                     marker=dict(color=colors[n], size=d.loc[gap, 'cap'], symbol='circle'),
                     hovertemplate=name + '<br>변동성: %{x:.2f}%<br>CAGR: %{y:.2f}%<br><extra></extra>'
                 ))
+
+            loc = data.loc[gap]
+            x = [0.8*loc.min(), 1.2 * loc.max()]
             fig.add_trace(go.Scatter(
-                name='기준선', x=[0, 100], y=[0, 80], mode='lines',
+                name='기준선', x=x, y=[0.8 * x[0], 0.8 * x[1]], mode='lines',
                 line=dict(color='black', dash='dot', width=0.5), hoverinfo='skip',
                 visible=False if t else True, showlegend=False
             ))
@@ -164,7 +167,7 @@ class compare(datum):
                 args=[{"visible": [False] * len(fig.data)}, {"title": f"{tags[i]}({gaps[i]}) 샤프비율 비교"}],
                 label=tags[i]
             )
-            for j in range(len(self.tickers)):
+            for j in range(len(self.tickers) + 1):
                 step["args"][0]["visible"][(len(self.tickers) + 1) * i + j] = True
             steps.append(step)
         sliders = [dict(active=0, currentvalue={"prefix": "비교 기간: "}, pad={"t": 50}, steps=steps)]
