@@ -60,12 +60,12 @@ class compare(datum):
         tags = ['3개월', '6개월', '1년', '2년', '3년', '5년']
         names, data, price = self.names, self.rel_yield.copy(), self.price.copy()
         for c, col in enumerate(gaps):
-            _data = data[col].dropna()
-            meta = [f'{d.year}/{d.month}/{d.day}' for d in _data.index]
             for n, name in enumerate(names):
+                _data = data[(col, name)].dropna()
+                meta = [f'{d.year}/{d.month}/{d.day}' for d in _data.index]
                 p = price[price.index >= _data.index[0]][name]
                 fig.add_trace(go.Scatter(
-                    name=name, x=_data.index, y=_data[name], visible=False if c else True, showlegend=True,
+                    name=name, x=_data.index, y=_data, visible=False if c else True, showlegend=True,
                     mode='lines', line=dict(color=colors[n]), meta=meta, customdata=p,
                     hovertemplate='날짜: %{meta}<br>' + name + ': %{y:.2f}%<br>가격: %{customdata:,}원<extra></extra>'
                 ))
@@ -101,12 +101,12 @@ class compare(datum):
         tags = ['3개월', '6개월', '1년', '2년', '3년', '5년']
         names, data, price = self.names, self.rel_drawdown.copy(), self.price.copy()
         for c, col in enumerate(gaps):
-            _data = data[col].dropna()
-            meta = [f'{d.year}/{d.month}/{d.day}' for d in _data.index]
             for n, name in enumerate(names):
+                _data = data[(col, name)].dropna()
+                meta = [f'{d.year}/{d.month}/{d.day}' for d in _data.index]
                 p = price[price.index >= _data.index[0]][name]
                 fig.add_trace(go.Scatter(
-                    name=name, x=_data.index, y=_data[name], visible=False if c else True, showlegend=True,
+                    name=name, x=_data.index, y=_data, visible=False if c else True, showlegend=True,
                     mode='lines', line=dict(color=colors[n]), meta=meta, customdata=p,
                     hovertemplate='날짜: %{meta}<br>' + name + ': %{y:.2f}%<br>가격: %{customdata:,}원<extra></extra>'
                 ))
@@ -307,16 +307,40 @@ class compare(datum):
 
     @property
     def fig_profit(self) -> go.Figure:
-        """ 수익률 비교 """
+        """ 발표 기준 수익성 비교 """
         fig = make_subplots(
             rows=2, cols=2, vertical_spacing=0.11, horizontal_spacing=0.1,
-            subplot_titles=("영업이익률", "ROA(Return On Asset)", "ROE(Return On Equity)", "배당수익률"),
+            subplot_titles=("영업이익률", "배당수익률", "ROA(Return On Asset)", "ROE(Return On Equity)"),
             specs=[[{"type": "bar"}, {"type": "bar"}], [{"type": "bar"}, {"type": "bar"}]]
         )
 
         profit = self.rel_profit.copy()
-        # for col in profit.columns:
+        for n, col in enumerate(profit.columns):
+            fig.add_trace(go.Bar(
+                name=col, x=profit.index, y=profit[col], visible=True, showlegend=False,
+                texttemplate='%{y:.2f}%', hoverinfo='skip'
+            ), row=1 if n < 2 else 2, col=2 if n % 2 else 1)
+        fig.update_layout(dict(title=f'[발표 기준] 수익성 비교', plot_bgcolor='white'))
+        fig.update_yaxes(title_text="[%]", showgrid=True, gridcolor='lightgrey')
+        return fig
 
+    @property
+    def fig_profit_estimate(self) -> go.Figure:
+        """ 전망치 수익성 비교 """
+        fig = make_subplots(
+            rows=2, cols=2, vertical_spacing=0.11, horizontal_spacing=0.1,
+            subplot_titles=("영업이익률", "배당수익률", "ROA(Return On Asset)", "ROE(Return On Equity)"),
+            specs=[[{"type": "bar"}, {"type": "bar"}], [{"type": "bar"}, {"type": "bar"}]]
+        )
+
+        profit = self.rel_profit_estimate.copy()
+        for n, col in enumerate(profit.columns):
+            fig.add_trace(go.Bar(
+                name=col, x=profit.index, y=profit[col], visible=True, showlegend=False,
+                texttemplate='%{y:.2f}%', hoverinfo='skip'
+            ), row=1 if n < 2 else 2, col=2 if n % 2 else 1)
+        fig.update_layout(dict(title=f'[전망치] 수익성 비교', plot_bgcolor='white'))
+        fig.update_yaxes(title_text="[%]", showgrid=True, gridcolor='lightgrey')
         return fig
 
 
@@ -339,9 +363,11 @@ if __name__ == "__main__":
     if not os.path.isdir(path):
         os.makedirs(path)
 
-    t_compare.save(t_compare.fig_returns, title='수익률 비교', path=path)
-    t_compare.save(t_compare.fig_drawdown, title='낙폭 비교', path=path)
-    t_compare.save(t_compare.fig_rsi, title='RSI 비교', path=path)
-    t_compare.save(t_compare.fig_cci_vortex, title='CCI_VORTEX', path=path)
-    t_compare.save(t_compare.fig_mfi_bb, title='MFI_B-Sig', path=path)
-    t_compare.save(t_compare.fig_sharpe_ratio, title='샤프비율 비교', path=path)
+    # t_compare.save(t_compare.fig_returns, title='수익률 비교', path=path)
+    # t_compare.save(t_compare.fig_drawdown, title='낙폭 비교', path=path)
+    # t_compare.save(t_compare.fig_rsi, title='RSI 비교', path=path)
+    # t_compare.save(t_compare.fig_cci_vortex, title='CCI_VORTEX', path=path)
+    # t_compare.save(t_compare.fig_mfi_bb, title='MFI_B-Sig', path=path)
+    # t_compare.save(t_compare.fig_sharpe_ratio, title='샤프비율 비교', path=path)
+    # t_compare.save(t_compare.fig_profit, title='발표기준_수익성 비교', path=path)
+    t_compare.save(t_compare.fig_profit_estimate, title='전망치_수익성 비교', path=path)

@@ -255,7 +255,7 @@ class ohlcv(_ohlcv):
 
 
 if __name__ == "__main__":
-    ticker = '035720'
+    ticker = '005930'
     # ticker = '1028'
     # ticker = 'TSLA'
 
@@ -267,15 +267,15 @@ if __name__ == "__main__":
     # print(app.sma)
     # print(app.ema)
     # print(app.iir)
-    # print(app.relative_return)
+    print(app.relative_return)
     # print(app.drawdown)
     # print(app.perf)
     # print(app.fiftytwo)
-    print(app.cagr())
-    print(app.cagr(days=365 * 2))
-    print(app.cagr(days=365))
-    print(app.cagr(days=183))
-    print(app.volatility())
+    # print(app.cagr())
+    # print(app.cagr(days=365 * 2))
+    # print(app.cagr(days=365))
+    # print(app.cagr(days=183))
+    # print(app.volatility())
     # print(app.pivot)
     # print(app.get_bound(gap='3M'))
     # print(app.get_trend(gap='3M'))

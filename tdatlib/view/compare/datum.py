@@ -245,21 +245,55 @@ class datum:
     @property
     def rel_profit(self) -> pd.DataFrame:
         """
-        영업이익률, ROA, ROE 및 배당수익률 비교 데이터
+        (발표 기준) 영업이익률, ROA, ROE 및 배당수익률 비교 데이터
         :return:
-                    삼성전자  SK하이닉스  DB하이텍  리노공업  동진쎄미켐  솔브레인
-        영업이익률     18.47       28.86     32.86     41.80       11.35     18.44
-        ROA             9.92       11.48     23.23     25.08        9.58     19.67
-        ROE            13.92       16.84     33.35     27.50       20.92     26.28
-        배당수익률      1.84        1.18      0.62      1.26        0.22      0.70
+                영업이익률    ROA    ROE  배당수익률
+        삼성전자     18.47   9.92  13.92        1.84
+        SK하이닉스   28.86  11.48  16.84        1.18
+        DB하이텍     32.86  23.23  33.35        0.62
+        리노공업     41.80  25.08  27.50        1.26
+        동진쎄미켐   11.35   9.58  20.92        0.22
+        솔브레인     18.44  19.67  26.28        0.70
         """
         objs = dict()
         for name, ticker in zip(self.names, self.tickers):
             data = self.__getattribute__(f'__{ticker}f').stat_annual
             loc = [i for i in data.index if not '(' in i][-1]
-            objs[name] = data.loc[loc, ['영업이익률', 'ROA', 'ROE', '배당수익률']]
-        return pd.concat(objs=objs, axis=1)
+            objs[name] = data.loc[loc, ['영업이익률', '배당수익률', 'ROA', 'ROE']]
+        return pd.concat(objs=objs, axis=1).T
 
+    @property
+    def rel_profit_estimate(self) -> pd.DataFrame:
+        """
+        (전망치 기준) 영업이익률, ROA, ROE 및 배당수익률 비교 데이터
+        :return:
+                영업이익률    ROA    ROE  배당수익률
+        삼성전자     18.47   9.92  13.92        1.84
+        SK하이닉스   28.86  11.48  16.84        1.18
+        DB하이텍     32.86  23.23  33.35        0.62
+        리노공업     41.80  25.08  27.50        1.26
+        동진쎄미켐   11.35   9.58  20.92        0.22
+        솔브레인     18.44  19.67  26.28        0.70
+        """
+        objs = dict()
+        for name, ticker in zip(self.names, self.tickers):
+            data = self.__getattribute__(f'__{ticker}f').stat_annual
+            loc = [i for i in data.index if '(' in i][0]
+            objs[name] = data.loc[loc, ['영업이익률', '배당수익률', 'ROA', 'ROE']]
+        return pd.concat(objs=objs, axis=1).T
+
+    @property
+    def rel_stat(self) -> pd.DataFrame:
+        """
+        분기별 영업이익률, 배당수익률, ROA 및 ROE
+        :return:
+        """
+        objs = dict()
+        for name, ticker in zip(self.names, self.tickers):
+            data = self.__getattribute__(f'__{ticker}f').stat_annual[['영업이익률', '배당수익률', 'ROA', 'ROE']]
+            for col in data.columns:
+                objs[(col, name)] = data[col]
+        return pd.concat(objs=objs, axis=1)
 
 
 if __name__ == "__main__":
@@ -282,4 +316,6 @@ if __name__ == "__main__":
     # print(t_series.rel_bb)
     # print(t_series.rel_sharpe_ratio)
 
-    print(t_series.rel_profit)
+    # print(t_series.rel_profit)
+    # print(t_series.rel_profit_estimate)
+    print(t_series.rel_stat)
