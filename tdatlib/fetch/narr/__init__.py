@@ -1,9 +1,10 @@
-from tdatlib.fetch.fundamental._fnguide import fnguide
+from tdatlib.fetch.narr._fnguide import fnguide
+from tdatlib.fetch.market import market_kr
 from inspect import currentframe as inner
 import pandas as pd
 
 
-class fundamental_kr(fnguide):
+class narrative_kr(fnguide):
 
     def __init__(self, ticker:str):
         super().__init__(ticker=ticker)
@@ -14,6 +15,17 @@ class fundamental_kr(fnguide):
             _func = self.__getattribute__(f'_get_{name}')
             self.__setattr__(f'__{name}', _func())
         return f'__{name}'
+
+    @property
+    def related(self) -> list:
+        """
+        업종 연관도 상위 시가총액 6종목 선출
+        :return:
+        ['000660', '402340', '000990', '058470', '005290', '357780']
+        """
+        if not hasattr(self, '__related'):
+            self.__setattr__('__related', market_kr().get_related(ticker=self.ticker))
+        return self.__getattribute__('__related')
 
     @property
     def name(self) -> str:
@@ -232,7 +244,7 @@ class fundamental_kr(fnguide):
         return self.__getattribute__(self.__checkattr__(inner().f_code.co_name))
 
     @property
-    def multiple_band(self) -> pd.DataFrame:
+    def multiple_band(self) -> (pd.DataFrame, pd.DataFrame):
         """
         투자배수 밴드
 
@@ -256,14 +268,15 @@ class fundamental_kr(fnguide):
 if __name__ == "__main__":
     # pd.set_option('display.expand_frame_repr', False)
 
-    _ticker = '005930'
+    _ticker = '058470'
 
-    app = fundamental_kr(ticker=_ticker)
+    app = narrative_kr(ticker=_ticker)
     print(app.name)
 
     # print(app.summary)
     # print(app.products)
-    # print(app.astat)
+    # print(app.stat_annual.columns)
+    # print(app.stat_annual)
     # print(app.qstat)
     # print(app.multifactor)
     # print(app.benchmark_return)
@@ -275,3 +288,4 @@ if __name__ == "__main__":
     # print(app.expenses)
     # print(app.multiple_series)
     # print(app.multiple_band)
+    print(app.related)

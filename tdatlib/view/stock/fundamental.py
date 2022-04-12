@@ -1,11 +1,11 @@
 from tdatlib.view.stock.toolbox import *
-from tdatlib import fundamental_kr
+from tdatlib import narrative_kr
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 import plotly.offline as of
 
 
-class fundamental(fundamental_kr):
+class narrative(narrative_kr):
 
     def __init__(self, ticker:str):
         super().__init__(ticker=ticker)
@@ -273,7 +273,7 @@ if __name__ == "__main__":
     # ticker = 'COKE'
     # ticker = '093370'
 
-    t_analyze = fundamental(ticker=ticker)
+    t_analyze = narrative(ticker=ticker)
     print(t_analyze.name, ticker)
 
     # t_analyze.fig_overview.show()

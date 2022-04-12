@@ -1,4 +1,4 @@
-from tdatlib import market_kr, ohlcv, fundamental_kr
+from tdatlib import market_kr, ohlcv, narrative_kr
 import pandas as pd
 import numpy as np
 
@@ -9,7 +9,7 @@ class datum:
         self.tickers, self.period = tickers, period
         for ticker in tickers:
             setattr(self, f'__{ticker}t', ohlcv(ticker=ticker, period=period))
-            setattr(self, f'__{ticker}f', fundamental_kr(ticker=ticker))
+            setattr(self, f'__{ticker}f', narrative_kr(ticker=ticker))
         self.names = [self.__getattribute__(f'__{ticker}t').name for ticker in self.tickers]
         return
 
@@ -242,10 +242,30 @@ class datum:
             objs[name] = pd.DataFrame(data=data).set_index(keys='term')
         return pd.concat(objs, axis=1)
 
+    @property
+    def rel_profit(self) -> pd.DataFrame:
+        """
+        영업이익률, ROA, ROE 및 배당수익률 비교 데이터
+        :return:
+                    삼성전자  SK하이닉스  DB하이텍  리노공업  동진쎄미켐  솔브레인
+        영업이익률     18.47       28.86     32.86     41.80       11.35     18.44
+        ROA             9.92       11.48     23.23     25.08        9.58     19.67
+        ROE            13.92       16.84     33.35     27.50       20.92     26.28
+        배당수익률      1.84        1.18      0.62      1.26        0.22      0.70
+        """
+        objs = dict()
+        for name, ticker in zip(self.names, self.tickers):
+            data = self.__getattribute__(f'__{ticker}f').stat_annual
+            loc = [i for i in data.index if not '(' in i][-1]
+            objs[name] = data.loc[loc, ['영업이익률', 'ROA', 'ROE', '배당수익률']]
+        return pd.concat(objs=objs, axis=1)
+
+
 
 if __name__ == "__main__":
     # t_tickers = ['TSLA', 'MSFT', 'GOOG', 'ZM']
-    t_tickers = ['005930', '000660', '058470', '000990']
+    # t_tickers = ['005930', '000660', '058470', '000990']
+    t_tickers = ['005930', '000660', '000990', '058470', '005290', '357780']
 
     t_series = datum(tickers=t_tickers, period=5)
     # print(t_series.price)
@@ -259,5 +279,7 @@ if __name__ == "__main__":
     # print(t_series.rel_stoch)
     # print(t_series.rel_cci)
     # print(t_series.rel_vortex)
-    print(t_series.rel_bb)
+    # print(t_series.rel_bb)
     # print(t_series.rel_sharpe_ratio)
+
+    print(t_series.rel_profit)

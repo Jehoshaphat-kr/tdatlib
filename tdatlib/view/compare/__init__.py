@@ -305,6 +305,20 @@ class compare(datum):
         )
         return fig
 
+    @property
+    def fig_profit(self) -> go.Figure:
+        """ 수익률 비교 """
+        fig = make_subplots(
+            rows=2, cols=2, vertical_spacing=0.11, horizontal_spacing=0.1,
+            subplot_titles=("영업이익률", "ROA(Return On Asset)", "ROE(Return On Equity)", "배당수익률"),
+            specs=[[{"type": "bar"}, {"type": "bar"}], [{"type": "bar"}, {"type": "bar"}]]
+        )
+
+        profit = self.rel_profit.copy()
+        # for col in profit.columns:
+
+        return fig
+
 
 
 if __name__ == "__main__":
@@ -314,7 +328,8 @@ if __name__ == "__main__":
 
     # t_tickers = ['TSLA', 'MSFT', 'GOOG', 'ZM']
     # t_tickers = ['1028', '005930', '000660', '058470', '000990']
-    t_tickers = ['005930', '000660', '058470', '000990']
+    # t_tickers = ['005930', '000660', '058470', '000990']
+    t_tickers = ['005930', '000660', '000990', '058470', '005290', '357780']
 
     t_compare = compare(tickers=t_tickers, period=5)
     # t_compare.fig_returns.show()
@@ -324,9 +339,9 @@ if __name__ == "__main__":
     if not os.path.isdir(path):
         os.makedirs(path)
 
-    # t_compare.save(t_compare.fig_returns, title='수익률 비교', path=path)
-    # t_compare.save(t_compare.fig_drawdown, title='낙폭 비교', path=path)
-    # t_compare.save(t_compare.fig_rsi, title='RSI 비교', path=path)
-    # t_compare.save(t_compare.fig_cci_vortex, title='CCI_VORTEX', path=path)
+    t_compare.save(t_compare.fig_returns, title='수익률 비교', path=path)
+    t_compare.save(t_compare.fig_drawdown, title='낙폭 비교', path=path)
+    t_compare.save(t_compare.fig_rsi, title='RSI 비교', path=path)
+    t_compare.save(t_compare.fig_cci_vortex, title='CCI_VORTEX', path=path)
     t_compare.save(t_compare.fig_mfi_bb, title='MFI_B-Sig', path=path)
-    # t_compare.save(t_compare.fig_sharpe_ratio, title='샤프비율 비교', path=path)
+    t_compare.save(t_compare.fig_sharpe_ratio, title='샤프비율 비교', path=path)

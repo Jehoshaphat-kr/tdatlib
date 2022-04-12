@@ -5,6 +5,10 @@ import pandas as pd
 
 class market_kr(krx):
 
+    def __init__(self):
+        super().__init__()
+        return
+
     def __checkattr__(self, name:str) -> str:
         if not hasattr(self, f'__{name}'):
             _func = self.__getattribute__(f'_get_{name}')
@@ -130,6 +134,19 @@ class market_kr(krx):
               ...              ...         ...            ...       ...         ...       ...                 ...
         """
         return self.__getattribute__(self.__checkattr__(inner().f_code.co_name))
+
+    def get_related(self, ticker:str) -> list:
+        """
+        업종 연관도 상위 시가총액 6종목 선출
+        :return:
+        ['000660', '402340', '000990', '058470', '005290', '357780']
+        """
+        wics = self.wics.copy()
+        if not ticker in wics.index:
+            raise KeyError(f"산업 분류에 없는 종목 코드 {ticker} 입니다")
+        rel = wics[wics['섹터'] == str(wics.loc[ticker, '섹터'])].copy()
+        rel = rel.join(self.icm['시가총액'], how='left').sort_values(by='시가총액', ascending=False).drop(index=[ticker])
+        return rel.index.tolist()[:6]
 
 
 if __name__ == "__main__":
