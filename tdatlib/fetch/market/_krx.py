@@ -84,19 +84,19 @@ class krx:
         icm = pd.read_csv(archive.icm, index_col='종목코드', encoding='utf-8')
         icm.index = icm.index.astype(str).str.zfill(6)
 
-        if self.krdate.weekday() in [5, 6] or 830 < int(self.krdate.strftime("%H%M")) <= 1530:
-            pass
-        else:
-            icm_date = str(icm['날짜'][0])
-            if not icm_date == self.tddate:
-                icm = pd.concat(objs=[
-                    self.__fetch_ipo(),
-                    stock.get_market_cap_by_ticker(date=self.tddate, market="ALL"),
-                    stock.get_market_fundamental(date=self.tddate, market='ALL')
-                ], axis=1)
-                icm['날짜'] = self.tddate
-                icm.index.name = '종목코드'
-                icm.to_csv(archive.icm, index=True, encoding='utf-8')
+        if self.krdate.weekday() in [5, 6] or 855 < int(self.krdate.strftime("%H%M")) <= 1530:
+            return icm.drop(columns=['날짜'])
+
+        icm_date = str(icm['날짜'][0])
+        if not icm_date == self.tddate:
+            icm = pd.concat(objs=[
+                self.__fetch_ipo(),
+                stock.get_market_cap_by_ticker(date=self.tddate, market="ALL"),
+                stock.get_market_fundamental(date=self.tddate, market='ALL')
+            ], axis=1)
+            icm['날짜'] = self.tddate
+            icm.index.name = '종목코드'
+            icm.to_csv(archive.icm, index=True, encoding='utf-8')
         return icm.drop(columns=['날짜'])
 
     def _get_wics(self) -> pd.DataFrame:

@@ -214,4 +214,14 @@ class fnguide:
         per['GS_YM'], pbr['GS_YM'] = pd.to_datetime(per['GS_YM']), pd.to_datetime(pbr['GS_YM'])
         return per.rename(columns=per_header).set_index(keys='날짜'), pbr.rename(columns=pbr_header).set_index(keys='날짜')
 
-
+    def _get_nps(self):
+        """ EPS, BPS, EBITA(PS), DPS """
+        url = f"http://cdn.fnguide.com/SVO2/json/chart/05/chart_A{self.ticker}_D.json"
+        src = json.loads(urlopen(url).read().decode('utf-8-sig', 'replace'))
+        header = pd.DataFrame(src['01_Y_H'])[['ID', 'NAME']].set_index(keys='ID').to_dict()['NAME']
+        header.update({'GS_YM': '날짜'})
+        data = pd.DataFrame(src['01_Y']).rename(columns=header)[header.values()].set_index(keys='날짜')
+        data = data[data != '-']
+        for col in data.columns:
+            data[col] = data[col].astype(str).str.replace(',', '').astype(float)
+        return data

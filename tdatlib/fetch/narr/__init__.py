@@ -264,6 +264,15 @@ class narrative_kr(fnguide):
         """
         return self.__getattribute__(self.__checkattr__(inner().f_code.co_name))
 
+    @property
+    def nps(self) -> pd.DataFrame:
+        """
+        투자배수: EPS, BPS, EBITA(PS), DPS
+        :return:
+
+        """
+        return self.__getattribute__(self.__checkattr__(inner().f_code.co_name))
+
 
 if __name__ == "__main__":
     # pd.set_option('display.expand_frame_repr', False)
@@ -288,4 +297,5 @@ if __name__ == "__main__":
     # print(app.expenses)
     # print(app.multiple_series)
     # print(app.multiple_band)
-    print(app.related)
+    # print(app.related)
+    print(app.nps)

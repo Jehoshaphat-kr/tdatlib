@@ -314,7 +314,7 @@ class compare(datum):
             specs=[[{"type": "bar"}, {"type": "bar"}], [{"type": "bar"}, {"type": "bar"}]]
         )
 
-        profit = self.rel_stat.copy()
+        profit = self.rel_profit.copy()
         for n in range(len(profit)):
             sliced = profit[profit.index.isin(profit.index[n:])].copy()
             for m, col in enumerate(['영업이익률', '배당수익률', 'ROA', 'ROE']):
@@ -344,6 +344,44 @@ class compare(datum):
         fig.update_yaxes(title_text="[%]", showgrid=True, gridcolor='lightgrey')
         return fig
 
+    @property
+    def fig_multiple(self) -> go.Figure:
+        """ 투자배수 비교 """
+        fig = make_subplots(
+            rows=2, cols=2, vertical_spacing=0.11, horizontal_spacing=0.1,
+            subplot_titles=("PSR", "EV/EBITDA", "PER", "PBR"),
+            specs=[[{"type": "bar"}, {"type": "bar"}], [{"type": "bar"}, {"type": "bar"}]]
+        )
+
+        data = self.rel_multiple.copy()
+        fig.add_trace(go.Bar(
+            name='', x=data.index, y=data.PSR, visible=True, showlegend=False,
+            meta=data.SPS, customdata=data.종가, texttemplate='%{y}',
+            hovertemplate='%{x}<br>종가: %{customdata:,d}원<br>SPS: %{meta:,.2f}원<extra></extra>'
+        ), row=1, col=1)
+
+        fig.add_trace(go.Bar(
+            name='', x=data.index, y=data['EV/EBITDA'], visible=True, showlegend=False,
+            meta=data.EBITDAPS, customdata=data.종가, texttemplate='%{y}',
+            hovertemplate='%{x}<br>종가: %{customdata:,d}원<br>EBITDA-PS: %{meta:,.2f}원<extra></extra>'
+        ), row=1, col=2)
+
+        fig.add_trace(go.Bar(
+            name='', x=data.index, y=data.PER, visible=True, showlegend=False,
+            meta=data.EPS, customdata=data.종가, texttemplate='%{y}',
+            hovertemplate='%{x}<br>종가: %{customdata:,d}원<br>EPS: %{meta:,.2f}원<extra></extra>'
+        ), row=2, col=1)
+
+        fig.add_trace(go.Bar(
+            name='', x=data.index, y=data.PBR, visible=True, showlegend=False,
+            meta=data.BPS, customdata=data.종가, texttemplate='%{y}',
+            hovertemplate='%{x}<br>종가: %{customdata:,d}원<br>BPS: %{meta:,.2f}원<extra></extra>'
+        ), row=2, col=2)
+
+        fig.update_layout(title='투자배수 비교', plot_bgcolor='white')
+        fig.update_yaxes(title_text="[-]", showgrid=True, gridcolor='lightgrey')
+        return fig
+
 
 
 if __name__ == "__main__":
@@ -370,4 +408,5 @@ if __name__ == "__main__":
     # t_compare.save(t_compare.fig_cci_vortex, title='CCI_VORTEX', path=path)
     # t_compare.save(t_compare.fig_mfi_bb, title='MFI_B-Sig', path=path)
     # t_compare.save(t_compare.fig_sharpe_ratio, title='샤프비율 비교', path=path)
-    t_compare.save(t_compare.fig_profit, title='수익성 비교', path=path)
+    # t_compare.save(t_compare.fig_profit, title='수익성 비교', path=path)
+    t_compare.save(t_compare.fig_multiple, title='투자배수 비교', path=path)

@@ -34,7 +34,7 @@ class datum:
         )
 
     @property
-    def icm(self) -> pd.DataFrame:
+    def rel_icm(self) -> pd.DataFrame:
         """
         IPO, 시가 총액(Market Cap) 및 기초 배수(Multiples)
         :return:
@@ -233,7 +233,7 @@ class datum:
         """
         objs = dict()
         for name, ticker in zip(self.names, self.tickers):
-            cap = np.log(self.icm.loc[ticker, '시가총액'])
+            cap = np.log(self.rel_icm.loc[ticker, '시가총액'])
             attr = self.__getattribute__(f'__{ticker}t')
             data = [
                 {f'cagr': attr.cagr(days=days), f'risk': attr.volatility(days=days), 'term':term, 'cap':cap}
@@ -243,10 +243,10 @@ class datum:
         return pd.concat(objs, axis=1)
 
     @property
-    def rel_stat(self) -> pd.DataFrame:
+    def rel_profit(self) -> pd.DataFrame:
         """
         분기별 영업이익률, 배당수익률, ROA 및 ROE
-        :return:
+        :return: (주석 생략)
         """
         objs = dict()
         for name, ticker in zip(self.names, self.tickers):
@@ -254,6 +254,63 @@ class datum:
             for col in data.columns:
                 objs[(col, name)] = data[col]
         return pd.concat(objs=objs, axis=1)[:-2]
+
+    @property
+    def rel_multiple(self) -> pd.DataFrame:
+        """
+        투자 배수: PSR, EV/EBITDA, PER, PBR
+        :return:
+                       매출액  EBITDAPS    종가  ...        SPS   PSR  EV/EBITDA
+        종목명                                   ...
+        삼성전자    2796048.0  12643.22   67000  ...   46836.68  1.43       5.30
+        SK하이닉스   429978.0  31687.86  111000  ...   59062.72  1.88       3.50
+        DB하이텍      12147.0  12219.13   69300  ...   27358.98  2.53       5.67
+        리노공업       2802.0   8492.08  175800  ...   18382.97  9.56      20.70
+        동진쎄미켐    11613.0   3515.13   36500  ...   22587.02  1.62      10.38
+        솔브레인      10239.0  30523.15  233900  ...  131630.95  1.78       7.66
+        """
+        objs = list()
+        for name, ticker in zip(self.names, self.tickers):
+            nps = self.__getattribute__(f'__{ticker}f').nps
+            stat = self.__getattribute__(f'__{ticker}f').stat_annual
+            key = [_ for _ in ['매출액', '순영업수익', '이자수익', '보험료수익'] if _ in stat.columns][0]
+            idx = [i for i in stat.index if not '(' in i][-1]
+            objs.append(dict(종목명=name, 종목코드=ticker, 매출액=stat.loc[idx, key], EBITDAPS=nps.iloc[-1]['EBITDAPS']))
+        sales = pd.DataFrame(data=objs).set_index(keys='종목코드')
+        multiple = sales.join(self.rel_icm[['종가', 'PER', 'EPS', 'PBR', 'BPS', '상장주식수']])
+        multiple['SPS'] = round(multiple['매출액'] * 100000000 / multiple['상장주식수'], 2)
+        multiple['PSR'] = round(multiple['종가'] / multiple['SPS'], 2)
+        multiple['EV/EBITDA'] = round(multiple['종가'] / multiple['EBITDAPS'], 2)
+        return multiple.set_index(keys='종목명')
+
+    @property
+    def rel_growth(self) -> pd.DataFrame:
+        """
+        성장 지표
+        :return:
+                 매출증가율  영업이익증가율  EPS증가율   PEG
+        종목명
+        삼성전자     18.07            43.45      50.40  0.35
+        SK하이닉스   34.79           147.58     101.93  0.16
+        DB하이텍     29.79            66.78      90.86  0.21
+        리노공업     39.20            50.32      87.45  0.56
+        동진쎄미켐   23.83             4.35      21.11  1.08
+        솔브레인    117.80            81.54     134.76  0.22
+        """
+        objs = list()
+        for name, ticker in zip(self.names, self.tickers):
+            stat = self.__getattribute__(f'__{ticker}f').stat_annual
+            key = [_ for _ in ['매출액', '순영업수익', '이자수익', '보험료수익'] if _ in stat.columns][0]
+            data = round(100 * stat[[key, '영업이익', 'EPS(원)']].pct_change(), 2)
+            idx = [i for i in stat.index if not '(' in i][-1]
+            objs.append(dict(종목명=name, 종목코드=ticker,
+                             매출증가율=data.loc[idx, key],
+                             영업이익증가율=data.loc[idx,'영업이익'],
+                             EPS증가율=data.loc[idx, 'EPS(원)']))
+        growth = pd.DataFrame(data=objs).set_index(keys='종목코드')
+        growth = growth.join(self.rel_icm['PER'])
+        growth['PEG'] = round(growth['PER'] / growth['EPS증가율'], 2)
+        return growth.set_index(keys='종목명').drop(columns=['PER'])
 
 
 if __name__ == "__main__":
@@ -263,8 +320,8 @@ if __name__ == "__main__":
 
     t_series = datum(tickers=t_tickers, period=5)
     # print(t_series.price)
-    # print(t_series.icm)
-    # print(t_series.icm.columns)
+    # print(t_series.rel_icm)
+    # print(t_series.rel_icm.columns)
     # print(t_series.rel_yield)
     # print(t_series.rel_yield['1Y'].dropna())
     # print(t_series.rel_drawdown)
@@ -277,5 +334,5 @@ if __name__ == "__main__":
     # print(t_series.rel_sharpe_ratio)
 
     # print(t_series.rel_profit)
-    # print(t_series.rel_profit_estimate)
-    print(t_series.rel_stat)
+    # print(t_series.rel_multiple)
+    print(t_series.rel_growth)
