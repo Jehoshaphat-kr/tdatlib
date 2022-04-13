@@ -21,7 +21,7 @@ def auto_mouse(t_gap:int=50, due:int=0):
 
 
 if __name__ == "__main__":
-    # auto_mouse(t_gap=90)
+    auto_mouse(t_gap=90)
 
     # if tdatlib.is_etf_latest(run=False):
     #     tdatlib.etf_excel_to_csv()

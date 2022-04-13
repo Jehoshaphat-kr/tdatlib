@@ -307,39 +307,40 @@ class compare(datum):
 
     @property
     def fig_profit(self) -> go.Figure:
-        """ 발표 기준 수익성 비교 """
+        """ 수익성 비교 """
         fig = make_subplots(
             rows=2, cols=2, vertical_spacing=0.11, horizontal_spacing=0.1,
-            subplot_titles=("영업이익률", "배당수익률", "ROA(Return On Asset)", "ROE(Return On Equity)"),
+            subplot_titles=("영업이익률", "배당수익률", "ROA", "ROE"),
             specs=[[{"type": "bar"}, {"type": "bar"}], [{"type": "bar"}, {"type": "bar"}]]
         )
 
-        profit = self.rel_profit.copy()
-        for n, col in enumerate(profit.columns):
-            fig.add_trace(go.Bar(
-                name=col, x=profit.index, y=profit[col], visible=True, showlegend=False,
-                texttemplate='%{y:.2f}%', hoverinfo='skip'
-            ), row=1 if n < 2 else 2, col=2 if n % 2 else 1)
-        fig.update_layout(dict(title=f'[발표 기준] 수익성 비교', plot_bgcolor='white'))
-        fig.update_yaxes(title_text="[%]", showgrid=True, gridcolor='lightgrey')
-        return fig
+        profit = self.rel_stat.copy()
+        for n in range(len(profit)):
+            sliced = profit[profit.index.isin(profit.index[n:])].copy()
+            for m, col in enumerate(['영업이익률', '배당수익률', 'ROA', 'ROE']):
+                sub = sliced[col]
+                for o, name in enumerate(sub.columns):
+                    fig.add_trace(go.Bar(
+                        name=name, x=sub[name].index, y=sub[name], showlegend=False if m else True, legendgroup=name,
+                        marker=dict(color=colors[o]), visible=False if n else True,
+                        texttemplate='%{y}%', hovertemplate=name + '<br>분기: %{x}<br>' + col + ': %{y}%<extra></extra>'
+                    ), row=1 if m < 2 else 2, col=2 if m % 2 else 1)
 
-    @property
-    def fig_profit_estimate(self) -> go.Figure:
-        """ 전망치 수익성 비교 """
-        fig = make_subplots(
-            rows=2, cols=2, vertical_spacing=0.11, horizontal_spacing=0.1,
-            subplot_titles=("영업이익률", "배당수익률", "ROA(Return On Asset)", "ROE(Return On Equity)"),
-            specs=[[{"type": "bar"}, {"type": "bar"}], [{"type": "bar"}, {"type": "bar"}]]
-        )
+        steps = []
+        for i in range(len(profit)):
+            step = dict(
+                method="update",
+                args=[{"visible": [False] * len(fig.data)}, {"title": f"수익성 비교"}, {'showlegend': [False] * len(fig.data)}],
+                label=f'{profit.index[i]}{str() if i + 1 == len(profit) else "~"}'
+            )
+            for j in range(len(self.tickers) * 4):
+                step["args"][0]["visible"][(len(self.tickers) * 4) * i + j] = True
+                if j < 4:
+                    step["args"][2]["showlegend"][(len(self.tickers) * 4) * i + j] = True
+            steps.append(step)
+        sliders = [dict(active=0, currentvalue={"prefix": "비교 기간: "}, pad={"t": 50}, steps=steps)]
 
-        profit = self.rel_profit_estimate.copy()
-        for n, col in enumerate(profit.columns):
-            fig.add_trace(go.Bar(
-                name=col, x=profit.index, y=profit[col], visible=True, showlegend=False,
-                texttemplate='%{y:.2f}%', hoverinfo='skip'
-            ), row=1 if n < 2 else 2, col=2 if n % 2 else 1)
-        fig.update_layout(dict(title=f'[전망치] 수익성 비교', plot_bgcolor='white'))
+        fig.update_layout(plot_bgcolor='white', sliders=sliders)
         fig.update_yaxes(title_text="[%]", showgrid=True, gridcolor='lightgrey')
         return fig
 
@@ -369,5 +370,4 @@ if __name__ == "__main__":
     # t_compare.save(t_compare.fig_cci_vortex, title='CCI_VORTEX', path=path)
     # t_compare.save(t_compare.fig_mfi_bb, title='MFI_B-Sig', path=path)
     # t_compare.save(t_compare.fig_sharpe_ratio, title='샤프비율 비교', path=path)
-    # t_compare.save(t_compare.fig_profit, title='발표기준_수익성 비교', path=path)
-    t_compare.save(t_compare.fig_profit_estimate, title='전망치_수익성 비교', path=path)
+    t_compare.save(t_compare.fig_profit, title='수익성 비교', path=path)
