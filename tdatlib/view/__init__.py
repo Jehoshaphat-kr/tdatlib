@@ -11,6 +11,12 @@ from tdatlib.view.stock import (
     view_fundamental
 )
 
+# class view_stock(view_technical, view_fundamental):
+#     def __init__(self, ticker:str, period:int=5, key:str='종가', namebook:pd.DataFrame=pd.DataFrame()):
+#         super(view_technical, self).__init__(ticker=ticker, period=period, key=key, namebook=namebook)
+#         super(view_fundamental, self).__init__(ticker=ticker)
+#         return
+
 def stock_analysis(ticker:str, path:str=str()):
     """ 주식 기본/기술 분석 데이터 다운로드 """
     if not path:
@@ -41,3 +47,7 @@ def stock_analysis(ticker:str, path:str=str()):
         obj = tech if __o else fund
         obj.save(getattr(obj, attr), title=title, path=path)
     return
+
+def stock_related(ticker:str):
+    func = tdatlib.view_fundamental(ticker=ticker)
+    return func.related

@@ -397,32 +397,15 @@ class compare(datum):
             if not y in columns:
                 columns.append(y)
 
-        for col in columns:
-            print(data[col])
-        
-        # fig.add_trace(go.Bar(
-        #     name='', x=data.index, y=data.PSR, visible=True, showlegend=False,
-        #     meta=data.SPS, customdata=data.종가, texttemplate='%{y}',
-        #     hovertemplate='%{x}<br>종가: %{customdata:,d}원<br>SPS: %{meta:,.2f}원<extra></extra>'
-        # ), row=1, col=1)
-        #
-        # fig.add_trace(go.Bar(
-        #     name='', x=data.index, y=data['EV/EBITDA'], visible=True, showlegend=False,
-        #     meta=data.EBITDAPS, customdata=data.종가, texttemplate='%{y}',
-        #     hovertemplate='%{x}<br>종가: %{customdata:,d}원<br>EBITDA-PS: %{meta:,.2f}원<extra></extra>'
-        # ), row=1, col=2)
-        #
-        # fig.add_trace(go.Bar(
-        #     name='', x=data.index, y=data.PER, visible=True, showlegend=False,
-        #     meta=data.EPS, customdata=data.종가, texttemplate='%{y}',
-        #     hovertemplate='%{x}<br>종가: %{customdata:,d}원<br>EPS: %{meta:,.2f}원<extra></extra>'
-        # ), row=2, col=1)
-        #
-        # fig.add_trace(go.Bar(
-        #     name='', x=data.index, y=data.PBR, visible=True, showlegend=False,
-        #     meta=data.BPS, customdata=data.종가, texttemplate='%{y}',
-        #     hovertemplate='%{x}<br>종가: %{customdata:,d}원<br>BPS: %{meta:,.2f}원<extra></extra>'
-        # ), row=2, col=2)
+        for n, col in enumerate(columns):
+            sub = data[col]
+            for m, key in enumerate(sub.columns):
+                u = '' if key == 'PEG' else '%'
+                fig.add_trace(go.Bar(
+                    name=col, x=sub.index, y=sub[key], visible=True if col.endswith('현재') else 'legendonly',
+                    showlegend=False if m else True, legendgroup=col,
+                    texttemplate='%{y}' + u, hovertemplate='분기: ' + col + '<br>' + key + ': %{y}' + u + '<extra></extra>'
+                ), row=1 if m < 2 else 2, col=2 if m % 2 else 1)
 
         fig.update_layout(title='투자배수 비교', plot_bgcolor='white')
         fig.update_yaxes(title_text="[-]", showgrid=True, gridcolor='lightgrey')
