@@ -11,6 +11,7 @@ class datum:
             setattr(self, f'__{ticker}t', ohlcv(ticker=ticker, period=period))
             setattr(self, f'__{ticker}f', narrative_kr(ticker=ticker))
         self.names = [self.__getattribute__(f'__{ticker}t').name for ticker in self.tickers]
+        self.market = market_kr()
         return
 
     @property
@@ -46,7 +47,7 @@ class datum:
         058470    리노공업  2001-12-18  175500    2670463224000  ...  7.93  3648.0  0.85  1500.0
         """
         if not hasattr(self, '__icm'):
-            icm = market_kr().icm
+            icm = self.market.icm
             self.__setattr__('__icm', icm[icm.index.isin(self.tickers)].copy())
         return self.__getattribute__('__icm')
 
@@ -297,20 +298,27 @@ class datum:
         동진쎄미켐   23.83             4.35      21.11  1.08
         솔브레인    117.80            81.54     134.76  0.22
         """
-        objs = list()
+        icm = self.rel_icm
+        growth = pd.DataFrame()
         for name, ticker in zip(self.names, self.tickers):
             stat = self.__getattribute__(f'__{ticker}f').stat_annual
             key = [_ for _ in ['매출액', '순영업수익', '이자수익', '보험료수익'] if _ in stat.columns][0]
             data = round(100 * stat[[key, '영업이익', 'EPS(원)']].pct_change(), 2)
-            idx = [i for i in stat.index if not '(' in i][-1]
-            objs.append(dict(종목명=name, 종목코드=ticker,
-                             매출증가율=data.loc[idx, key],
-                             영업이익증가율=data.loc[idx,'영업이익'],
-                             EPS증가율=data.loc[idx, 'EPS(원)']))
-        growth = pd.DataFrame(data=objs).set_index(keys='종목코드')
-        growth = growth.join(self.rel_icm['PER'])
-        growth['PEG'] = round(growth['PER'] / growth['EPS증가율'], 2)
-        return growth.set_index(keys='종목명').drop(columns=['PER'])
+            data = data[1:].join(stat['PER'], how='left')
+            data['PEG'] = round(data['PER'] / data['EPS(원)'], 2)
+            data = data.drop(columns=['PER']).rename(columns={
+                key:'매출증가율', '영업이익':'영업이익률', 'EPS(원)':'EPS증가율'
+            })
+
+            objs = dict()
+            for i in data.index[:-2]:
+                _data = data.loc[i].to_dict()
+                objs[i] = pd.DataFrame(data=_data, index=[name])
+                if i.startswith(str(self.market.krdate.year - 1)):
+                    _data['PEG'] = round(icm.loc[ticker, 'PER'] / _data['EPS증가율'], 2)
+                    objs[f'{self.market.krdate.year}/현재'] = pd.DataFrame(data=_data, index=[name])
+            growth = pd.concat(objs=[growth, pd.concat(objs=objs, axis=1)], axis=0)
+        return growth
 
 
 if __name__ == "__main__":
