@@ -1,5 +1,5 @@
 from tdatlib.fetch.narr._fnguide import fnguide
-from tdatlib.fetch.market import market_kr
+from tdatlib.fetch.market import market
 from inspect import currentframe as inner
 import pandas as pd
 
@@ -16,16 +16,16 @@ class narrative_kr(fnguide):
             self.__setattr__(f'__{name}', _func())
         return f'__{name}'
 
-    @property
-    def related(self) -> list:
-        """
-        업종 연관도 상위 시가총액 6종목 선출
-        :return:
-        ['000660', '402340', '000990', '058470', '005290', '357780']
-        """
-        if not hasattr(self, '__related'):
-            self.__setattr__('__related', market_kr().get_related(ticker=self.ticker))
-        return self.__getattribute__('__related')
+    # @property
+    # def related(self) -> list:
+    #     """
+    #     업종 연관도 상위 시가총액 6종목 선출
+    #     :return:
+    #     ['000660', '402340', '000990', '058470', '005290', '357780']
+    #     """
+    #     if not hasattr(self, '__related'):
+    #         self.__setattr__('__related', market().get_related(ticker=self.ticker))
+    #     return self.__getattribute__('__related')
 
     @property
     def name(self) -> str:

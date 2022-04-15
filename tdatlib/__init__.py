@@ -1,7 +1,7 @@
 import tdatlib.archive as archive
 from tdatlib.fetch import (
     narrative_kr,
-    market_kr,
+    market,
     ohlcv
 )
 from tdatlib.view import (

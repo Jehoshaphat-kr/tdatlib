@@ -1,155 +1,101 @@
 import pandas as pd
-import requests, time, json, os
-import urllib.request as req
-from tdatlib import archive
-from tdatlib.fetch.ohlcv import ohlcv
-from tqdm import tqdm
+import os
 from pytz import timezone
-from datetime import datetime, timedelta
+from datetime import datetime
 from pykrx import stock
 from inspect import currentframe as inner
 
 
-DIR_PERF = f'{os.path.dirname(os.path.dirname(__file__))}/archive/common/perf.csv'
+URL_KIND = 'http://kind.krx.co.kr/corpgeneral/corpList.do?method=download'
+DIR_ICM = f'{os.path.dirname(os.path.dirname(__file__))}/archive/common/icm.csv'
+DIR_THM = f'{os.path.dirname(os.path.dirname(__file__))}/archive/category/theme.csv'
+PM_DATE = datetime.now(timezone('Asia/Seoul'))
 
-def fetch_date() -> str:
+def fetch_ipo() -> pd.DataFrame:
     """
-    실행 시각 기준, 최근 유효 거래일
-    :return: %y%m%d
-    """
-    return stock.get_nearest_business_day_in_a_week(date=datetime.now(timezone('Asia/Seoul')).strftime("%Y%m%d"))
-
-def fetch_trading_dates(td:str) -> dict:
-    """
-    1D/1W/1M/3M/6M/1Y 거래일 다운로드
+    상장일 포함 전 종목 데이터 프레임
     :return:
     """
-    td = datetime.strptime(td, "%Y%m%d")
-    dm = lambda x: (td - timedelta(x)).strftime("%Y%m%d")
-    iter = [('1D', 1), ('1W', 7), ('1M', 30), ('3M', 91), ('6M', 183), ('1Y', 365)]
-    return {l: stock.get_nearest_business_day_in_a_week(date=dm(d)) for l, d in iter}
+    ipo = pd.read_html(io=URL_KIND, header=0)[0][['회사명', '종목코드', '상장일']]
+    ipo = ipo.rename(columns={'회사명': '종목명', '상장일': 'IPO'}).set_index(keys='종목코드')
+    ipo.index = ipo.index.astype(str).str.zfill(6)
+    ipo.IPO = pd.to_datetime(ipo.IPO)
+    return ipo
 
-def fetch_even_shares(dates:tuple or list) -> list:
+def fetch_cap() -> pd.DataFrame:
     """
-    1Y 기준 상장주식수 미변동 분 종목코드 리스트
+    시가총액 전 종목 데이터 프레임
     :return:
     """
-    prev, curr = dates
-    shares = pd.concat(objs={
-        'prev': stock.get_market_cap_by_ticker(date=prev, market='ALL')['상장주식수'],
-        'curr': stock.get_market_cap_by_ticker(date=curr, market='ALL')['상장주식수']
-    }, axis=1)
-    return shares[shares.prev == shares.curr].index.tolist()
+    return stock.get_market_cap_by_ticker(date=PM_DATE.strftime("%Y%m%d"), market="ALL", prev=True)
 
-def fetch_stock_returns(td_tds_evens:tuple or list) -> pd.DataFrame:
+def fetch_mul() -> pd.DataFrame:
     """
-    상장 주식 기간별 수익률
+    투자배수 및 (x)ps 전 종목 데이터 프레임
     :return: 
     """
-    td, tds, evens = td_tds_evens
-    objs = {'TD0D': stock.get_market_ohlcv_by_ticker(date=td, market='ALL', prev=False)['종가']}
-    for k, date, in tqdm(tds.items(), desc='기간별 수익률 계산(주식)'):
-        objs[f'TD{k}'] = stock.get_market_ohlcv_by_ticker(date=date, market='ALL', prev=False)['종가']
-    p_s = pd.concat(objs=objs, axis=1)
-    perf = pd.concat(objs={f'R{k}': round(100 * (p_s.TD0D / p_s[f'TD{k}'] - 1), 2) for k in tds.keys()}, axis=1)
-    perf.index.name = '종목코드'
-    return perf[perf.index.isin(evens)]
+    return stock.get_market_fundamental(date=PM_DATE.strftime("%Y%m%d"), market="ALL", prev=True)
 
-def fetch_etf_returns(td_tds:tuple or list) -> pd.DataFrame:
+def fetch_icm(ipo_cap_mul:tuple or list) -> pd.DataFrame:
     """
-    상장 ETF 기간별 수익률
-    :return: 
+    IPO, (market)Cap 및 Multiple 데이터 프레임
+    :return:
     """
-    td, tds = td_tds
-    objs = {'TD0D': stock.get_etf_ohlcv_by_ticker(date=td)['종가']}
-    for k, date in tqdm(tds.items(), desc='기간별 수익률 계산(ETF)'):
-        objs[f'TD{k}'] = stock.get_etf_ohlcv_by_ticker(date=date)['종가']
-    p_s = pd.concat(objs=objs, axis=1)
-    perf = pd.concat(objs={f'R{k}': round(100 * (p_s.TD0D / p_s[f'TD{k}'] - 1), 2) for k in tds.keys()}, axis=1)
-    perf.index.name = '종목코드'
-    return perf
-    
-class common:
+    icm = pd.read_csv(DIR_ICM, index_col='종목코드', encoding='utf-8')
+    icm.index = icm.index.astype(str).str.zfill(6)
+    icm_date = str(icm['날짜'][0])
+
+    td_date = stock.get_nearest_business_day_in_a_week(PM_DATE.strftime("%Y%m%d"))
+    is_weekend = PM_DATE.weekday() == 5 or PM_DATE.weekday() == 6
+    is_market_open = 855 < int(PM_DATE.strftime("%H%M")) <= 1530
+    if is_weekend or is_market_open or icm_date == td_date:
+        return icm.drop(columns=['날짜'])
+
+    icm = pd.concat(objs=ipo_cap_mul, axis=1)
+    icm['날짜'] = td_date
+    icm.index.name = '종목코드'
+    icm.to_csv(DIR_ICM, index=True, encoding='utf-8')
+    return icm.drop(columns=['날짜'])
+
+
+class comm(object):
 
     def __init__(self):
         pass
 
     def __attr__(self, **kwargs):
-        name = kwargs['name']
-        keys = kwargs['key'] if 'key' in kwargs.keys() else 'fetch'
-        if not hasattr(self, f'__{name}'):
-            _func = globals()[f'{keys}_{name}']
-            if 'args' in kwargs.keys():
-                self.__setattr__(f'__{name}', _func(kwargs['args']))
-            else:
-                self.__setattr__(f'__{name}', _func())
-        return self.__getattribute__(f'__{name}')
+        if not hasattr(self, f'__{kwargs["name"]}'):
+            f = globals()[f'fetch_{kwargs["name"]}']
+            self.__setattr__(f'__{kwargs["name"]}', f(kwargs['args']) if 'args' in kwargs.keys() else f())
+        return self.__getattribute__(f'__{kwargs["name"]}')
 
     @property
-    def td_date(self) -> str:
+    def ipo(self) -> pd.DataFrame:
         return self.__attr__(name=inner().f_code.co_name)
 
     @property
-    def trading_dates(self) -> dict:
-        return self.__attr__(name=inner().f_code.co_name, args=self.td_date)
+    def cap(self) -> pd.DataFrame:
+        return self.__attr__(name=inner().f_code.co_name)
 
     @property
-    def even_shares(self) -> list:
-        return self.__attr__(name=inner().f_code.co_name, args=(self.trading_dates['1Y'], self.td_date))
+    def mul(self) -> pd.DataFrame:
+        return self.__attr__(name=inner().f_code.co_name)
 
     @property
-    def stock_returns(self) -> pd.DataFrame:
-        return self.__attr__(name=inner().f_code.co_name, args=[self.td_date, self.trading_dates, self.even_shares])
+    def icm(self) -> pd.DataFrame:
+        return self.__attr__(name=inner().f_code.co_name, args=[self.ipo, self.cap, self.mul])
 
     @property
-    def etf_returns(self) -> pd.DataFrame:
-        return self.__attr__(name=inner().f_code.co_name, args=[self.td_date, self.trading_dates])
-
-    @property
-    def market_returns(self):
-        perf = pd.read_csv(DIR_PERF, encoding='utf-8', index_col='종목코드')
-        perf.index = perf.index.astype(str).str.zfill(6)
-        if not str(perf['날짜'][0]) == self.td_date:
-            return self.market_returns_latest
-        return perf.drop(columns=['날짜'])
-
-    @property
-    def market_returns_latest(self):
-        perf = pd.concat(objs=[self.stock_returns, self.etf_returns], axis=0, ignore_index=False)
-        perf = perf[~perf['R1D'].isna()].copy()
-        perf['날짜'] = self.td_date
-        perf.to_csv(DIR_PERF, encoding='utf-8', index=True)
-        return perf.drop(columns=['날짜'])
-
-    def update_returns(self, tickers) -> pd.DataFrame:
-        """ 종목 기간별 수익률 업데이트 """
-        perf = self.market_returns.copy()
-        add_tickers = [ticker for ticker in tickers if not ticker in perf.index]
-        if not add_tickers:
-            return perf[perf.index.isin(tickers)]
-
-        process = tqdm(add_tickers)
-        for n, ticker in enumerate(process):
-            process.set_description(f'Fetch Returns - {ticker}')
-            while True:
-                try:
-                    other = ohlcv(ticker=ticker, period=2).perf
-                    perf = pd.concat(objs=[perf, other], axis=0, ignore_index=False)
-                    break
-                except ConnectionError as e:
-                    time.sleep(0.5)
-        perf.index.name = '종목코드'
-        perf.to_csv(archive.perf(self.td_date), encoding='utf-8', index=True)
-        return perf[perf.index.isin(tickers)]
+    def theme(self) -> pd.DataFrame:
+        df = pd.read_csv(DIR_THM, index_col='종목코드')
+        df.index = df.index.astype(str).str.zfill(6)
+        return df
 
 
 if __name__ == "__main__":
     tester = common()
 
-    # print(tester.date)
-    # print(tester.trading_dates)
-    # print(tester.even_shares)
-    # print(tester.stock_returns)
-    # print(tester.etf_returns)
-    # print(tester.market_returns_latest)
-    print(tester.market_returns)
+    # print(tester.ipo)
+    # print(tester.cap)
+    # print(tester.mul)
+    print(tester.icm)

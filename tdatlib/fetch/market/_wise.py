@@ -67,7 +67,7 @@ CD_WI26 = {
     'WI800': '유틸리티',
 }
 
-def fetch_date() -> str:
+def fetch_wi_date() -> str:
     """
     WISE 산업/업종 분류 기준 날짜 다운로드
     :return: %Y%m%d
@@ -99,28 +99,29 @@ def fetch_group(group_name:str, group_codes:dict, wise_date:str=str()) -> pd.Dat
     frame['날짜'] = wise_date
     return frame.set_index(keys='종목코드')
 
+
 class wise(object):
 
     def __init__(self):
         pass
 
-    def __chksetattr__(self, name:str, key:str='fetch') -> str:
-        if not hasattr(self, f'__{name}'):
-            _func = globals()[f'{key}_{name}']
-            self.__setattr__(f'__{name}', _func())
-        return f'__{name}'
+    def __attr__(self, **kwargs):
+        if not hasattr(self, f'__{kwargs["name"]}'):
+            f = globals()[f'fetch_{kwargs["name"]}']
+            self.__setattr__(f'__{kwargs["name"]}', f(kwargs['args']) if 'args' in kwargs.keys() else f())
+        return self.__getattribute__(f'__{kwargs["name"]}')
 
     @property
-    def date(self) -> str:
-        return self.__getattribute__(self.__chksetattr__(inner().f_code.co_name))
+    def wi_date(self) -> str:
+        return self.__attr__(name=inner().f_code.co_name)
 
     @property
     def wics(self) -> pd.DataFrame:
         if not hasattr(self, f'__wics'):
             fetch = pd.read_csv(DIR_WICS, index_col='종목코드', encoding='utf-8')
             fetch.index = fetch.index.astype(str).str.zfill(6)
-            if not str(fetch['날짜'][0]) == self.date:
-                fetch = fetch_group('WICS', CD_WICS, self.date)
+            if not str(fetch['날짜'][0]) == self.wi_date:
+                fetch = fetch_group('WICS', CD_WICS, self.wi_date)
                 fetch.to_csv(DIR_WICS, index=True, encoding='utf-8')
             self.__setattr__(f'__wics', fetch.drop(columns=['날짜']))
         return self.__getattribute__(f'__wics')
@@ -130,8 +131,8 @@ class wise(object):
         if not hasattr(self, f'__wi26'):
             fetch = pd.read_csv(DIR_WI26, index_col='종목코드', encoding='utf-8')
             fetch.index = fetch.index.astype(str).str.zfill(6)
-            if not str(fetch['날짜'][0]) == self.date:
-                fetch = fetch_group('WI26', CD_WI26, self.date)
+            if not str(fetch['날짜'][0]) == self.wi_date:
+                fetch = fetch_group('WI26', CD_WI26, self.wi_date)
                 fetch.drop(columns=['산업'], inplace=True)
                 fetch.to_csv(DIR_WI26, index=True, encoding='utf-8')
             self.__setattr__(f'__wi26', fetch.drop(columns=['날짜']))
@@ -140,6 +141,6 @@ class wise(object):
 if __name__ == "__main__":
     tester = wise()
 
-    print(tester.date)
+    print(tester.wi_date)
     print(tester.wics)
     print(tester.wi26)

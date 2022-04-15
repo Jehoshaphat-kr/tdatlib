@@ -1,9 +1,9 @@
 import pandas as pd
-from tdatlib import archive, market_kr
+from tdatlib import archive, market
 from pykrx import stock
 
 
-market = market_kr()
+market = market()
 class toolbox:
 
     def __init__(self, category:str, sub_category:str=str(), kq:list=None):
@@ -39,7 +39,7 @@ class toolbox:
     def _get_baseline(self):
         """ 분류, 기본 정보 및 sub_category(시가총액) 별 종목 제한 """
         base = self.group
-        line = market.etfs[['종목명', '종가', '시가총액']] if self.cat == 'ETF' else market.icm
+        line = market.etf_list[['종목명', '종가', '시가총액']] if self.cat == 'ETF' else market.icm
         baseline = base.join(other=line.drop(columns=['종목명']), how='left')
 
         if self.cat.startswith('WI'):
