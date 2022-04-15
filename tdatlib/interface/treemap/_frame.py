@@ -13,9 +13,8 @@ CD_INDEX = {
 
 class frame(object):
 
-    def __init__(self, market_data:market, category:str, sub_category:str=str(), kq:list=None):
-        super().__init__()
-        self.market = market_data
+    def __init__(self, category:str, sub_category:str=str(), kq:list=None, market_data=None):
+        self.market = market_data if isinstance(market_data, market) else market()
 
         if not category in ['WICS', 'WI26', 'ETF', 'THEME']:
             raise KeyError(f'입력 가능한 category: WICS, WI26, ETF, THEME')
@@ -189,8 +188,6 @@ class frame(object):
             return f"{x['크기']}억원" if len(x['크기']) < 5 else f"{x['크기'][:-4]}조 {x['크기'][-4:]}억원"
 
         frame = self.__calc_colors().copy()
-        print(frame)
-        frame.to_csv(r'./test.csv', encoding='euc-kr', index=True)
         frame['종가'].fillna('-', inplace=True)
         frame['크기'] = frame['크기'].astype(int).astype(str)
 
@@ -210,6 +207,6 @@ class frame(object):
         return frame
 
 if __name__ == "__main__":
-    tester = frame(market_data=market(), category='THEME', sub_category=str(), kq=None)
+    tester = frame(market_data=market(), category='ETF', sub_category=str(), kq=None)
 
     print(tester.mapframe)

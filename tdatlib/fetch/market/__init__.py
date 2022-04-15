@@ -131,7 +131,7 @@ class market(object):
         """
         return getattr(self.__attr__(perf, arg=self.td_date), inner().f_code.co_name)
 
-    def get_market_returns(self, tickers:list or tuple) -> pd.DataFrame:
+    def get_market_returns(self, tickers) -> pd.DataFrame:
         return getattr(self.__attr__(perf, arg=self.td_date), 'returns')(tickers)
 
 

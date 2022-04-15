@@ -5,10 +5,9 @@ import plotly.offline as of
 
 class treemap(treemap_data):
 
-    def __init__(self, category:str, sub_category:str=str(), kq:list=None):
-        super().__init__(category=category, sub_category=sub_category, kq=kq)
+    def __init__(self, category:str, sub_category:str=str()):
+        super().__init__(category=category, sub_category=sub_category)
         pass
-
 
     def view_map(self, key:str='R1D', save:bool or str=False):
         """
@@ -27,7 +26,7 @@ class treemap(treemap_data):
             branchvalues='total', opacity=0.9,
             hovertemplate='%{label}<br>시총: %{meta}<br>종가: %{customdata}<br>' + key + ': %{text}' + unit + '<extra></extra>'
         ))
-        title = f'[{self.cat} / {self.mapname}]: {self.td_date} 종가 기준 {key}'
+        title = f'[{self.cat} / {self.mapname}]: {self.market.td_date} 종가 기준 {key}'
         fig.update_layout(title=title)
         if isinstance(save, bool) and save == True:
             of.plot(fig, filename=rf'./{self.cat}_{self.mapname}.html', auto_open=False)
@@ -38,5 +37,5 @@ class treemap(treemap_data):
         return
 
 if __name__ == "__main__":
-    tester = treemap(category='WICS')
-    tester.view_map(save=True)
+    tester = treemap(category='ETF')
+    tester.view_map(save=False)

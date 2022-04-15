@@ -1,7 +1,7 @@
 from tdatlib.interface.treemap._frame import frame
+from tdatlib.fetch.market import market
 from datetime import datetime
 from pytz import timezone
-from inspect import currentframe as inner
 from pykrx import stock
 import pandas as pd
 import codecs, jsmin, os
@@ -39,10 +39,10 @@ class deploy(object):
     __cover, __datum = list(), pd.DataFrame(columns=['종목코드'])
 
     def __init__(self):
-
+        market_data = market()
         kq = stock.get_index_portfolio_deposit_file(ticker='2001')
         for n, (c, s, var) in enumerate(CD_CATEGORY):
-            treemap = frame(category=c, sub_category=s, kq=kq)
+            treemap = frame(category=c, sub_category=s, kq=kq, market_data=market_data)
             print(f'[{n + 1}/{len(CD_CATEGORY)}] {c} / {treemap.mapname}')
 
             map_data = treemap.mapframe.copy()
@@ -66,16 +66,15 @@ class deploy(object):
         javascript 파일 출력
         :return:
         """
-
         yy, mm, dd = CD_DATE[:4], CD_DATE[4:6], CD_DATE[6:]
         suffix = codecs.open(filename=DIR_SUFFIX, mode='r', encoding='utf-8').read()
         syntax = f'document.getElementsByClassName("date")[0].innerHTML="{yy}년 {mm}월 {dd}일 종가 기준";'
 
         _cnt = 1
-        _js = os.path.join(DIR_DEPLOY, f"{t[2:]}MM-r{_cnt}.js")
+        _js = os.path.join(DIR_DEPLOY, f"{CD_DATE[2:]}MM-r{_cnt}.js")
         while os.path.isfile(_js):
             _cnt += 1
-            _js = os.path.join(DIR_DEPLOY, f"{t[2:]}MM-r{_cnt}.js")
+            _js = os.path.join(DIR_DEPLOY, f"{CD_DATE[2:]}MM-r{_cnt}.js")
 
         proc = [('labels', self.__labels), ('covers', self.__covers), ('ids', self.__ids), ('bar', self.__bars)]
         for name, data in proc:

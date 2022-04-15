@@ -132,7 +132,7 @@ class perf(object):
         return rtrn.drop(columns=['날짜'])
 
     def returns(self, tickers:list) -> pd.DataFrame:
-        return self.__attr__(name=inner().f_code.co_name, args=[self.td_date, self.market_returns, tickers])
+        return fetch_returns(td_raw_tickers=[self.td_date, self.market_returns, tickers])
 
 
 if __name__ == "__main__":
