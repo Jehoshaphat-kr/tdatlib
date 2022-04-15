@@ -1,6 +1,6 @@
 import pandas as pd
 import time, os
-from tdatlib.fetch.ohlcv import ohlcv
+from tdatlib.interface.ohlcv import ohlcv
 from tqdm import tqdm
 from pytz import timezone
 from datetime import datetime, timedelta
@@ -9,13 +9,9 @@ from inspect import currentframe as inner
 
 
 DIR_PERF = f'{os.path.dirname(os.path.dirname(__file__))}/archive/common/perf.csv'
+PM_DATE = datetime.now(timezone('Asia/Seoul'))
+C_MARKET_OPEN = 900 <= int(PM_DATE.strftime("%H%M")) <= 1530
 
-def fetch_td_date() -> str:
-    """
-    실행 시각 기준, 최근 유효 거래일
-    :return: %y%m%d
-    """
-    return stock.get_nearest_business_day_in_a_week(date=datetime.now(timezone('Asia/Seoul')).strftime("%Y%m%d"))
 
 def fetch_trading_dates(td:str) -> dict:
     """
@@ -82,19 +78,22 @@ def fetch_returns(td_raw_tickers:tuple or list) -> pd.DataFrame:
         process.set_description(f'Fetch Returns - {ticker}')
         while True:
             try:
-                other = ohlcv(ticker=ticker, period=2).perf
-                rtrn = pd.concat(objs=[rtrn, other], axis=0, ignore_index=False)
+                rtrn = pd.concat(objs=[rtrn, ohlcv(ticker=ticker, period=2).perf], axis=0, ignore_index=False)
                 break
             except ConnectionError as e:
                 time.sleep(0.5)
     rtrn.index.name = '종목코드'
+    if (PM_DATE == td) and C_MARKET_OPEN:
+        return rtrn[rtrn.index.isin(tickers)]
+
     rtrn['날짜'] = td
     rtrn.to_csv(DIR_PERF, encoding='utf-8', index=True)
-    return rtrn[rtrn.index.isin(tickers)]
+    return rtrn[rtrn.index.isin(tickers)].drop(columns=['날짜'])
     
 class perf(object):
 
-    def __init__(self):
+    def __init__(self, date:str):
+        self.td_date = date
         pass
 
     def __attr__(self, **kwargs):
@@ -102,10 +101,6 @@ class perf(object):
             f = globals()[f'fetch_{kwargs["name"]}']
             self.__setattr__(f'__{kwargs["name"]}', f(kwargs['args']) if 'args' in kwargs.keys() else f())
         return self.__getattribute__(f'__{kwargs["name"]}')
-
-    @property
-    def td_date(self) -> str:
-        return self.__attr__(name=inner().f_code.co_name)
 
     @property
     def trading_dates(self) -> dict:
@@ -128,15 +123,12 @@ class perf(object):
         rtrn = pd.read_csv(DIR_PERF, encoding='utf-8', index_col='종목코드')
         rtrn.index = rtrn.index.astype(str).str.zfill(6)
         if not str(rtrn['날짜'][0]) == self.td_date:
-            return self.market_returns_latest
-        return rtrn.drop(columns=['날짜'])
-
-    @property
-    def market_returns_latest(self):
-        rtrn = pd.concat(objs=[self.stock_returns, self.etf_returns], axis=0, ignore_index=False)
-        rtrn = rtrn[~rtrn['R1D'].isna()].copy()
-        rtrn['날짜'] = self.td_date
-        rtrn.to_csv(DIR_PERF, encoding='utf-8', index=True)
+            rtrn = pd.concat(objs=[self.stock_returns, self.etf_returns], axis=0, ignore_index=False)
+            rtrn = rtrn[~rtrn['R1D'].isna()].copy()
+            if (PM_DATE == self.td_date) and C_MARKET_OPEN:
+                return rtrn
+            rtrn['날짜'] = self.td_date
+            rtrn.to_csv(DIR_PERF, encoding='utf-8', index=True)
         return rtrn.drop(columns=['날짜'])
 
     def returns(self, tickers:list) -> pd.DataFrame:
@@ -144,13 +136,12 @@ class perf(object):
 
 
 if __name__ == "__main__":
-    tester = perf()
+    tester = perf(date='20220415')
 
     print(tester.td_date)
-    print(tester.trading_dates)
-    print(tester.even_shares)
-    print(tester.stock_returns)
-    print(tester.etf_returns)
-    print(tester.market_returns_latest)
+    # print(tester.trading_dates)
+    # print(tester.even_shares)
+    # print(tester.stock_returns)
+    # print(tester.etf_returns)
     print(tester.market_returns)
-    print(tester.returns(tickers=['005930', '000660']))
+    # print(tester.returns(tickers=['005930', '000660']))

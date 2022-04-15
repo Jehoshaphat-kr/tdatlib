@@ -1,21 +1,28 @@
-# from tdatlib.fetch.market._krx import krx
+from pykrx import stock
+from pytz import timezone
+from datetime import datetime
 from inspect import currentframe as inner
-import pandas as pd
-
 from tdatlib.fetch.market import (
     _comm, _wise, _etf, _perf
 )
+import pandas as pd
 
+PM_DATE = datetime.now(timezone('Asia/Seoul'))
+C_WEEKEND_NOW = PM_DATE.weekday() == 5 or PM_DATE.weekday() == 6
+C_TRADING_NOW = 855 < int(PM_DATE.strftime("%H%M")) <= 1530
 comm, wise, etf, perf = 'comm', 'wise', 'etf', 'perf'
+
 class market(object):
 
     def __init__(self):
+        self.td_date = stock.get_nearest_business_day_in_a_week(date=PM_DATE.strftime("%Y%m%d"))
         pass
 
-    def __attr__(self, arg:str):
-        if not hasattr(self, arg):
-            self.__setattr__(arg, getattr(globals()[f'_{arg}'], arg)())
-        return self.__getattribute__(arg)
+    def __attr__(self, obj:str, arg=None):
+        if not hasattr(self, obj):
+            inst = getattr(globals()[f'_{obj}'], obj)(arg) if arg else getattr(globals()[f'_{obj}'], obj)()
+            self.__setattr__(obj, inst)
+        return self.__getattribute__(obj)
 
     @property
     def icm(self):
@@ -32,7 +39,7 @@ class market(object):
         009275      NaN         NaN  36500     3312010000  ...      0   0.00  0.00      0  0.00     0
         001529      NaN         NaN  34650     3108867300  ...      0   0.00  0.00      0  0.43   150
         """
-        return getattr(self.__attr__(comm), inner().f_code.co_name)
+        return getattr(self.__attr__(comm, arg=self.td_date), inner().f_code.co_name)
 
     @property
     def wi26(self) -> pd.DataFrame:
@@ -77,7 +84,7 @@ class market(object):
         093370         후성       2차전지
         145020         휴젤        바이오
         """
-        return getattr(self.__attr__(comm), inner().f_code.co_name)
+        return getattr(self.__attr__(comm, arg=self.td_date), inner().f_code.co_name)
 
     @property
     def etf_group(self) -> pd.DataFrame:
@@ -122,16 +129,17 @@ class market(object):
         140950 -0.81 -2.39  -3.89 -10.23 -12.29 -15.21
         419890  0.04  0.04    NaN    NaN    NaN    NaN
         """
-        return getattr(self.__attr__(perf), inner().f_code.co_name)
+        return getattr(self.__attr__(perf, arg=self.td_date), inner().f_code.co_name)
 
     def get_market_returns(self, tickers:list or tuple) -> pd.DataFrame:
-        return getattr(self.__attr__(perf), 'returns')(tickers)
+        return getattr(self.__attr__(perf, arg=self.td_date), 'returns')(tickers)
 
 
 if __name__ == "__main__":
     # pd.set_option('display.expand_frame_repr', False)
 
     tester = market()
+    print(tester.td_date)
     print(tester.icm)
     print(tester.wics)
     print(tester.wi26)
@@ -139,5 +147,5 @@ if __name__ == "__main__":
     print(tester.etf_group)
     print(tester.etf_list)
     print(tester.market_returns)
-    print(tester.get_market_returns(tickers=['005930', '000660']))
+
 

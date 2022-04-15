@@ -10,6 +10,8 @@ URL_KIND = 'http://kind.krx.co.kr/corpgeneral/corpList.do?method=download'
 DIR_ICM = f'{os.path.dirname(os.path.dirname(__file__))}/archive/common/icm.csv'
 DIR_THM = f'{os.path.dirname(os.path.dirname(__file__))}/archive/category/theme.csv'
 PM_DATE = datetime.now(timezone('Asia/Seoul'))
+C_MARKET_OPEN = 900 <= int(PM_DATE.strftime("%H%M")) <= 1530
+
 
 def fetch_ipo() -> pd.DataFrame:
     """
@@ -36,23 +38,19 @@ def fetch_mul() -> pd.DataFrame:
     """
     return stock.get_market_fundamental(date=PM_DATE.strftime("%Y%m%d"), market="ALL", prev=True)
 
-def fetch_icm(ipo_cap_mul:tuple or list) -> pd.DataFrame:
+def fetch_icm(td_ipo_cap_mul:tuple or list) -> pd.DataFrame:
     """
     IPO, (market)Cap 및 Multiple 데이터 프레임
     :return:
     """
+    td, ipo, cap, mul = td_ipo_cap_mul
     icm = pd.read_csv(DIR_ICM, index_col='종목코드', encoding='utf-8')
     icm.index = icm.index.astype(str).str.zfill(6)
-    icm_date = str(icm['날짜'][0])
-
-    td_date = stock.get_nearest_business_day_in_a_week(PM_DATE.strftime("%Y%m%d"))
-    is_weekend = PM_DATE.weekday() == 5 or PM_DATE.weekday() == 6
-    is_market_open = 855 < int(PM_DATE.strftime("%H%M")) <= 1530
-    if is_weekend or is_market_open or icm_date == td_date:
+    if str(icm['날짜'][0]) == td or (PM_DATE == td and C_MARKET_OPEN):
         return icm.drop(columns=['날짜'])
 
-    icm = pd.concat(objs=ipo_cap_mul, axis=1)
-    icm['날짜'] = td_date
+    icm = pd.concat(objs=[ipo, cap, mul], axis=1)
+    icm['날짜'] = td
     icm.index.name = '종목코드'
     icm.to_csv(DIR_ICM, index=True, encoding='utf-8')
     return icm.drop(columns=['날짜'])
@@ -60,7 +58,8 @@ def fetch_icm(ipo_cap_mul:tuple or list) -> pd.DataFrame:
 
 class comm(object):
 
-    def __init__(self):
+    def __init__(self, date:str):
+        self.td_date = date
         pass
 
     def __attr__(self, **kwargs):
@@ -83,7 +82,7 @@ class comm(object):
 
     @property
     def icm(self) -> pd.DataFrame:
-        return self.__attr__(name=inner().f_code.co_name, args=[self.ipo, self.cap, self.mul])
+        return self.__attr__(name=inner().f_code.co_name, args=[self.td_date, self.ipo, self.cap, self.mul])
 
     @property
     def theme(self) -> pd.DataFrame:
@@ -93,7 +92,7 @@ class comm(object):
 
 
 if __name__ == "__main__":
-    tester = common()
+    tester = comm()
 
     # print(tester.ipo)
     # print(tester.cap)

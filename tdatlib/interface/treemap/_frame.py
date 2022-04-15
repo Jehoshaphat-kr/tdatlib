@@ -1,66 +1,105 @@
-import pandas as pd
-from tdatlib import archive, market
+from tdatlib.fetch.market import market
 from pykrx import stock
+import pandas as pd
 
 
-market = market()
-class toolbox:
+CD_INDEX = {
+    '1028': '코스피200',
+    '1003': '코스피 중형주',
+    '1004': '코스피 소형주',
+    '2203': '코스닥150',
+    '2003': '코스닥 중형주'
+}
 
-    def __init__(self, category:str, sub_category:str=str(), kq:list=None):
+class frame(object):
+
+    def __init__(self, market_data:market, category:str, sub_category:str=str(), kq:list=None):
+        super().__init__()
+        self.market = market_data
+
         if not category in ['WICS', 'WI26', 'ETF', 'THEME']:
             raise KeyError(f'입력 가능한 category: WICS, WI26, ETF, THEME')
         if not sub_category in [str(), '1028', '1003', '1004', '2203', '2003']:
             raise KeyError(f'입력 가능한 sub_category: 1028, 1003, 1004, 2203, 2003')
 
         self.cat, self.sub = category, sub_category
-        self.kq = kq if kq else stock.get_index_portfolio_deposit_file(ticker='2001')
+        if kq:
+            self.kq = kq
+        else:
+            self.kq = stock.get_index_portfolio_deposit_file(ticker='2001')
 
         if self.cat == 'WICS':
-            self.group =  market.wics
+            self.group =  self.market.wics
         if self.cat == 'WI26':
-            self.group =  market.wi26
+            self.group =  self.market.wi26
         if self.cat == 'ETF':
-            self.group =  market.etf_group
+            self.group =  self.market.etf_group
         if self.cat == 'THEME':
-            self.group =  market.theme
+            self.group =  self.market.theme
         return
 
-    def _get_mapname(self) -> str:
-        """ 시장지도 분류 명 """
-        if self.sub:
-            # 코스피200(1028), 코스피 중형주(1003), 코스피 소형주(1004), 코스닥150(2203), 코스닥 중형주(2003)
-            return archive.index_code[self.sub]
-        if self.cat.startswith('WI'):
-            return '전체'
-        if self.cat == 'THEME':
-            return '테마'
-        return self.cat
-
-    def _get_baseline(self):
-        """ 분류, 기본 정보 및 sub_category(시가총액) 별 종목 제한 """
-        base = self.group
-        line = market.etf_list[['종목명', '종가', '시가총액']] if self.cat == 'ETF' else market.icm
-        baseline = base.join(other=line.drop(columns=['종목명']), how='left')
-
-        if self.cat.startswith('WI'):
+    @property
+    def mapname(self) -> str:
+        """
+        시장 지도 이름
+        :return:
+        """
+        if not hasattr(self, '__mapname'):
             if self.sub:
-                baseline = baseline[baseline.index.isin(stock.get_index_portfolio_deposit_file(ticker=self.sub))]
-            else:
-                baseline = baseline[baseline['시가총액'] > 300000000000]
-        perf = market.update_perf(tickers=baseline.index)
-        return baseline.join(other=perf, how='left')
+                self.__setattr__('__mapname', CD_INDEX[self.sub])
+            elif self.cat.startswith('WI'):
+                self.__setattr__('__mapname', '전체')
+            elif self.cat == 'THEME':
+                self.__setattr__('__mapname', '테마')
+            elif self.cat == 'ETF':
+                self.__setattr__('__mapname', 'ETF')
+        return self.__getattribute__('__mapname')
 
-    def _get_mapframe(self):
-        """ 시장지도 데이터 """
+    @property
+    def baseline(self) -> pd.DataFrame:
+        """
+        분류, 기본 정보 및 sub_category(시가총액) 별 종목 제한
+        :return:
+        """
+        if not hasattr(self, '__baseline'):
+            base = self.group
+            line = self.market.etf_list[['종목명', '종가', '시가총액']] if self.cat == 'ETF' else self.market.icm
+            baseline = base.join(other=line.drop(columns=['종목명']), how='left')
+
+            if self.cat.startswith('WI'):
+                if self.sub:
+                    baseline = baseline[baseline.index.isin(stock.get_index_portfolio_deposit_file(ticker=self.sub))]
+                else:
+                    baseline = baseline[baseline['시가총액'] > 300000000000]
+            perf = self.market.get_market_returns(tickers=baseline.index)
+            self.__setattr__('__baseline', baseline.join(other=perf, how='left'))
+        return self.__getattribute__('__baseline')
+
+    @property
+    def mapframe(self):
+        """
+        시장지도 데이터
+        :return:
+        """
         return self.__calc_post().copy()
+
+    @property
+    def barframe(self) -> list:
+        """
+        시장지도 업종 종류
+        :return:
+        """
+        if not hasattr(self, '__bar'):
+            self.__calc_reduction()
+        return self.__getattribute__('__bar')
 
     def __calc_reduction(self) -> pd.DataFrame:
         """ 차원축소 - 1차원 지도 데이터 """
-        frame = self._get_baseline().copy().reset_index(level=0)
+        frame = self.baseline.copy().reset_index(level=0)
         frame['크기'] = frame['시가총액'] / 100000000
         levels = [col for col in ['종목코드', '섹터', '산업'] if col in frame.columns]
         factors = [col for col in frame.columns if any([col.startswith(keyword) for keyword in ['R', 'B', 'P', 'D']])]
-        map_name = self._get_mapname()
+        map_name = self.mapname
 
         parent = pd.DataFrame()
         for n, level in enumerate(levels):
@@ -85,7 +124,7 @@ class toolbox:
                             _t = frm[frm['PER'] != 0].copy() if f == 'PER' else frm
                             child.loc[child["종목명"] == name, f] = (_t[f] * _t['크기'] / _t['크기'].sum()).sum()
                 if level == "섹터":
-                    self.__setattr__('_bar', child["종목코드"].tolist())
+                    self.__setattr__('__bar', child["종목코드"].tolist())
             parent = pd.concat(objs=[parent, child], axis=0, ignore_index=True)
 
         cover = pd.DataFrame(
@@ -150,6 +189,8 @@ class toolbox:
             return f"{x['크기']}억원" if len(x['크기']) < 5 else f"{x['크기'][:-4]}조 {x['크기'][-4:]}억원"
 
         frame = self.__calc_colors().copy()
+        print(frame)
+        frame.to_csv(r'./test.csv', encoding='euc-kr', index=True)
         frame['종가'].fillna('-', inplace=True)
         frame['크기'] = frame['크기'].astype(int).astype(str)
 
@@ -167,3 +208,8 @@ class toolbox:
         if not self.cat == 'ETF':
             frame['PER'] = frame['PER'].apply(lambda val: val if not val == 0 else 'N/A')
         return frame
+
+if __name__ == "__main__":
+    tester = frame(market_data=market(), category='THEME', sub_category=str(), kq=None)
+
+    print(tester.mapframe)
