@@ -1,4 +1,4 @@
-from tdatlib.fetch.ohlcv._ohlcv import _ohlcv, _trend
+from tdatlib.fetch.archive.deprecate.ohlcv._ohlcv import _ohlcv, _trend
 from inspect import currentframe as inner
 import pandas as pd
 

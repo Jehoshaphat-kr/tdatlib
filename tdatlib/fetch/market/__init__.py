@@ -3,7 +3,7 @@ from pytz import timezone
 from datetime import datetime
 from inspect import currentframe as inner
 from tdatlib.fetch.market import (
-    _comm, _wise, _etf, _perf
+    common, wise, etf, perf
 )
 import pandas as pd
 

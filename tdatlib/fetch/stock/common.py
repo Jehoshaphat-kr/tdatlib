@@ -5,11 +5,23 @@ import yfinance as yf
 import pandas as pd
 
 
+def fetch_currency(ticker:str) -> str:
+    return 'USD' if ticker.isalpha() else 'KRW' if len(ticker) == 6 else '-'
+
+
+def fetch_name(ticker:str) -> str:
+    if ticker.isalpha():
+        return ticker
+    elif len(ticker) == 4:
+        return stock.get_index_ticker_name(ticker=ticker)
+    elif len(ticker) == 6:
+        name = stock.get_market_ticker_name(ticker=ticker)
+        if isinstance(name, pd.DataFrame):
+            return stock.get_etf_ticker_name(ticker=ticker)
+        return name
+
+
 def fetch_ohlcv(ticker:str, period:int=5) -> pd.DataFrame:
-    """
-    주가 시계열
-    :return:
-    """
     curr = datetime.now(timezone('Asia/Seoul' if ticker.isdigit() else 'US/Eastern'))
     prev = curr - timedelta(365 * period)
     if ticker.isdigit():
@@ -26,8 +38,5 @@ def fetch_ohlcv(ticker:str, period:int=5) -> pd.DataFrame:
     return ohlcv
 
 
-if __name__ == "__main__":
-    # t_ticker = '005930'
-    t_ticker = 'TSLA'
-
-    print(fetch_ohlcv(ticker=t_ticker))
+def fetch_related(ticker:str) -> list:
+    return list()

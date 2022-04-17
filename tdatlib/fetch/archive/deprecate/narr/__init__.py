@@ -1,5 +1,4 @@
-from tdatlib.fetch.narr._fnguide import fnguide
-from tdatlib.fetch.market import market
+from tdatlib.fetch.archive.deprecate.narr._fnguide import fnguide
 from inspect import currentframe as inner
 import pandas as pd
 

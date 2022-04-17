@@ -3,6 +3,7 @@ import requests, time, os
 from tqdm import tqdm
 from inspect import currentframe as inner
 
+
 URL_BASE = 'http://www.wiseindex.com/Index/Index#/G1010.0.Components'
 URL_WISE = 'http://www.wiseindex.com/Index/GetIndexComponets?ceil_yn=0&dt=%s&sec_cd=%s'
 DIR_WICS = f'{os.path.dirname(os.path.dirname(__file__))}/archive/category/wics.csv'
@@ -67,21 +68,8 @@ CD_WI26 = {
     'WI800': '유틸리티',
 }
 
-def fetch_wi_date() -> str:
-    """
-    WISE 산업/업종 분류 기준 날짜 다운로드
-    :return: %Y%m%d
-    """
-    src = requests.get(url=URL_BASE).text
-    tic = src.find("기준일")
-    toc = tic + src[tic:].find("</p>")
-    return src[tic + 6: toc].replace('.', '')
 
-def fetch_group(group_name:str, group_codes:dict, wise_date:str=str()) -> pd.DataFrame:
-    """
-    WISE 산업/업종 분류 다운로드
-    :return: 분류 기준별 데이터프레임
-    """
+def __wise__(group_name:str, group_codes:dict, wise_date:str=str()) -> pd.DataFrame:
     loop, frame = tqdm(group_codes.items()), pd.DataFrame()
     for code, label in loop:
         loop.set_description(desc=f'{group_name} / ({code}){label}...')
@@ -98,6 +86,36 @@ def fetch_group(group_name:str, group_codes:dict, wise_date:str=str()) -> pd.Dat
         frame = pd.concat(objs=[frame, fetch], axis=0, ignore_index=True)
     frame['날짜'] = wise_date
     return frame.set_index(keys='종목코드')
+
+
+def fetch_wi_date() -> str:
+    """
+    WISE 산업/업종 분류 기준 날짜 다운로드
+    :return: %Y%m%d
+    """
+    src = requests.get(url=URL_BASE).text
+    tic = src.find("기준일")
+    toc = tic + src[tic:].find("</p>")
+    return src[tic + 6: toc].replace('.', '')
+
+
+def fetch_wics(wise_date:str) -> pd.DataFrame:
+    fetch = pd.read_csv(DIR_WICS, index_col='종목코드', encoding='utf-8')
+    fetch.index = fetch.index.astype(str).str.zfill(6)
+    if not str(fetch['날짜'][0]) == wise_date:
+        fetch = __wise__(group_name='WICS', group_codes=CD_WICS, wise_date=wise_date)
+        fetch.to_csv(DIR_WICS, index=True, encoding='utf-8')
+    return fetch.drop(columns=['날짜'])
+
+
+def fetch_wi26(wise_date:str) -> pd.DataFrame:
+    fetch = pd.read_csv(DIR_WI26, index_col='종목코드', encoding='utf-8')
+    fetch.index = fetch.index.astype(str).str.zfill(6)
+    if not str(fetch['날짜'][0]) == wise_date:
+        fetch = __wise__(group_name='WI26', group_codes=CD_WI26, wise_date=wise_date)
+        fetch.drop(columns=['산업'], inplace=True)
+        fetch.to_csv(DIR_WI26, index=True, encoding='utf-8')
+    return fetch.drop(columns=['날짜'])
 
 
 class wise(object):
@@ -139,8 +157,5 @@ class wise(object):
         return self.__getattribute__(f'__wi26')
 
 if __name__ == "__main__":
-    tester = wise()
-
-    print(tester.wi_date)
-    print(tester.wics)
-    print(tester.wi26)
+    print(fetch_wics('20220415'))
+    print(fetch_wi26('20220415'))
