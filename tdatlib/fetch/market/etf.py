@@ -16,7 +16,7 @@ def fetch_etf_list() -> pd.DataFrame:
     return df.set_index(keys='종목코드')
 
 
-def fetch_etf_group(self) -> pd.DataFrame:
+def fetch_etf_group() -> pd.DataFrame:
     df = pd.read_csv(DIR_ETF, index_col='종목코드')
     df.index = df.index.astype(str).str.zfill(6)
     return df

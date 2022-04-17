@@ -92,4 +92,4 @@ def fetch_performance(td:str, tickers:list) -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    print(fetch_performance(td='20220415', tickers=['005960', '005930']))
+    print(fetch_performance(td='20220415', tickers=['005960', '005930', '253450']))

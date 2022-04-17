@@ -1,5 +1,5 @@
 from tdatlib.fetch.market import market
-from pykrx import stock
+from pykrx.stock import get_index_portfolio_deposit_file
 import pandas as pd
 
 
@@ -13,19 +13,14 @@ CD_INDEX = {
 
 class frame(object):
 
-    def __init__(self, category:str, sub_category:str=str(), kq:list=None, market_data=None):
+    def __init__(self, category:str, sub_category:str=str(), market_data=None):
         self.market = market_data if isinstance(market_data, market) else market()
 
         if not category in ['WICS', 'WI26', 'ETF', 'THEME']:
             raise KeyError(f'입력 가능한 category: WICS, WI26, ETF, THEME')
         if not sub_category in [str(), '1028', '1003', '1004', '2203', '2003']:
             raise KeyError(f'입력 가능한 sub_category: 1028, 1003, 1004, 2203, 2003')
-
         self.cat, self.sub = category, sub_category
-        if kq:
-            self.kq = kq
-        else:
-            self.kq = stock.get_index_portfolio_deposit_file(ticker='2001')
 
         if self.cat == 'WICS':
             self.group =  self.market.wics
@@ -67,17 +62,17 @@ class frame(object):
 
             if self.cat.startswith('WI'):
                 if self.sub:
-                    baseline = baseline[baseline.index.isin(stock.get_index_portfolio_deposit_file(ticker=self.sub))]
+                    baseline = baseline[baseline.index.isin(get_index_portfolio_deposit_file(ticker=self.sub))]
                 else:
                     baseline = baseline[baseline['시가총액'] > 300000000000]
-            perf = self.market.get_market_returns(tickers=baseline.index)
+            perf = self.market.performance(tickers=baseline.index)
             self.__setattr__('__baseline', baseline.join(other=perf, how='left'))
         return self.__getattribute__('__baseline')
 
     @property
     def mapframe(self):
         """
-        시장지도 데이터
+        시장 지도 데이터
         :return:
         """
         return self.__calc_post().copy()
@@ -169,9 +164,9 @@ class frame(object):
                 v = value.tolist()
                 limit = [v[int(len(value) / 7) * i] for i in range(len(re_scale))] + [v[-1]]
                 _color = pd.cut(value, bins=limit[::-1], labels=re_scale, right=True)
-                _color.fillna(re_scale[0], inplace=True)
                 _color.name = f"C{f}"
-                colored = colored.join(_color.astype(str), how='left')
+                colored = colored.join(_color.astype(str), how='left').fillna(re_scale[0 if f == 'DIV' else -1])
+                colored = colored.replace('nan', re_scale[0 if f == 'DIV' else -1])
 
         frm = frm.join(colored, how='left')
         for col in colored.columns:
@@ -181,7 +176,7 @@ class frame(object):
     def __calc_post(self):
         """ 지도 데이터 후처리 """
         def rename(x):
-            return x['종목명'] + "*" if x['종목코드'] in self.kq else x['종목명']
+            return x['종목명'] + "*" if x['종목코드'] in self.market.kosdaq else x['종목명']
         def reform_price(x):
             return '-' if x['종가'] == '-' else '{:,}원'.format(int(x['종가']))
         def reform_cap(x):
@@ -207,6 +202,8 @@ class frame(object):
         return frame
 
 if __name__ == "__main__":
-    tester = frame(market_data=market(), category='ETF', sub_category=str(), kq=None)
+    # tester = frame(category='WICS', sub_category=str(), market_data=market())
+    tester = frame(category='WI26', sub_category='1028', market_data=market())
 
     print(tester.mapframe)
+    tester.mapframe.to_csv(r'./test.csv', encoding='euc-kr', index=True)

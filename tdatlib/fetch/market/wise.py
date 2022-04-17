@@ -1,7 +1,6 @@
 import pandas as pd
 import requests, time, os
 from tqdm import tqdm
-from inspect import currentframe as inner
 
 
 URL_BASE = 'http://www.wiseindex.com/Index/Index#/G1010.0.Components'
@@ -117,44 +116,6 @@ def fetch_wi26(wise_date:str) -> pd.DataFrame:
         fetch.to_csv(DIR_WI26, index=True, encoding='utf-8')
     return fetch.drop(columns=['날짜'])
 
-
-class wise(object):
-
-    def __init__(self):
-        pass
-
-    def __attr__(self, **kwargs):
-        if not hasattr(self, f'__{kwargs["name"]}'):
-            f = globals()[f'fetch_{kwargs["name"]}']
-            self.__setattr__(f'__{kwargs["name"]}', f(kwargs['args']) if 'args' in kwargs.keys() else f())
-        return self.__getattribute__(f'__{kwargs["name"]}')
-
-    @property
-    def wi_date(self) -> str:
-        return self.__attr__(name=inner().f_code.co_name)
-
-    @property
-    def wics(self) -> pd.DataFrame:
-        if not hasattr(self, f'__wics'):
-            fetch = pd.read_csv(DIR_WICS, index_col='종목코드', encoding='utf-8')
-            fetch.index = fetch.index.astype(str).str.zfill(6)
-            if not str(fetch['날짜'][0]) == self.wi_date:
-                fetch = fetch_group('WICS', CD_WICS, self.wi_date)
-                fetch.to_csv(DIR_WICS, index=True, encoding='utf-8')
-            self.__setattr__(f'__wics', fetch.drop(columns=['날짜']))
-        return self.__getattribute__(f'__wics')
-
-    @property
-    def wi26(self) -> pd.DataFrame:
-        if not hasattr(self, f'__wi26'):
-            fetch = pd.read_csv(DIR_WI26, index_col='종목코드', encoding='utf-8')
-            fetch.index = fetch.index.astype(str).str.zfill(6)
-            if not str(fetch['날짜'][0]) == self.wi_date:
-                fetch = fetch_group('WI26', CD_WI26, self.wi_date)
-                fetch.drop(columns=['산업'], inplace=True)
-                fetch.to_csv(DIR_WI26, index=True, encoding='utf-8')
-            self.__setattr__(f'__wi26', fetch.drop(columns=['날짜']))
-        return self.__getattribute__(f'__wi26')
 
 if __name__ == "__main__":
     print(fetch_wics('20220415'))

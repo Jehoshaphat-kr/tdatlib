@@ -1,33 +1,49 @@
-from pykrx import stock
+from tdatlib.fetch.market.common import (
+    fetch_icm,
+    fetch_theme,
+    fetch_kosdaq
+)
+from tdatlib.fetch.market.wise import (
+    fetch_wi_date,
+    fetch_wics,
+    fetch_wi26
+)
+from tdatlib.fetch.market.etf import (
+    fetch_etf_list,
+    fetch_etf_group,
+    check_etf_handler,
+    convert_etf_xl2csv
+)
+from tdatlib.fetch.market.perf import fetch_performance
+from pykrx.stock import get_nearest_business_day_in_a_week
+from inspect import currentframe as inner
 from pytz import timezone
 from datetime import datetime
-from inspect import currentframe as inner
-from tdatlib.fetch.market import (
-    common, wise, etf, perf
-)
 import pandas as pd
+import numpy as np
+
 
 PM_DATE = datetime.now(timezone('Asia/Seoul'))
 C_WEEKEND_NOW = PM_DATE.weekday() == 5 or PM_DATE.weekday() == 6
 C_TRADING_NOW = 855 < int(PM_DATE.strftime("%H%M")) <= 1530
-comm, wise, etf, perf = 'comm', 'wise', 'etf', 'perf'
+
 
 class market(object):
 
     def __init__(self):
-        self.td_date = stock.get_nearest_business_day_in_a_week(date=PM_DATE.strftime("%Y%m%d"))
+        self.td_date = get_nearest_business_day_in_a_week(date=PM_DATE.strftime("%Y%m%d"))
         pass
 
-    def __attr__(self, obj:str, arg=None):
-        if not hasattr(self, obj):
-            inst = getattr(globals()[f'_{obj}'], obj)(arg) if arg else getattr(globals()[f'_{obj}'], obj)()
-            self.__setattr__(obj, inst)
-        return self.__getattribute__(obj)
+    def __attr__(self, p:str, fname:str=str(), **kwargs):
+        if not hasattr(self, f'__{p}'):
+            self.__setattr__(f'__{p}', globals()[f"fetch_{fname if fname else p}"](**kwargs))
+        return self.__getattribute__(f'__{p}')
 
     @property
     def icm(self):
         """
         IPO, Market Cap and Multiples: 상장일, 시가총액 및 투자배수(기초) 정보
+        :return:
 
                  종목명         IPO   종가       시가총액  ...    BPS    PER   PBR    EPS   DIV   DPS
         종목코드
@@ -39,7 +55,15 @@ class market(object):
         009275      NaN         NaN  36500     3312010000  ...      0   0.00  0.00      0  0.00     0
         001529      NaN         NaN  34650     3108867300  ...      0   0.00  0.00      0  0.43   150
         """
-        return getattr(self.__attr__(comm, arg=self.td_date), inner().f_code.co_name)
+        return self.__attr__(inner().f_code.co_name, td=self.td_date)
+
+    @property
+    def wi_date(self) -> str:
+        """
+        WISE Group 기준 날짜
+        :return:
+        """
+        return self.__attr__(inner().f_code.co_name)
 
     @property
     def wi26(self) -> pd.DataFrame:
@@ -54,7 +78,7 @@ class market(object):
         053050          지에스이  유틸리티
         034590      인천도시가스  유틸리티
         """
-        return getattr(self.__attr__(wise), inner().f_code.co_name)
+        return self.__attr__(inner().f_code.co_name, wise_date=self.wi_date)
 
     @property
     def wics(self) -> pd.DataFrame:
@@ -69,7 +93,7 @@ class market(object):
         053050          지에스이  유틸리티  유틸리티
         034590      인천도시가스  유틸리티  유틸리티
         """
-        return getattr(self.__attr__(wise), inner().f_code.co_name)
+        return self.__attr__(inner().f_code.co_name, wise_date=self.wi_date)
 
     @property
     def theme(self) -> pd.DataFrame:
@@ -84,7 +108,7 @@ class market(object):
         093370         후성       2차전지
         145020         휴젤        바이오
         """
-        return getattr(self.__attr__(comm, arg=self.td_date), inner().f_code.co_name)
+        return self.__attr__(inner().f_code.co_name)
 
     @property
     def etf_group(self) -> pd.DataFrame:
@@ -99,7 +123,7 @@ class market(object):
         391600    KINDEX 미국친환경그린테마INDXX           해외  미국
         391590         KINDEX 미국스팩&IPO INDXX           해외  미국
         """
-        return getattr(self.__attr__(etf), inner().f_code.co_name)
+        return self.__attr__(inner().f_code.co_name)
 
     @property
     def etf_list(self) -> pd.DataFrame:
@@ -114,10 +138,19 @@ class market(object):
         287310         KBSTAR 200경기소비재  10895     1500000000
         287320             KBSTAR 200산업재  11135     1300000000
         """
-        return getattr(self.__attr__(etf), inner().f_code.co_name)
+        return self.__attr__(inner().f_code.co_name)
 
     @property
-    def market_returns(self) -> pd.DataFrame:
+    def kosdaq(self) -> pd.DataFrame:
+        """
+        코스닥 종목 리스트
+        :return:
+
+        ['247540', '091990', '066970', ... , '409570', '413600', '038340']
+        """
+        return self.__attr__(inner().f_code.co_name)
+
+    def performance(self, tickers) -> pd.DataFrame:
         """
                  R1D   R1W    R1M    R3M    R6M    R1Y
         종목코드
@@ -129,10 +162,7 @@ class market(object):
         140950 -0.81 -2.39  -3.89 -10.23 -12.29 -15.21
         419890  0.04  0.04    NaN    NaN    NaN    NaN
         """
-        return getattr(self.__attr__(perf, arg=self.td_date), inner().f_code.co_name)
-
-    def get_market_returns(self, tickers) -> pd.DataFrame:
-        return getattr(self.__attr__(perf, arg=self.td_date), 'returns')(tickers)
+        return fetch_performance(td=self.td_date, tickers=tickers)
 
 
 if __name__ == "__main__":
@@ -140,12 +170,14 @@ if __name__ == "__main__":
 
     tester = market()
     print(tester.td_date)
+    print(tester.wi_date)
     print(tester.icm)
     print(tester.wics)
     print(tester.wi26)
     print(tester.theme)
     print(tester.etf_group)
     print(tester.etf_list)
-    print(tester.market_returns)
+    print(tester.kosdaq)
+    print(tester.performance(tickers=tester.theme.index))
 
 

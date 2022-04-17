@@ -17,17 +17,9 @@ PM_KEY = '종가'
 
 
 def calc_ta(ohlcv:pd.DataFrame) -> pd.DataFrame:
-    """
-    Technical Analysis
-    :return:
-    """
     return add_all_ta_features(ohlcv.copy(), open='시가', close='종가', low='저가', high='고가', volume='거래량')
 
 def calc_rr(ohlcv:pd.DataFrame) -> pd.DataFrame:
-    """
-    상대 수익률
-    :return:
-    """
     v = ohlcv[PM_KEY].copy()
     objs = {
         label: 100 * (v[v.index >= v.index[-1] - timedelta(dt)].pct_change().fillna(0) + 1).cumprod() - 100
@@ -36,10 +28,6 @@ def calc_rr(ohlcv:pd.DataFrame) -> pd.DataFrame:
     return pd.concat(objs=objs, axis=1)
 
 def calc_dd(ohlcv:pd.DataFrame) -> pd.DataFrame:
-    """
-    시계열 낙폭
-    :return:
-    """
     val, objs = ohlcv[PM_KEY].copy(), dict()
     for label, dt in [('3M', 92), ('6M', 183), ('1Y', 365), ('2Y', 730), ('3Y', 1095), ('5Y', 1825)]:
         sampled = val[val.index >= val.index[-1] - timedelta(dt)]
@@ -47,24 +35,12 @@ def calc_dd(ohlcv:pd.DataFrame) -> pd.DataFrame:
     return pd.concat(objs=objs, axis=1)
 
 def calc_sma(ohlcv) -> pd.DataFrame:
-    """
-    이동 평균선
-    :return:
-    """
     return pd.concat(objs={f'SMA{w}D': ohlcv[PM_KEY].rolling(w).mean() for w in [5, 10, 20, 60, 120]}, axis=1)
 
 def calc_ema(ohlcv) -> pd.DataFrame:
-    """
-    지수 이동 평균선
-    :return:
-    """
     return pd.concat(objs={f'EMA{w}D': ohlcv[PM_KEY].ewm(span=w).mean() for w in [5, 10, 20, 60, 120]}, axis=1)
 
 def calc_iir(ohlcv) -> pd.DataFrame:
-    """
-    IIR 필터선
-    :return:
-    """
     objs, price = dict(), ohlcv[PM_KEY]
     for win in [5, 10, 20, 60, 120]:
         cutoff = (252 / win) / (252 / 2)
@@ -72,54 +48,34 @@ def calc_iir(ohlcv) -> pd.DataFrame:
         objs[f'IIR{win}D'] = pd.Series(data=filtfilt(a, b, price), index=price.index)
     return pd.concat(objs=objs, axis=1)
 
-def calc_perf(ticker_ohlcv:list or tuple) -> pd.DataFrame:
-    """
-    기간별 수익률
-    :return:
-    """
-    ticker, ohlcv = ticker_ohlcv
+def calc_perf(ohlcv:pd.DataFrame, ticker:str) -> pd.DataFrame:
     val, data = ohlcv[PM_KEY], dict()
     for label, dt in (('R1D', 1), ('R1W', 5), ('R1M', 21), ('R3M', 63), ('R6M', 126), ('R1Y', 252)):
         data[label] = round(100 * val.pct_change(periods=dt)[-1], 2)
     return pd.DataFrame(data=data, index=[ticker])
 
-def calc_cagr(ticker_ohlcv:list or tuple):
-    """
-    3M / 6M / 1Y / 2Y / 3Y / 5Y 연평균화 수익률
-    :return:
-    """
-    ticker, ohlcv = ticker_ohlcv
+def calc_cagr(ohlcv:pd.DataFrame, ticker:str) -> pd.DataFrame:
     val, objs = ohlcv[PM_KEY].copy(), dict()
     for label, dt in [('3M', 92), ('6M', 183), ('1Y', 365), ('2Y', 730), ('3Y', 1095), ('5Y', 1825)]:
         sampled = val[val.index >= val.index[-1] - timedelta(dt)]
         objs[label] = round(100 * ((sampled[-1] / sampled[0]) ** (1 / (dt / 365)) - 1), 2)
     return pd.DataFrame(data=objs, index=[ticker])
 
-def calc_volatility(ticker_ohlcv:list or tuple):
-    """
-    3M / 6M / 1Y / 2Y / 3Y / 5Y 연평균화 변동성
-    :return:
-    """
-    ticker, ohlcv = ticker_ohlcv
+def calc_volatility(ohlcv:pd.DataFrame, ticker:str) -> pd.DataFrame:
     val, objs = ohlcv[PM_KEY].copy(), dict()
     for label, dt in [('3M', 92), ('6M', 183), ('1Y', 365), ('2Y', 730), ('3Y', 1095), ('5Y', 1825)]:
         sampled = val[val.index >= val.index[-1] - timedelta(dt)]
         objs[label] = round(100 * (np.log(sampled / sampled.shift(1)).std() * (252 ** 0.5)), 2)
     return pd.DataFrame(data=objs, index=[ticker])
 
-def calc_fiftytwo(ticker_ohlcv) -> pd.DataFrame:
-    """
-    52주 최고/최저 가격 및 대비 수익률
-    :return:
-    """
-    ticker, ohlcv = ticker_ohlcv
+def calc_fiftytwo(ohlcv:pd.DataFrame, ticker:str) -> pd.DataFrame:
     frame = ohlcv[ohlcv.index >= (ohlcv.index[-1] - timedelta(365))][PM_KEY]
     close, _max, _min = frame[-1], frame.max(), frame.min()
     by_max, by_min = round(100 * (close/_max - 1), 2), round(100 * (close/_min - 1), 2)
     return pd.DataFrame(data={'52H': _max, '52L': _min, 'pct52H': by_max, 'pct52L': by_min}, index=[ticker])
 
 
-class trend(object):
+class calc_trend(object):
 
     __avg_slope_high, __avg_slope_low = dict(), dict()
 
@@ -196,9 +152,6 @@ class trend(object):
 
     @property
     def avg(self) -> pd.DataFrame:
-        """
-        평균 선형 회귀
-        """
         if hasattr(self, '__avg'):
             return self.__getattribute__('__avg')
 

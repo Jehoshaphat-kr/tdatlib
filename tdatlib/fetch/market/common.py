@@ -1,6 +1,10 @@
+from pykrx.stock import (
+    get_market_cap_by_ticker,
+    get_market_fundamental,
+    get_index_portfolio_deposit_file
+)
 from pytz import timezone
 from datetime import datetime
-from pykrx import stock
 import pandas as pd
 import os
 
@@ -21,11 +25,11 @@ def _ipo_() -> pd.DataFrame:
 
 
 def _cap_(td:str) -> pd.DataFrame:
-    return stock.get_market_cap_by_ticker(date=td, market="ALL", prev=True)
+    return get_market_cap_by_ticker(date=td, market="ALL", prev=True)
 
 
 def _mul_(td:str) -> pd.DataFrame:
-    return stock.get_market_fundamental(date=td, market="ALL", prev=True)
+    return get_market_fundamental(date=td, market="ALL", prev=True)
 
 
 def fetch_icm(td:str) -> pd.DataFrame:
@@ -45,6 +49,9 @@ def fetch_theme() -> pd.DataFrame:
     df = pd.read_csv(DIR_THM, index_col='종목코드')
     df.index = df.index.astype(str).str.zfill(6)
     return df
+
+def fetch_kosdaq() -> list:
+    return get_index_portfolio_deposit_file('2001')
 
 
 if __name__ == "__main__":

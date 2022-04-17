@@ -1,8 +1,7 @@
-from tdatlib.interface.treemap._frame import frame
+from tdatlib.interface.treemap.frame import frame
 from tdatlib.fetch.market import market
 from datetime import datetime
 from pytz import timezone
-from pykrx import stock
 import pandas as pd
 import codecs, jsmin, os
 
@@ -40,9 +39,8 @@ class deploy(object):
 
     def __init__(self):
         market_data = market()
-        kq = stock.get_index_portfolio_deposit_file(ticker='2001')
         for n, (c, s, var) in enumerate(CD_CATEGORY):
-            treemap = frame(category=c, sub_category=s, kq=kq, market_data=market_data)
+            treemap = frame(category=c, sub_category=s, market_data=market_data)
             print(f'[{n + 1}/{len(CD_CATEGORY)}] {c} / {treemap.mapname}')
 
             map_data = treemap.mapframe.copy()
