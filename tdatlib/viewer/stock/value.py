@@ -24,14 +24,18 @@ def show_overview(
 
     fig.add_trace(go.Pie(
         name='Product', labels=df_products.index, values=df_products, visible=True, showlegend=False,
-        textinfo='label+percent', insidetextorientation='radial', hoverinfo='label+percent'
+        textfont=dict(color='white'), textinfo='label+percent',
+        insidetextorientation='radial', hoverinfo='label+percent'
     ), row=1, col=1)
 
     for n, col in enumerate(df_multifactor.columns):
-        fig.add_trace(go.Scatterpolar(
+        scatter = go.Scatterpolar(
             name=col, r=df_multifactor[col], theta=df_multifactor.index, visible=True, showlegend=True,
             fill='toself', hovertemplate=col + '<br>팩터: %{theta}<br>값: %{r}<extra></extra>'
-        ), row=1, col=2)
+        )
+        if not n:
+            scatter.legendgrouptitle = dict(text='멀티팩터')
+        fig.add_trace(scatter, row=1, col=2)
 
     fig.add_trace(go.Bar(
         name='자산', x=df_asset.index, y=df_asset.자산총계, marker=dict(color='green'), opacity=0.9,
@@ -48,16 +52,19 @@ def show_overview(
         if col.endswith('LB'):
             continue
 
-        fig.add_trace(go.Bar(
-            name=f'연간{col}', x=df_profit.index, y=df_profit[col],
-            marker=dict(color=CD_COLORS[n]), opacity=0.9, legendgroup=col, meta=df_profit[f'{col}LB'],
-            hovertemplate=col + ': %{meta}<extra></extra>',
-        ), row=2, col=2)
+        bar = go.Bar(
+            name=f'연간{col}', x=df_profit.index, y=df_profit[col], marker=dict(color=CD_COLORS[n]),
+            opacity=0.9, legendgroup=col, showlegend=True,
+            meta=df_profit[f'{col}LB'], hovertemplate=col + ': %{meta}<extra></extra>',
+        )
+        if not n:
+            bar.legendgrouptitle = dict(text='연간 실적')
+        fig.add_trace(bar, row=2, col=2)
 
     fig.update_layout(dict(
         title=f'{name}[{ticker}] : 제품, 자산 및 실적',
         plot_bgcolor='white',
-        margin=dict(l=0)
+        legend=dict(groupclick="toggleitem")
     ))
     fig.update_yaxes(title_text="억원", gridcolor='lightgrey', row=2, col=1)
     fig.update_yaxes(title_text="억원", gridcolor='lightgrey', row=2, col=2)
@@ -77,32 +84,59 @@ def show_relative(
 
     fig = make_subplots(
         rows=2, cols=2, vertical_spacing=0.12, horizontal_spacing=0.1,
-        subplot_titles=("상대 수익률", "PER", "EV/EBITA", "ROE"),
+        subplot_titles=("상대 수익률", "PER", "EV/EBITDA", "ROE"),
         specs=[[{"type": "xy"}, {"type": "bar"}], [{"type": "bar"}, {"type": "bar"}]]
     )
 
-    for col in ['3M', '1Y']:
-        df = df_benchmark_return[col].dropna()
-        for n, c in enumerate(df.columns):
-            fig.add_trace(go.Scatter(
-                name=f'{col}수익률비교', x=df.index, y=df[c].astype(float),
-                visible=True if col == '3M' else 'legendonly', showlegend=True if not n else False,
-                legendgroup=f'{col}수익률비교', meta=dform(span=df.index),
-                hovertemplate='날짜: %{meta}<br>' + f'{c}: ' + '%{y:.2f}%<extra></extra>'
-            ), row=1, col=1)
+    df = df_benchmark_return['3M'].dropna()
+    for n, c in enumerate(df.columns):
+        fig.add_trace(go.Scatter(
+            name=f'3개월 {c}', x=df.index, y=df[c].astype(float), visible=True,
+            showlegend=True, legendgroup=f'3M수익률비교', legendgrouptitle=dict(text='수익률 비교'),
+            meta=dform(span=df.index), hovertemplate='날짜: %{meta}<br>' + f'{c}: ' + '%{y:.2f}%<extra></extra>'
+        ), row=1, col=1)
+    df = df_benchmark_return['1Y'].dropna()
+    for n, c in enumerate(df.columns):
+        fig.add_trace(go.Scatter(
+            name=f'1년 {c}', x=df.index, y=df[c].astype(float), visible='legendonly',
+            showlegend=True, legendgroup=f'1Y수익률비교',
+            meta=dform(span=df.index), hovertemplate='날짜: %{meta}<br>' + f'{c}: ' + '%{y:.2f}%<extra></extra>'
+        ), row=1, col=1)
 
-    for m, col in enumerate(['PER', 'EV/EBITDA', 'ROE']):
-        df = df_benchmark_multiple[col]
-        unit = '%' if col == 'ROE' else ''
-        for n, c in enumerate(df.columns):
-            fig.add_trace(go.Bar(
-                name=f'{col}:{c}', x=df[c].index, y=df[c], marker=dict(color=CD_COLORS[n]),
-                hovertemplate='분기: %{x}<br>' + c + ': %{y:.2f}' + unit + '<extra></extra>'
-            ), row=1 if not m else 2, col=2 if m == 0 or m == 2 else 1)
+    df = df_benchmark_multiple.PER.astype(float)
+    for n, c in enumerate(df.columns):
+        bar = go.Bar(
+            name=f'{c}', x=df[c].index, y=df[c], marker=dict(color=CD_COLORS[n]), legendgroup='PER',
+            hovertemplate='분기: %{x}<br>' + c + ': %{y:.2f}<extra></extra>'
+        )
+        if not n:
+            bar.legendgrouptitle = dict(text='PER 비교')
+        fig.add_trace(bar, row=1, col=2)
+
+    df = df_benchmark_multiple['EV/EBITDA'].astype(float)
+    for n, c in enumerate(df.columns):
+        bar = go.Bar(
+            name=f'{c}', x=df[c].index, y=df[c], marker=dict(color=CD_COLORS[n]), legendgroup='EV',
+            hovertemplate='분기: %{x}<br>' + c + ': %{y:.2f}<extra></extra>'
+        )
+        if not n:
+            bar.legendgrouptitle = dict(text='EV/EBITDA 비교')
+        fig.add_trace(bar, row=2, col=1)
+
+    df = df_benchmark_multiple.ROE.astype(float)
+    for n, c in enumerate(df.columns):
+        bar = go.Bar(
+            name=f'{c}', x=df[c].index, y=df[c], marker=dict(color=CD_COLORS[n]), legendgroup='ROE',
+            hovertemplate='분기: %{x}<br>' + c + ': %{y:.2f}%<extra></extra>'
+        )
+        if not n:
+            bar.legendgrouptitle = dict(text='ROE 비교')
+        fig.add_trace(bar, row=2, col=2)
 
     fig.update_layout(dict(
         title=f'<b>{name}[{ticker}]</b> : 벤치마크 대비 지표',
         plot_bgcolor='white',
+        legend=dict(groupclick="toggleitem")
     ))
     fig.update_yaxes(title_text="상대 수익률[%]", gridcolor='lightgrey', row=1, col=1)
     fig.update_yaxes(title_text="PER[-]", gridcolor='lightgrey', row=1, col=2)
@@ -149,24 +183,24 @@ def show_supply(
     for n, c in enumerate(df.columns):
         form, name = '%{y:.2f}%' if n else '%{y:,d}원', '종가' if c.endswith('종가') else '비중'
         fig.add_trace(go.Scatter(
-            name=f'3M: {name}', x=df.index, y=df[c], mode='lines', meta=dform(df.index), visible=True,
-            showlegend=True, legendgroup='외국인 보유비중', legendgrouptitle=dict(text="외국인 보유비중"),
+            name=f'3개월:{name}', x=df.index, y=df[c], mode='lines', meta=dform(df.index), visible=True,
+            showlegend=True, legendgroup='3개월', legendgrouptitle=dict(text="외국인 보유비중"),
             hovertemplate='날짜: %{meta}<br>' + f'{name}: ' + f'{form}<extra></extra>'
         ), row=1, col=2, secondary_y=False if n else True)
     df = df_foreign_rate[df_foreign_rate != '']['1Y'].dropna()
     for n, c in enumerate(df.columns):
         form, name = '%{y:.2f}%' if n else '%{y:,d}원', '종가' if c.endswith('종가') else '비중'
         fig.add_trace(go.Scatter(
-            name=f'1Y: {name}', x=df.index, y=df[c], mode='lines', meta=dform(df.index),
-            visible='legendonly', showlegend=True, legendgroup='외국인 보유비중',
+            name=f'1년:{name}', x=df.index, y=df[c], mode='lines', meta=dform(df.index),
+            visible='legendonly', showlegend=True, legendgroup='1년',
             hovertemplate='날짜: %{meta}<br>' + f'{name}: ' + f'{form}<extra></extra>'
         ), row=1, col=2, secondary_y=False if n else True)
     df = df_foreign_rate[df_foreign_rate != '']['3Y'].dropna()
     for n, c in enumerate(df.columns):
         form, name = '%{y:.2f}%' if n else '%{y:,d}원', '종가' if c.endswith('종가') else '비중'
         fig.add_trace(go.Scatter(
-            name=f'3Y: {name}', x=df.index, y=df[c], mode='lines', meta=dform(df.index),
-            visible='legendonly', showlegend=True, legendgroup='외국인 보유비중',
+            name=f'3년: {name}', x=df.index, y=df[c], mode='lines', meta=dform(df.index),
+            visible='legendonly', showlegend=True, legendgroup='3년',
             hovertemplate='날짜: %{meta}<br>' + f'{name}: ' + f'{form}<extra></extra>'
         ), row=1, col=2, secondary_y=False if n else True)
 
@@ -209,73 +243,122 @@ def show_supply(
     return fig
 
 
-class narrative:
-    @property
-    def fig_cost(self) -> go.Figure:
-        """
-        지출 비용
-        """
-        fig = make_subplots(
-            rows=2, cols=2, vertical_spacing=0.11, horizontal_spacing=0.1,
-            subplot_titles=("매출 원가", "판관비", "R&D투자 비중", "부채율"),
-            specs=[[{"type": "xy", "secondary_y": True}, {"type": "xy", "secondary_y": True}],
-                   [{"type": "xy", "secondary_y": True}, {"type": "xy", 'secondary_y': True}]]
-        )
+def show_cost(
+        ticker:str,
+        name:str,
+        df_expenses:pd.DataFrame,
+        df_statement:pd.DataFrame
+) -> go.Figure:
 
-        cost = self.expenses.copy()
-        for n, col in enumerate(['매출원가율', '판관비율', 'R&D투자비중']):
-            df = cost[col].dropna().astype(float) if n < 2 else cost[col].fillna(0).astype(float)
-            fig.add_trace(go.Bar(
-                x=df.index, y=df, name=col,
-                hovertemplate='%{x}<br>' + col + ': %{y:.2f}%<extra></extra>'
-            ), row = n // 2 + 1, col=n % 2 + 1)
+    fig = make_subplots(
+        rows=2, cols=2, vertical_spacing=0.11, horizontal_spacing=0.1,
+        subplot_titles=("매출 원가", "판관비", "R&D투자 비중", "부채율"),
+        specs=[[{"type": "xy", "secondary_y": True}, {"type": "xy", "secondary_y": True}],
+               [{"type": "xy", "secondary_y": True}, {"type": "xy", 'secondary_y': True}]]
+    )
 
-        a_stat = self.stat_annual.copy()
-        fig.add_trace(go.Bar(
-            x=a_stat.index, y=a_stat['부채비율'].astype(float), name='부채비율',
-            hovertemplate='%{x}<br>부채비율: %{y:.2f}%<extra></extra>'
-       ), row=2, col=2)
+    for n, col in enumerate(['매출원가율', '판관비율', 'R&D투자비중']):
+        df = df_expenses[col].dropna()
+        fig.add_trace(go.Scatter(
+            name=col, x=df.index, y=df, mode='lines+markers',
+            hovertemplate='%{x}<br>' + col + ': %{y:.2f}%<extra></extra>'
+        ), row = n // 2 + 1, col=n % 2 + 1)
 
-        fig.update_layout(dict(title=f'{self.name}[{self.ticker}]: 비용과 부채', plot_bgcolor='white'))
-        for row, col in ((1, 1), (1, 2), (2, 1), (2, 2)):
-            fig.update_yaxes(title_text="비율[%]", showgrid=True, gridcolor='lightgrey', row=row, col=col)
-        return fig
+    df = df_statement['부채비율'].dropna()
+    fig.add_trace(go.Scatter(
+        x=df.index, y=df, name='부채비율', mode='lines+markers',
+        hovertemplate='%{x}<br>부채비율: %{y:.2f}%<extra></extra>'
+   ), row=2, col=2)
 
-    @property
-    def fig_multiple(self) -> go.Figure:
-        """
+    fig.update_layout(dict(title=f'{name}[{ticker}]: 비용과 부채', plot_bgcolor='white'))
+    for row, col in ((1, 1), (1, 2), (2, 1), (2, 2)):
+        fig.update_yaxes(title_text="비율[%]", showgrid=True, gridcolor='lightgrey', row=row, col=col)
+    for n, annotation in enumerate(fig['layout']['annotations']):
+        annotation['x'] = 0 + 0.55 * (n % 2)
+        annotation['xanchor'] = 'center'
+        annotation['xref'] = 'paper'
+    return fig
 
-        """
-        fig = make_subplots(
-            rows=2, cols=2, vertical_spacing=0.11, horizontal_spacing=0.1,
-            subplot_titles=("EPS / PER(3Y)", "BPS / PBR(3Y)", "PER BAND", "PBR BAND"),
-            specs=[[{"type": "xy", "secondary_y": True}, {"type": "xy", "secondary_y": True}],
-                   [{"type": "xy", "secondary_y": False}, {"type": "xy", 'secondary_y': False}]]
-        )
-        fa = fig.add_trace
 
-        multiples = self.multiple_series.copy()
-        for n, c in enumerate(['PER', 'EPS']):
-            data, dtype, unit = multiples[c].astype(int if n else float), 'int' if n else 'float', '원' if n else ''
-            fa(trace=traceLine(data=data, name=c, unit=unit, dtype=dtype), row=1, col=1, secondary_y=False if n else True)
-        for n, c in enumerate(['PBR', 'BPS']):
-            data, dtype, unit = multiples[c].astype(int if n else float), 'int' if n else 'float', '원' if n else ''
-            fa(trace=traceLine(data=data, name=c, unit=unit, dtype=dtype), row=1, col=2, secondary_y=False if n else True)
+def show_multiples(
+        ticker:str,
+        name:str,
+        df_multiple_series:pd.DataFrame,
+        df_multiple_band:pd.DataFrame
+) -> go.Figure:
 
-        per, pbr = self.multiple_band
-        for n, c in enumerate(per.columns):
-            data, dtype, unit = per[c].dropna().astype(float if n else int), 'float' if n else 'int', '' if n else '원'
-            fa(trace=traceLine(data=data, name=c, unit=unit, dtype=dtype), row=2, col=1)
-        for n, c in enumerate(pbr.columns):
-            data, dtype, unit = pbr[c].dropna().astype(float if n else int), 'float' if n else 'int', '' if n else '원'
-            fa(trace=traceLine(data=data, name=c, unit=unit, dtype=dtype), row=2, col=2)
+    fig = make_subplots(
+        rows=2, cols=2, vertical_spacing=0.11, horizontal_spacing=0.1,
+        subplot_titles=("EPS / PER(3Y)", "BPS / PBR(3Y)", "PER BAND", "PBR BAND"),
+        specs=[[{"type": "xy", "secondary_y": True}, {"type": "xy", "secondary_y": True}],
+               [{"type": "xy", "secondary_y": False}, {"type": "xy", 'secondary_y': False}]]
+    )
 
-        fig.update_layout(dict(
-            title=f'<b>{self.name}[{self.ticker}]</b> : PER / PBR',
-            plot_bgcolor='white'
-        ))
-        for row, col in ((1, 1), (1, 2), (2, 1), (2, 2)):
-            fig.update_yaxes(title_text="KRW[원]", showgrid=True, gridcolor='lightgrey', row=row, col=col,
-                             secondary_y=False)
-            fig.update_yaxes(title_text="배수[-]", showgrid=False, row=row, col=col, secondary_y=True)
-        return fig
+    meta = dform(span=df_multiple_series.index)
+    fig.add_trace(go.Scatter(
+        name='PER', x=df_multiple_series.index, y=df_multiple_series.PER, visible=True, meta=meta,
+        showlegend=True, legendgroup='PER_EPS', legendgrouptitle=dict(text='PER/EPS'),
+        hovertemplate='날짜: %{meta}<br>PER: %{y:.2f}<extra></extra>'
+    ), row=1, col=1, secondary_y=True)
+    fig.add_trace(go.Scatter(
+        name='EPS', x=df_multiple_series.index, y=df_multiple_series.EPS, visible=True, meta=meta,
+        showlegend=True, legendgroup='PER_EPS',
+        hovertemplate='날짜: %{meta}<br>EPS: %{y:,d}원<extra></extra>'
+    ), row=1, col=1, secondary_y=False)
+
+    fig.add_trace(go.Scatter(
+        name='PBR', x=df_multiple_series.index, y=df_multiple_series.PBR, visible=True, meta=meta,
+        showlegend=True, legendgroup='PBR_BPS', legendgrouptitle=dict(text='PBR/BPS'),
+        hovertemplate='날짜: %{meta}<br>PBR: %{y:.2f}<extra></extra>'
+    ), row=1, col=2, secondary_y=True)
+    fig.add_trace(go.Scatter(
+        name='BPS', x=df_multiple_series.index, y=df_multiple_series.BPS, visible=True, meta=meta,
+        showlegend=True, legendgroup='PBR_BPS',
+        hovertemplate='날짜: %{meta}<br>BPS: %{y:,d}원<extra></extra>'
+    ), row=1, col=2, secondary_y=False)
+
+    per, pbr = df_multiple_band
+    meta = dform(span=per.index)
+    prc = per[per.columns[0]].dropna().astype(int)
+    fig.add_trace(go.Scatter(
+        name=per.columns[0], x=prc.index, y=prc, visible=True, meta=meta,
+        showlegend=True, legendgroup='PER BAND', legendgrouptitle=dict(text='PER BAND'),
+        hovertemplate='날짜: %{meta}<br>주가: %{y:,d}원<extra></extra>'
+    ), row=2, col=1)
+    for n, c in enumerate(per.columns[1:]):
+        data = per[c].dropna().astype(float)
+        fig.add_trace(go.Scatter(
+            name=c, x=data.index, y=data, visible=True, meta=meta,
+            showlegend=True, legendgroup='PER BAND',
+            hovertemplate='날짜: %{meta}<br>' + c + ': %{y:,.2f}원<extra></extra>'
+        ), row=2, col=1)
+
+    meta = dform(span=pbr.index)
+    prc = pbr[pbr.columns[0]].dropna().astype(int)
+    fig.add_trace(go.Scatter(
+        name=pbr.columns[0], x=prc.index, y=prc, visible=True, meta=meta,
+        showlegend=True, legendgroup='PBR BAND', legendgrouptitle=dict(text='PBR BAND'),
+        hovertemplate='날짜: %{meta}<br>주가: %{y:,d}원<extra></extra>'
+    ), row=2, col=2)
+    for n, c in enumerate(pbr.columns[1:]):
+        data = pbr[c].dropna().astype(float)
+        fig.add_trace(go.Scatter(
+            name=c, x=data.index, y=data, visible=True, meta=meta,
+            showlegend=True, legendgroup='PBR BAND',
+            hovertemplate='날짜: %{meta}<br>' + c + ': %{y:,.2f}원<extra></extra>'
+        ), row=2, col=2)
+
+
+    fig.update_layout(dict(
+        title=f'<b>{name}[{ticker}]</b> : PER / PBR',
+        plot_bgcolor='white',
+        legend=dict(groupclick="toggleitem")
+    ))
+    for row, col in ((1, 1), (1, 2), (2, 1), (2, 2)):
+        fig.update_yaxes(title_text="KRW[원]", showgrid=True, gridcolor='lightgrey', row=row, col=col, secondary_y=False)
+        fig.update_yaxes(title_text="배수[-]", showgrid=False, row=row, col=col, secondary_y=True)
+    for n, annotation in enumerate(fig['layout']['annotations']):
+        annotation['x'] = 0 + 0.55 * (n % 2)
+        annotation['xanchor'] = 'center'
+        annotation['xref'] = 'paper'
+    return fig

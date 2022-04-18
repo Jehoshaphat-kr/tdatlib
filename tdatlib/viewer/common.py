@@ -18,17 +18,16 @@ CD_COLORS = [
 ]
 
 CD_X_RANGER = dict(
-    rangeselector=dict(
-        buttons=list([
-            dict(count=1, label="1m", step="month", stepmode="backward"),
-            dict(count=3, label="3m", step="month", stepmode="backward"),
-            dict(count=6, label="6m", step="month", stepmode="backward"),
-            dict(count=1, label="YTD", step="year", stepmode="todate"),
-            dict(count=1, label="1y", step="year", stepmode="backward"),
-            dict(step="all")
-        ])
-    )
+    buttons=list([
+        dict(count=1, label="1m", step="month", stepmode="backward"),
+        dict(count=3, label="3m", step="month", stepmode="backward"),
+        dict(count=6, label="6m", step="month", stepmode="backward"),
+        dict(count=1, label="YTD", step="year", stepmode="todate"),
+        dict(count=1, label="1y", step="year", stepmode="backward"),
+        dict(step="all")
+    ])
 )
+
 
 
 def save(fig: go.Figure, filename: str, path: str = str()):
@@ -60,3 +59,23 @@ def dform(span) -> list:
     :return     : YY/MM/DD
     """
     return [f'{d.year}/{d.month}/{d.day}' for d in span]
+
+
+def set_x(title:str, label:bool=True) -> dict:
+    """
+    :param title : x축 이름
+    :param label : label 표출 여부
+    """
+    return dict(
+        title=title, showgrid=True, gridcolor='lightgrey', showticklabels=label, zeroline=False, autorange=True,
+        showline=True, linewidth=1, linecolor='grey', mirror=False
+    )
+
+def set_y(title:str) -> dict:
+    """
+    :param title: y축 이름
+    """
+    return dict(
+        title=title, showgrid=True, gridcolor='lightgrey', showticklabels=True, zeroline=False, autorange=True,
+        showline=True, linewidth=0.5, linecolor='grey', mirror=False
+    )

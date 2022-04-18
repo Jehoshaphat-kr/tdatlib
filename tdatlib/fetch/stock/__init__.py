@@ -347,7 +347,7 @@ class fetch_stock(object):
 
 
 if __name__ == "__main__":
-    t_ticker = '035420'
+    t_ticker = '001680'
     tester = fetch_stock(ticker=t_ticker)
 
     print(tester.name)

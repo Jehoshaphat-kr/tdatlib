@@ -74,45 +74,20 @@ def calc_fiftytwo(ohlcv:pd.DataFrame, ticker:str) -> pd.DataFrame:
     by_max, by_min = round(100 * (close/_max - 1), 2), round(100 * (close/_min - 1), 2)
     return pd.DataFrame(data={'52H': _max, '52L': _min, 'pct52H': by_max, 'pct52L': by_min}, index=[ticker])
 
+def calc_trix_sign(ta:pd.DataFrame) -> pd.DataFrame:
+    trix = ta.trend_trix
+    signal = trix.iloc[np.where(np.diff(np.sign(np.array(trix))))[0]]
+    bottom = trix.iloc[np.where(np.diff(np.sign(np.array(trix.diff()))))[0]]
+    return pd.concat(objs={'Signal': signal, 'Bottom':bottom}, axis=1)
+
 
 class calc_trend(object):
 
-    __avg_slope_high, __avg_slope_low = dict(), dict()
+    __avg_slope = dict()
 
     def __init__(self, ohlcv: pd.DataFrame):
         self.ohlcv = ohlcv
-        ohlcv_1y = ohlcv[ohlcv.index >= (ohlcv.index[-1] - timedelta(365))].copy()
-        _, mx = self.calc_extrema(h=ohlcv_1y.고가, accuracy=2)
-        mn, _ = self.calc_extrema(h=ohlcv_1y.저가, accuracy=2)
-        self.pivot = pd.concat(objs={'저점': ohlcv_1y.저가.iloc[mn], '고점': ohlcv_1y.고가.iloc[mx]}, axis=1)
         return
-
-    @staticmethod
-    def calc_extrema(h:pd.Series or np.array, accuracy:int=2):
-        """
-        Customized Pivot Detection
-        Originally from PyPI: trendln @https://github.com/GregoryMorse/trendln
-        :param h: 시계열 1-D 데이터
-        :param accuracy: FinDiff 파라미터
-        """
-        dx = 1
-        d_dx, d2_dx2 = FinDiff(0, dx, 1, acc=accuracy), FinDiff(0, dx, 2, acc=accuracy)
-        def get_peak(h):
-            arr = np.asarray(h, dtype=np.float64)
-            mom, momacc = d_dx(arr), d2_dx2(arr)
-            def __diff_extrema(func):
-                return [x for x in range(len(mom)) if func(x) and ( mom[x] == 0 or (
-                    x != len(mom) - 1 and (
-                        mom[x] > 0 > mom[x + 1] and h[x] >= h[x + 1] or mom[x] < 0 < mom[x + 1] and h[x] <= h[x + 1]
-                    ) or x != 0 and (
-                        mom[x - 1] > 0 > mom[x] and h[x - 1] < h[x] or mom[x - 1] < 0 < mom[x] and h[x - 1] > h[x]
-                    )
-                ))]
-
-            return lambda x: momacc[x] > 0, lambda x: momacc[x] < 0, __diff_extrema
-
-        minFunc, maxFunc, diff_extrema = get_peak(h)
-        return diff_extrema(minFunc), diff_extrema(maxFunc)
 
     @staticmethod
     def calcEdgeLine(price: pd.DataFrame, key: str) -> pd.Series:
@@ -159,35 +134,20 @@ class calc_trend(object):
         for gap, days in [('2M', 61), ('3M', 92), ('6M', 183), ('1Y', 365)]:
             since = self.ohlcv.index[-1] - timedelta(days)
             price = self.ohlcv[self.ohlcv.index >= since].reset_index(level=0).copy()
-            pivot = self.pivot[self.pivot.index >= since].copy()
-
             price['N'] = (price.날짜.diff()).dt.days.fillna(1).astype(int).cumsum()
             price.set_index(keys='날짜', inplace=True)
 
-            y_l, y_h = pivot.저점.dropna(), pivot.고점.dropna()
-            x_l, x_h = price[price.index.isin(y_l.index)]['N'], price[price.index.isin(y_h.index)]['N']
-
-            s_l, i_l, _, _, _ = linregress(x=x_l, y=y_l)
-            s_h, i_h, _, _, _ = linregress(x=x_h, y=y_h)
-
-            lo, hi = s_l * price['N'] + i_l, s_h * price['N'] + i_h
-            self.__avg_slope_low[gap], self.__avg_slope_high[gap] = s_l, s_h
-
-            objs[gap] = pd.concat(objs={'resist': hi, 'support': lo}, axis=1)
+            price['Y'] = 0.25 * price.시가 + 0.25 * price.고가 + 0.25 * price.저가 + 0.25 * price.종가
+            self.__avg_slope[gap], i, _, _, _ = linregress(x=price.N, y=price.Y)
+            objs[gap] = self.__avg_slope[gap] * price.N + i
         self.__setattr__('__avg', pd.concat(objs=objs, axis=1))
         return self.__getattribute__('__avg')
 
     @property
-    def avg_slope_high(self) -> dict:
-        if not self.__avg_slope_high:
+    def avg_slope(self) -> dict:
+        if not self.__avg_slope:
             _ = self.avg
-        return self.__avg_slope_high
-
-    @property
-    def avg_slope_low(self) -> dict:
-        if not self.__avg_slope_low:
-            _ = self.avg
-        return self.__avg_slope_low
+        return self.__avg_slope
 
     @property
     def bound(self) -> pd.DataFrame:

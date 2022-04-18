@@ -164,7 +164,7 @@ def fetch_expenses(htmls:list) -> pd.DataFrame:
     })
     if '관련 데이터가 없습니다.' in r_n_d.index:
         r_n_d.drop(index=['관련 데이터가 없습니다.'], inplace=True)
-    return pd.concat(objs=[sales_cost.T, sg_n_a.T, r_n_d], axis=1).sort_index(ascending=True)
+    return pd.concat(objs=[sales_cost.T, sg_n_a.T, r_n_d], axis=1).sort_index(ascending=True).astype(float)
 
 
 def fetch_multiple_band(ticker:str) -> (pd.DataFrame, pd.DataFrame):

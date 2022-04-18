@@ -11,7 +11,8 @@ from tdatlib.interface.stock.ohlcv import (
     calc_cagr,
     calc_perf,
     calc_fiftytwo,
-    calc_trend
+    calc_trend,
+    calc_trix_sign
 )
 from tdatlib.interface.stock.value import (
     calc_asset,
@@ -176,41 +177,30 @@ class interface_stock(fetch_stock):
     @property
     def avg_trend(self) -> pd.DataFrame:
         """
-        2M / 3M / 6M / 1Y 평균 추세 (고, 저가 기준)
+        2M / 3M / 6M / 1Y 평균 추세
         :return:
 
-                                            2M  ...                          1Y
-                          resist       support  ...        resist       support
-        날짜                                    ...
-        2021-04-15           NaN           NaN  ...  97225.300849  93679.558182
-        2021-04-16           NaN           NaN  ...  97203.470138  93648.820327
-        2021-04-19           NaN           NaN  ...  97137.978003  93556.606763
-        ...                  ...           ...  ...           ...           ...
-        2022-04-13  94001.008065  90324.100352  ...  89300.752611  82521.716897
-        2022-04-14  94091.532258  90458.508344  ...  89278.921899  82490.979042
-        2022-04-15  94182.056452  90592.916336  ...  89257.091188  82460.241187
+                              2M            3M            6M            1Y
+        날짜
+        2021-04-19           NaN           NaN           NaN  28269.707532
+        2021-04-20           NaN           NaN           NaN  28250.902293
+        2021-04-21           NaN           NaN           NaN  28232.097054
+        ...                  ...           ...           ...           ...
+        2022-04-14  23415.377697  23319.884209  22555.336484  21499.821449
+        2022-04-15  23436.252573  23335.154925  22549.787845  21481.016210
+        2022-04-18  23498.877202  23380.967073  22533.141929  21424.600493
         """
         return self.__calc__(inner().f_code.co_name, fname='trend', ohlcv=self.ohlcv).avg
 
     @property
-    def avg_slope_high(self) -> dict:
+    def avg_slope(self) -> dict:
         """
         2M / 3M / 6M / 1Y 평균 추세선 고가 기울기
         :return: 
 
         {'2M': 90.5241935483871, '3M': 115.84006512618194, '6M': -1.67125418860699, '1Y': -21.830711400644308}
         """
-        return self.__calc__(inner().f_code.co_name, fname='trend', ohlcv=self.ohlcv).avg_slope_high
-
-    @property
-    def avg_slope_low(self) -> dict:
-        """
-        2M / 3M / 6M / 1Y 평균 추세선 저가 기울기
-        :return:
-        
-        {'2M': 134.40799182654106, '3M': 153.6237745494548, '6M': 13.375811890542476, '1Y': -30.73785477892385} 
-        """
-        return self.__calc__(inner().f_code.co_name, fname='trend', ohlcv=self.ohlcv).avg_slope_low
+        return self.__calc__(inner().f_code.co_name, fname='trend', ohlcv=self.ohlcv).avg_slope
 
     @property
     def bnd_trend(self) -> pd.DataFrame:
@@ -267,10 +257,28 @@ class interface_stock(fetch_stock):
         """
         return self.__calc__(inner().f_code.co_name, df_statement=self.annual_stat)
 
+    @property
+    def trix_sign(self) -> pd.DataFrame:
+        """
+        TRIX 지표 기준 매매 신호 감지
+        :return:
+
+                      Signal    Bottom
+        날짜
+        2017-04-19       NaN       NaN
+        ...              ...       ...
+        2022-02-21 -0.004991       NaN
+        2022-02-25       NaN  0.047175
+        2022-03-07  0.003213       NaN
+        2022-03-18       NaN -0.100612
+        2022-03-29 -0.005523       NaN
+        """
+        return self.__calc__(inner().f_code.co_name, ta=self.ta)
+
 
 if __name__ == "__main__":
     # t_ticker = 'TSLA'
-    t_ticker = '253450'
+    t_ticker = '001680'
 
     tester = interface_stock(ticker=t_ticker)
     print(tester.ta)
@@ -284,8 +292,8 @@ if __name__ == "__main__":
     print(tester.volatility)
     print(tester.fiftytwo)
     print(tester.avg_trend)
-    print(tester.avg_slope_high)
-    print(tester.avg_slope_low)
+    print(tester.avg_slope)
     print(tester.bnd_trend)
     print(tester.asset)
     print(tester.profit)
+    print(tester.trix_sign)
