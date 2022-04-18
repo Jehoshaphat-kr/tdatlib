@@ -1,6 +1,6 @@
 from inspect import currentframe as inner
 from tdatlib.fetch.stock import fetch_stock
-from tdatlib.interface.ohlcv.common import (
+from tdatlib.interface.stock.ohlcv import (
     calc_ta,
     calc_rr,
     calc_dd,
@@ -13,10 +13,14 @@ from tdatlib.interface.ohlcv.common import (
     calc_fiftytwo,
     calc_trend
 )
+from tdatlib.interface.stock.value import (
+    calc_asset,
+    calc_profit
+)
 import pandas as pd
 
 
-class ohlcv(fetch_stock):
+class interface_stock(fetch_stock):
 
     def __calc__(self, p: str, fname: str = str(), **kwargs):
         if not hasattr(self, f'__{p}'):
@@ -227,12 +231,48 @@ class ohlcv(fetch_stock):
         """
         return self.__calc__(inner().f_code.co_name, fname='trend', ohlcv=self.ohlcv).bound
 
+    @property
+    def asset(self) -> pd.DataFrame:
+        """
+        연간 자산, 부채, 자본 총계 (단위: 억원)
+        :return:
+
+                   자산총계  부채총계  자본총계    자산총계LB  부채총계LB  자본총계LB
+        2017/12        4595       910      3684      4595억원     910억원    3684억원
+        2018/12        5124      1111      4013      5124억원    1111억원    4013억원
+        2019/12        5816      1533      4283      5816억원    1533억원    4283억원
+        2020/12        7573      1480      6093      7573억원    1480억원    6093억원
+        2021/12        8840      2002      6839      8840억원    2002억원    6839억원
+        2022/12(E)     9393      2023      7370      9393억원    2023억원    7370억원
+        2023/12(E)    10352      2178      8174  1조 0352억원    2178억원    8174억원
+        2024/12(E)    11755      2298      9457  1조 1755억원    2298억원    9457억원
+        """
+        return self.__calc__(inner().f_code.co_name, df_statement=self.annual_stat)
+
+    @property
+    def profit(self) -> pd.DataFrame:
+        """
+        매출, 영업이익, 당기순이익 (단위: 억원)
+        :return:
+
+                  매출액  영업이익  당기순이익  매출액LB  영업이익LB  당기순이익LB
+        2017/12     2868       330         238  2868억원     330억원       238억원
+        2018/12     3796       399         358  3796억원     399억원       358억원
+        2019/12     4687       287         264  4687억원     287억원       264억원
+        2020/12     5257       491         296  5257억원     491억원       296억원
+        2021/12     4871       526         390  4871억원     526억원       390억원
+        2022/12(E)  6429       832         623  6429억원     832억원       623억원
+        2023/12(E)  7324       996         745  7324억원     996억원       745억원
+        2024/12(E)  7822      1247         964  7822억원    1247억원       964억원
+        """
+        return self.__calc__(inner().f_code.co_name, df_statement=self.annual_stat)
+
 
 if __name__ == "__main__":
     # t_ticker = 'TSLA'
     t_ticker = '253450'
 
-    tester = ohlcv(ticker=t_ticker)
+    tester = interface_stock(ticker=t_ticker)
     print(tester.ta)
     print(tester.rr)
     print(tester.dd)
@@ -247,3 +287,5 @@ if __name__ == "__main__":
     print(tester.avg_slope_high)
     print(tester.avg_slope_low)
     print(tester.bnd_trend)
+    print(tester.asset)
+    print(tester.profit)

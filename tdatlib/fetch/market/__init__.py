@@ -20,7 +20,6 @@ from inspect import currentframe as inner
 from pytz import timezone
 from datetime import datetime
 import pandas as pd
-import numpy as np
 
 
 PM_DATE = datetime.now(timezone('Asia/Seoul'))

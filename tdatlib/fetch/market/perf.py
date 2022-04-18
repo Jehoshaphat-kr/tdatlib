@@ -4,7 +4,7 @@ from pykrx.stock import (
     get_market_ohlcv_by_ticker,
     get_etf_ohlcv_by_ticker
 )
-from tdatlib.interface.ohlcv import ohlcv
+from tdatlib.interface.stock import interface_stock
 from tqdm import tqdm
 from pytz import timezone
 from datetime import datetime, timedelta
@@ -76,8 +76,9 @@ def fetch_performance(td:str, tickers:list) -> pd.DataFrame:
     for ticker in process:
         process.set_description(f'Fetch Returns - {ticker}')
         while True:
+            # noinspection PyBroadException
             try:
-                raw = pd.concat(objs=[raw, ohlcv(ticker=ticker, period=2).perf], axis=0, ignore_index=False)
+                raw = pd.concat(objs=[raw, interface_stock(ticker=ticker, period=2).perf], axis=0, ignore_index=False)
                 break
             except ConnectionError as e:
                 time.sleep(0.5)

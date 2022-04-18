@@ -14,6 +14,7 @@ colors = [
     '#bcbd22',  # curry yellow-green
     '#17becf'   # blue-teal
 ]
+
 def setXaxis(title:str, label:bool=True, xranger:bool=True) -> dict:
     """
     X축 Layout 설정

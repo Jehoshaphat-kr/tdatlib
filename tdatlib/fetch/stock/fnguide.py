@@ -66,7 +66,7 @@ def fetch_multifactor(ticker:str) -> pd.DataFrame:
     header = pd.DataFrame(data['CHART_H'])['NAME'].tolist()
     return pd.DataFrame(data['CHART_D']).rename(
         columns=dict(zip(['NM', 'VAL1', 'VAL2'], ['팩터'] + header))
-    ).set_index(keys='팩터')
+    ).set_index(keys='팩터').astype(float)
 
 
 def fetch_benchmark_return(ticker:str):
@@ -86,7 +86,7 @@ def fetch_benchmark_return(ticker:str):
 def fetch_benchmark_multiple(ticker:str) -> pd.DataFrame:
     data = json.loads(urlopen(URL_MULTIPLE % ticker).read().decode('utf-8-sig', 'replace'))
     objs = {}
-    for label, index in (('PER', '02'), ('EV/EBITA', '03'), ('ROE', '04')):
+    for label, index in (('PER', '02'), ('EV/EBITDA', '03'), ('ROE', '04')):
         header1 = pd.DataFrame(data[f'{index}_H'])[['ID', 'NAME']].set_index(keys='ID')
         header1['NAME'] = header1['NAME'].astype(str).str.replace("'", "20")
         header1 = header1.to_dict()['NAME']
@@ -119,6 +119,8 @@ def fetch_foreign_rate(ticker:str) -> pd.DataFrame:
             'TRD_DT': '날짜', 'J_PRC': '종가', 'FRG_RT': '외국인보유비중'
         }).set_index(keys='날짜')
         frame.index = pd.to_datetime(frame.index)
+        frame['종가'] = frame['종가'].astype(int)
+        frame['외국인보유비중'] = frame['외국인보유비중'].astype(float)
         objs[dt] = frame
     return pd.concat(objs=objs, axis=1)
 
@@ -126,18 +128,22 @@ def fetch_foreign_rate(ticker:str) -> pd.DataFrame:
 def fetch_short_sell(ticker:str) -> pd.DataFrame:
     data = json.loads(urlopen(URL_SHORTSELL % ticker).read().decode('utf-8-sig', 'replace'))
     shorts = pd.DataFrame(data['CHART']).rename(columns={
-        'TRD_DT': '날짜', 'VAL': '차입공매도비중', 'ADJ_PRC': '수정 종가'
+        'TRD_DT': '날짜', 'VAL': '차입공매도비중', 'ADJ_PRC': '수정종가'
     }).set_index(keys='날짜')
     shorts.index = pd.to_datetime(shorts.index)
+    shorts['수정종가'] = shorts['수정종가'].astype(int)
+    shorts['차입공매도비중'] = shorts['차입공매도비중'].astype(float)
     return shorts
 
 
 def fetch_short_balance(ticker:str) -> pd.DataFrame:
     data = json.loads(urlopen(URL_BALANCE % ticker).read().decode('utf-8-sig', 'replace'))
     balance = pd.DataFrame(data['CHART'])[['TRD_DT', 'BALANCE_RT', 'ADJ_PRC']].rename(columns={
-        'TRD_DT': '날짜', 'BALANCE_RT': '대차잔고비중', 'ADJ_PRC': '수정 종가'
+        'TRD_DT': '날짜', 'BALANCE_RT': '대차잔고비중', 'ADJ_PRC': '수정종가'
     }).set_index(keys='날짜')
     balance.index = pd.to_datetime(balance.index)
+    balance['수정종가'] = balance['수정종가'].astype(int)
+    balance['대차잔고비중'] = balance['대차잔고비중'].astype(float)
     return balance
 
 
