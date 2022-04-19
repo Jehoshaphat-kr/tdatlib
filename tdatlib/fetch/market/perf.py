@@ -84,7 +84,7 @@ def fetch_performance(td:str, tickers:list) -> pd.DataFrame:
                 time.sleep(0.5)
 
     raw.index.name = '종목코드'
-    if (PM_DATE == td) and C_MARKET_OPEN:
+    if (PM_DATE.strftime("%Y%m%d") == td) and C_MARKET_OPEN:
         return raw[raw.index.isin(tickers)]
 
     raw['날짜'] = td

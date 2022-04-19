@@ -35,7 +35,7 @@ def _mul_(td:str) -> pd.DataFrame:
 def fetch_icm(td:str) -> pd.DataFrame:
     icm = pd.read_csv(DIR_ICM, index_col='종목코드', encoding='utf-8')
     icm.index = icm.index.astype(str).str.zfill(6)
-    if str(icm['날짜'][0]) == td or (PM_DATE == td and C_MARKET_OPEN):
+    if str(icm['날짜'][0]) == td or (PM_DATE.strftime("%Y%m%d") == td and C_MARKET_OPEN):
         return icm.drop(columns=['날짜'])
 
     icm = pd.concat(objs=[_ipo_(), _cap_(td=td), _mul_(td=td)], axis=1)
@@ -55,4 +55,4 @@ def fetch_kosdaq() -> list:
 
 
 if __name__ == "__main__":
-    print(fetch_icm(td='20220415'))
+    print(fetch_icm(td='20220419'))

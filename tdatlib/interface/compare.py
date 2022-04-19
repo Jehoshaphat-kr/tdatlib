@@ -322,7 +322,7 @@ if __name__ == "__main__":
     # t_tickers = ['005930', '000660', '058470', '000990']
     t_tickers = ['005930', '000660', '000990', '058470', '005290', '357780']
 
-    t_series = datum(tickers=t_tickers, period=5)
+    t_series = interface_compare(tickers=t_tickers, period=5)
     print(t_series.price)
     print(t_series.rel_icm)
     print(t_series.rel_icm.columns)

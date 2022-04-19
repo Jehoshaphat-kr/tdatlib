@@ -30,6 +30,7 @@ C_TRADING_NOW = 855 < int(PM_DATE.strftime("%H%M")) <= 1530
 class market(object):
 
     def __init__(self):
+        self.kr_date = PM_DATE
         self.td_date = get_nearest_business_day_in_a_week(date=PM_DATE.strftime("%Y%m%d"))
         pass
 
