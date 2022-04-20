@@ -1,12 +1,8 @@
 import pandas as pd
 import math, warnings
-import yfinance as yf
 import numpy as np
-from pykrx import stock as krx
 from ta import add_all_ta_features
-from datetime import datetime, timedelta
-from pytz import timezone
-from findiff import FinDiff
+from datetime import timedelta
 from scipy.stats import linregress
 from scipy.signal import butter, filtfilt
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -77,8 +73,18 @@ def calc_fiftytwo(ohlcv:pd.DataFrame, ticker:str) -> pd.DataFrame:
 def calc_trix_sign(ta:pd.DataFrame) -> pd.DataFrame:
     trix = ta.trend_trix
     signal = trix.iloc[np.where(np.diff(np.sign(np.array(trix))))[0]]
-    bottom = trix.iloc[np.where(np.diff(np.sign(np.array(trix.diff()))))[0]]
-    return pd.concat(objs={'Signal': signal, 'Bottom':bottom}, axis=1)
+    raw_bottom = trix.iloc[np.where(np.diff(np.sign(np.array(trix.diff()))))[0]]
+    calc = pd.concat(objs={'trix':trix, 'Signal': signal, 'Temp':raw_bottom}, axis=1)
+
+    bottom = list()
+    for i in range(len(calc)):
+        if np.isnan(calc.iloc[i]['Temp']):
+            bottom.append(np.nan)
+            continue
+        bottom.append(calc.iloc[i]['trix'] if calc.iloc[i-1]['trix'] > calc.iloc[i]['trix'] else np.nan)
+
+    calc['Bottom'] = bottom
+    return calc.drop(columns=['Temp'])
 
 
 class calc_trend(object):

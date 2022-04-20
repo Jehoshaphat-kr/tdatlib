@@ -317,32 +317,29 @@ def show_trix(
         ticker:str,
         name:str,
         base:go.Figure,
-        ta:pd.DataFrame,
-        sign:pd.DataFrame
+        trix:pd.DataFrame
 ) -> go.Figure:
 
+    meta = dform(trix.index)
     base.add_trace(go.Scatter(
-        name='TRIX', x=ta.index, y=ta.trend_trix, visible=True, showlegend=True, legendgrouptitle=dict(text='TRIX'),
-        meta=dform(ta.index), hovertemplate='날짜: %{meta}<br>TRIX: %{y:.2f}<extra></extra>'
+        name='TRIX', x=trix.index, y=trix.trix, visible=True, showlegend=True, legendgrouptitle=dict(text='TRIX'),
+        meta=meta, hovertemplate='날짜: %{meta}<br>TRIX: %{y:.2f}<extra></extra>'
     ), row=3, col=1)
 
-    data = sign.Signal
     base.add_trace(go.Scatter(
-        name='Signal', x=data.index, y=data, visible='legendonly', showlegend=True, mode='markers',
+        name='Signal', x=trix.index, y=trix.Signal, visible='legendonly', showlegend=True, mode='markers',
         marker=dict(
-            symbol=['triangle-down' if s > 0 else 'triangle-up' for s in data],
-            color=['blue' if s > 0 else 'red' for s in data],
+            symbol=['triangle-down' if s > 0 else 'triangle-up' for s in trix.Signal],
+            color=['blue' if s > 0 else 'red' for s in trix.Signal],
             size=8
         ),
-        meta=dform(data.index), hovertemplate='날짜: %{meta}<br>신호: %{y:.2f}<extra></extra>'
+        meta=meta, hovertemplate='날짜: %{meta}<br>신호: %{y:.2f}<extra></extra>'
     ), row=3, col=1)
 
-    # data = sign[sign.Bottom <= 0]['Bottom'].copy()
-    data = sign.Bottom
     base.add_trace(go.Scatter(
-        name='Bottom', x=data.index, y=data, visible='legendonly', showlegend=True, mode='markers',
-        marker=dict(symbol='star', color='green', size=8),
-        meta=dform(data.index), hovertemplate='날짜: %{meta}<br>바닥: %{y:.2f}<extra></extra>'
+        name='Bottom', x=trix.index, y=trix.Bottom, visible='legendonly', showlegend=True, mode='markers',
+        marker=dict(symbol='circle-open', color='green', size=8),
+        meta=meta, hovertemplate='날짜: %{meta}<br>바닥: %{y:.2f}<extra></extra>'
     ), row=3, col=1)
 
     base.update_layout(

@@ -160,8 +160,7 @@ class view_stock(interface_stock):
             inner().f_code.co_name,
             ticker=self.ticker, name=self.name,
             base=self.__base__(row_width=[0.3, 0.1, 0.6], vertical_spacing=0.02),
-            ta=self.ta,
-            sign=self.trix_sign
+            trix=self.trix_sign
         )
 
     @property
@@ -220,8 +219,8 @@ if __name__ == "__main__":
     # ticker = 'ARKG'
     viewer = view_stock(ticker=ticker, period=5)
 
-    viewer.collect_techical_analysis()
-    viewer.collect_fundamental_analysis()
+    # viewer.collect_techical_analysis()
+    # viewer.collect_fundamental_analysis()
 
     # save(fig=viewer.basic, filename=f'{viewer.name}_기술_01_기본형')
     # save(fig=viewer.bollinger_band, filename=f'{viewer.name}_기술_02_볼린저밴드')
@@ -231,7 +230,7 @@ if __name__ == "__main__":
     # save(fig=viewer.cci, filename=f'{viewer.name}_기술_06_CCI')
     # save(fig=viewer.vortex, filename=f'{viewer.name}_기술_07_VORTEX')
     # save(fig=viewer.stc, filename=f'{viewer.name}_기술_08_STC')
-    # save(fig=viewer.trix, filename=f'{viewer.name}_기술_09_TRIX')
+    save(fig=viewer.trix, filename=f'{viewer.name}_기술_09_TRIX')
     
     # save(fig=viewer.overview, filename=f'{viewer.name}_기본_01_기업개요')
     # save(fig=viewer.relative, filename=f'{viewer.name}_기본_02_벤치마크')

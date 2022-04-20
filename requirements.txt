@@ -8,7 +8,6 @@ scipy
 pyautogui
 requests
 bs4
-findiff
 ta
 yfinance
 tqdm
