@@ -203,7 +203,9 @@ class frame(object):
 
 if __name__ == "__main__":
     # tester = frame(category='WICS', sub_category=str(), market_data=market())
-    tester = frame(category='WI26', sub_category='1028', market_data=market())
+    # tester = frame(category='WI26', sub_category='1028', market_data=market())
+
+    tester = frame(category='ETF', sub_category=str(), market_data=market())
 
     print(tester.mapframe)
-    tester.mapframe.to_csv(r'./test.csv', encoding='euc-kr', index=True)
+    # tester.mapframe.to_csv(r'./test.csv', encoding='euc-kr', index=True)
