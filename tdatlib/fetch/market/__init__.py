@@ -1,7 +1,12 @@
 from tdatlib.fetch.market.common import (
     fetch_icm,
     fetch_theme,
-    fetch_kosdaq
+    fetch_kospi,
+    fetch_kospi200,
+    fetch_kospi_midcap,
+    fetch_kosdaq,
+    fetch_kosdaq150,
+    fetch_kosdaq_midcap
 )
 from tdatlib.fetch.market.wise import (
     fetch_wi_date,
@@ -27,7 +32,7 @@ C_WEEKEND_NOW = PM_DATE.weekday() == 5 or PM_DATE.weekday() == 6
 C_TRADING_NOW = 855 < int(PM_DATE.strftime("%H%M")) <= 1530
 
 
-class market(object):
+class fetch_market(object):
 
     def __init__(self):
         self.kr_date = PM_DATE
@@ -141,12 +146,62 @@ class market(object):
         return self.__attr__(inner().f_code.co_name)
 
     @property
-    def kosdaq(self) -> pd.DataFrame:
+    def kospi(self) -> list:
+        """
+        코스피 종목 리스트
+        :return:
+
+        ['005930', '373220', '000660', ... , '012320', '012600', '013000']
+        """
+        return self.__attr__(inner().f_code.co_name)
+
+    @property
+    def kospi200(self) -> list:
+        """
+        코스피200 종목 리스트
+        :return:
+
+        ['005930', '373220', '000660', ... , '064960', '192400', '057050']
+        """
+        return self.__attr__(inner().f_code.co_name)
+
+    @property
+    def kospi_midcap(self) -> list:
+        """
+        코스피 중형주 종목 리스트
+        :return:
+
+        ['028670', '010620', '008770', ... , '012630', '026890', '003580']
+        """
+        return self.__attr__(inner().f_code.co_name)
+
+    @property
+    def kosdaq(self) -> list:
         """
         코스닥 종목 리스트
         :return:
 
         ['247540', '091990', '066970', ... , '409570', '413600', '038340']
+        """
+        return self.__attr__(inner().f_code.co_name)
+
+    @property
+    def kosdaq150(self) -> list:
+        """
+        코스닥150 종목 리스트
+        :return:
+
+        ['247540', '091990', '066970', ... , '033310', '299660', '140410']
+        """
+        return self.__attr__(inner().f_code.co_name)
+
+    @property
+    def kosdaq_midcap(self) -> list:
+        """
+        코스닥 중형주 종목 리스트
+        :return:
+
+        ['225570', '214370', '090460', ... , '185490', '247660', '084650']
         """
         return self.__attr__(inner().f_code.co_name)
 
@@ -168,7 +223,7 @@ class market(object):
 if __name__ == "__main__":
     # pd.set_option('display.expand_frame_repr', False)
 
-    tester = market()
+    tester = fetch_market()
     print(tester.td_date)
     print(tester.wi_date)
     print(tester.icm)
@@ -177,7 +232,12 @@ if __name__ == "__main__":
     print(tester.theme)
     print(tester.etf_group)
     print(tester.etf_list)
+    print(tester.kospi)
+    print(tester.kospi200)
+    print(tester.kospi_midcap)
     print(tester.kosdaq)
+    print(tester.kosdaq150)
+    print(tester.kosdaq_midcap)
     print(tester.performance(tickers=tester.theme.index))
 
 

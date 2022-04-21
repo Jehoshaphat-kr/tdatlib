@@ -1,5 +1,5 @@
 from tdatlib.interface.treemap.frame import frame
-from tdatlib.fetch.market import market
+from tdatlib.fetch.market import fetch_market
 from datetime import datetime
 from pytz import timezone
 import pandas as pd
@@ -38,7 +38,7 @@ class deploy(object):
     __cover, __datum = list(), pd.DataFrame(columns=['종목코드'])
 
     def __init__(self):
-        market_data = market()
+        market_data = fetch_market()
         for n, (c, s, var) in enumerate(CD_CATEGORY):
             treemap = frame(category=c, sub_category=s, market_data=market_data)
             print(f'[{n + 1}/{len(CD_CATEGORY)}] {c} / {treemap.mapname}')

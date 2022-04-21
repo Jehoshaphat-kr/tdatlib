@@ -17,25 +17,30 @@ class view_compare(interface_compare):
         fig = go.Figure()
 
         gaps = ['3M', '6M', '1Y', '2Y', '3Y', '5Y']
-        tags = ['3개월', '6개월', '1년', '2년', '3년', '5년']
-        names, data, price = self.names, self.rel_yield.copy(), self.price.copy()
+        data, price = self.rel_yield.copy(), self.price.copy()
         for c, col in enumerate(gaps):
-            for n, name in enumerate(names):
-                _data = data[(col, name)].dropna()
-                meta = [f'{d.year}/{d.month}/{d.day}' for d in _data.index]
-                p = price[price.index >= _data.index[0]][name]
+            for n, name in enumerate(self.names):
+                d = data[(col, name)].dropna()
+                p = price[price.index >= d.index[0]][name]
                 fig.add_trace(go.Scatter(
-                    name=name, x=_data.index, y=_data, visible=False if c else True, showlegend=True,
-                    mode='lines', line=dict(color=CD_COLORS[n]), meta=meta, customdata=p,
-                    hovertemplate='날짜: %{meta}<br>' + name + ': %{y:.2f}%<br>가격: %{customdata:,}원<extra></extra>'
+                    name=name,
+                    x=d.index,
+                    y=d,
+                    visible=False if c else True,
+                    showlegend=True,
+                    mode='lines',
+                    line=dict(color=CD_COLORS[n]),
+                    customdata=p,
+                    hovertemplate=name + '<br>%{y:.2f}% / %{customdata:,}원<extra></extra>'
                 ))
 
         steps = []
-        for i in range(len(gaps)):
+        for i, gap in enumerate(gaps):
+            label = gap.replace('M', '개월').replace('Y', '년')
             step = dict(
                 method="update",
-                args=[{"visible": [False] * len(fig.data)}, {"title": f"{tags[i]}({gaps[i]}) 수익률 비교"}],
-                label=tags[i]
+                args=[{"visible": [False] * len(fig.data)}, {"title": f"{label} 수익률 비교"}],
+                label=label
             )
             for j in range(len(self.tickers)):
                 step["args"][0]["visible"][len(self.tickers) * i + j] = True
@@ -43,12 +48,32 @@ class view_compare(interface_compare):
         sliders = [dict(active=0, currentvalue={"prefix": "비교 기간: "}, pad={"t": 50}, steps=steps)]
 
         fig.update_layout(
-            title=f'{tags[0]}({gaps[0]}) 수익률 비교',
+            title=f'{gaps[0].replace("M", "개월").replace("Y", "년")} 수익률 비교',
             plot_bgcolor='white',
             sliders=sliders,
-            xaxis=dict(title='날짜', showgrid=True, gridcolor='lightgrey', autorange=True),
-            yaxis=dict(title='수익률[%]', showgrid=True, gridcolor='lightgrey', autorange=True,
-                       zeroline=True, zerolinecolor='grey', zerolinewidth=1)
+            hovermode="x",
+            hoverlabel = dict(font=dict(color='white')),
+            xaxis=dict(
+                title='날짜',
+                showgrid=True,
+                gridcolor='lightgrey',
+                autorange=True,
+                tickformat='%Y/%m/%d',
+                showspikes=True,
+                spikecolor="black",
+                spikesnap="cursor",
+                spikemode="across",
+                spikethickness=0.5
+            ),
+            yaxis=dict(
+                title='수익률[%]',
+                showgrid=True,
+                gridcolor='lightgrey',
+                autorange=True,
+                zeroline=True,
+                zerolinecolor='grey',
+                zerolinewidth=1
+            )
         )
         return fig
 
@@ -57,25 +82,30 @@ class view_compare(interface_compare):
         fig = go.Figure()
 
         gaps = ['3M', '6M', '1Y', '2Y', '3Y', '5Y']
-        tags = ['3개월', '6개월', '1년', '2년', '3년', '5년']
-        names, data, price = self.names, self.rel_drawdown.copy(), self.price.copy()
+        data, price = self.rel_drawdown.copy(), self.price.copy()
         for c, col in enumerate(gaps):
-            for n, name in enumerate(names):
-                _data = data[(col, name)].dropna()
-                meta = [f'{d.year}/{d.month}/{d.day}' for d in _data.index]
-                p = price[price.index >= _data.index[0]][name]
+            for n, name in enumerate(self.names):
+                d = data[(col, name)].dropna()
+                p = price[price.index >= d.index[0]][name]
                 fig.add_trace(go.Scatter(
-                    name=name, x=_data.index, y=_data, visible=False if c else True, showlegend=True,
-                    mode='lines', line=dict(color=CD_COLORS[n]), meta=meta, customdata=p,
-                    hovertemplate='날짜: %{meta}<br>' + name + ': %{y:.2f}%<br>가격: %{customdata:,}원<extra></extra>'
+                    name=name,
+                    x=d.index,
+                    y=d,
+                    visible=False if c else True,
+                    showlegend=True,
+                    mode='lines',
+                    line=dict(color=CD_COLORS[n]),
+                    customdata=p,
+                    hovertemplate=name + '<br>%{y:.2f}% / %{customdata:,}원<extra></extra>'
                 ))
 
         steps = []
-        for i in range(len(gaps)):
+        for i, gap in enumerate(gaps):
+            label = gap.replace('M', '개월').replace('Y', '년')
             step = dict(
                 method="update",
-                args=[{"visible": [False] * len(fig.data)}, {"title": f"{tags[i]}({gaps[i]}) 낙폭 비교"}],
-                label=tags[i]
+                args=[{"visible": [False] * len(fig.data)}, {"title": f"{label} 낙폭 비교"}],
+                label=label
             )
             for j in range(len(self.tickers)):
                 step["args"][0]["visible"][len(self.tickers) * i + j] = True
@@ -83,75 +113,155 @@ class view_compare(interface_compare):
         sliders = [dict(active=0, currentvalue={"prefix": "비교 기간: "}, pad={"t": 50}, steps=steps)]
 
         fig.update_layout(
-            title=f'{tags[0]}({gaps[0]}) 낙폭 비교',
+            title=f'{gaps[0].replace("M", "개월").replace("Y", "년")} 낙폭 비교',
             plot_bgcolor='white',
             sliders=sliders,
-            xaxis=dict(title='날짜', showgrid=True, gridcolor='lightgrey', autorange=True),
-            yaxis=dict(title='낙폭[%]', showgrid=True, gridcolor='lightgrey', autorange=True,
-                       zeroline=True, zerolinecolor='grey', zerolinewidth=1)
+            hovermode="x",
+            hoverlabel=dict(font=dict(color='white')),
+            xaxis=dict(
+                title='날짜',
+                showgrid=True,
+                gridcolor='lightgrey',
+                autorange=True,
+                tickformat='%Y/%m/%d',
+                showspikes=True,
+                spikecolor="black",
+                spikesnap="cursor",
+                spikemode="across",
+                spikethickness=0.5
+            ),
+            yaxis=dict(
+                title='낙폭[%]',
+                showgrid=True,
+                gridcolor='lightgrey',
+                autorange=True,
+                zeroline=True,
+                zerolinecolor='grey',
+                zerolinewidth=1
+            )
         )
         return fig
 
     @property
     def fig_rsi(self) -> go.Figure:
         fig = make_subplots(
-            rows=2, cols=1, vertical_spacing=0.11, subplot_titles=("RSI", "Stochastic-RSI"), shared_xaxes=True,
+            rows=2, cols=1,
+            vertical_spacing=0.1,
+            subplot_titles=("RSI", "Stochastic-RSI"),
+            shared_xaxes=True,
             specs=[[{"type": "xy"}], [{"type": "xy"}]]
         )
 
         data = self.rel_rsi.copy()
-        meta = dform(data.index)
         for n, col in enumerate(data.columns):
             scatter = go.Scatter(
-                name=f'{col}', x=data.index, y=data[col], mode='lines', line=dict(color=CD_COLORS[n]),
-                legendgroup='RSI', showlegend=True, visible=True,
-                meta=meta, hovertemplate='날짜: %{meta}<br>' + col + ': %{y:.2f}%<extra></extra>'
+                name=f'{col}',
+                x=data.index,
+                y=data[col],
+                mode='lines',
+                line=dict(color=CD_COLORS[n]),
+                legendgroup='RSI',
+                showlegend=True,
+                visible=True,
+                hovertemplate=col + ': %{y:.2f}%<extra></extra>'
             )
             if not n:
                 scatter.legendgrouptitle = dict(text='RSI 비교')
             fig.add_trace(scatter, row=1, col=1)
-        fig.add_hrect(y0=70, y1=80, line_width=0, fillcolor='red', opacity=0.2, row=1, col=1)
-        fig.add_hrect(y0=20, y1=30, line_width=0, fillcolor='green', opacity=0.2, row=1, col=1)
+        fig.add_hrect(y0=70, y1=90, line_width=0, fillcolor='red', opacity=0.2, row=1, col=1)
+        fig.add_hline(y=80, line_width=0.5, line_dash="dash", line_color="black", row=1, col=1)
+        fig.add_hrect(y0=10, y1=30, line_width=0, fillcolor='green', opacity=0.2, row=1, col=1)
+        fig.add_hline(y=20, line_width=0.5, line_dash="dash", line_color="black", row=1, col=1)
 
         data = self.rel_stoch.copy()
-        meta = dform(data.index)
         for n, col in enumerate(data.columns):
             scatter = go.Scatter(
-                name=f'{col}', x=data.index, y=data[col], mode='lines', line=dict(color=CD_COLORS[n]),
-                legendgroup='Stochastic', showlegend=True, visible=True,
-                meta=meta, hovertemplate='날짜: %{meta}<br>' + col + ': %{y:.2f}[%]<extra></extra>'
+                name=f'{col}',
+                x=data.index,
+                y=data[col],
+                mode='lines',
+                line=dict(color=CD_COLORS[n]),
+                legendgroup='Stochastic',
+                showlegend=True,
+                visible=True,
+                hovertemplate=col + ': %{y:.2f}[%]<extra></extra>'
             )
             if not n:
                 scatter.legendgrouptitle = dict(text='Stochastic RSI 비교')
             fig.add_trace(scatter, row=2, col=1)
         fig.add_hrect(y0=80, y1=100, line_width=0, fillcolor='red', opacity=0.2, row=2, col=1)
+        fig.add_hline(y=90, line_width=0.5, line_dash="dash", line_color="black", row=1, col=1)
         fig.add_hrect(y0=0, y1=20, line_width=0, fillcolor='green', opacity=0.2, row=2, col=1)
+        fig.add_hline(y=10, line_width=0.5, line_dash="dash", line_color="black", row=1, col=1)
 
         fig.update_layout(
             title=f'RSI 비교',
             plot_bgcolor='white',
             legend=dict(groupclick="toggleitem"),
-            xaxis=dict(title='', showgrid=True, gridcolor='lightgrey', autorange=True, rangeselector=CD_X_RANGER),
-            xaxis2=dict(title='날짜', showgrid=True, gridcolor='lightgrey', autorange=True),
-            yaxis=dict(title='RSI[%]', showgrid=True, gridcolor='lightgrey', autorange=True),
-            yaxis2=dict(title='S-RSI[%]', showgrid=True, gridcolor='lightgrey', autorange=True)
+            hovermode="x",
+            hoverlabel=dict(font=dict(color='white')),
+            xaxis=dict(
+                showgrid=True,
+                gridcolor='lightgrey',
+                autorange=True,
+                showticklabels=True,
+                tickformat='%Y/%m/%d',
+                showspikes=True,
+                spikecolor="black",
+                spikesnap="cursor",
+                spikemode="across",
+                spikethickness=0.5,
+                rangeselector=CD_X_RANGER
+            ),
+            xaxis2=dict(
+                title='날짜',
+                showgrid=True,
+                gridcolor='lightgrey',
+                autorange=True,
+                tickformat='%Y/%m/%d',
+                showspikes=True,
+                spikecolor="black",
+                spikesnap="cursor",
+                spikemode="across",
+                spikethickness=0.5
+            ),
+            yaxis=dict(
+                title='RSI[%]',
+                showgrid=True,
+                gridcolor='lightgrey',
+                autorange=True
+            ),
+            yaxis2=dict(
+                title='Stochastic-RSI[%]',
+                showgrid=True,
+                gridcolor='lightgrey',
+                autorange=True
+            )
         )
         return fig
 
     @property
     def fig_cci_vortex(self) -> go.Figure:
         fig = make_subplots(
-            rows=2, cols=1, vertical_spacing=0.11, subplot_titles=("CCI", "VORTEX"), shared_xaxes=True,
+            rows=2, cols=1,
+            vertical_spacing=0.1,
+            subplot_titles=("CCI", "VORTEX"),
+            shared_xaxes=True,
             specs=[[{"type": "xy"}], [{"type": "xy"}]]
         )
 
         data = self.rel_cci.copy()
-        meta = dform(data.index)
         for n, col in enumerate(data.columns):
             scatter = go.Scatter(
-                name=f'{col}', x=data.index, y=data[col], mode='lines', line=dict(color=CD_COLORS[n]),
-                showlegend=True, visible=True, legendgroup='CCI',
-                meta=meta, hovertemplate='날짜: %{meta}<br>' + col + ': %{y:.2f}[-]<extra></extra>'
+                name=f'{col}',
+                x=data.index,
+                y=data[col],
+                mode='lines',
+                line=dict(color=CD_COLORS[n]),
+                showlegend=True,
+                visible=True,
+                legendgroup='CCI',
+                hovertemplate=col + ': %{y:.2f}[-]<extra></extra>'
             )
             if not n:
                 scatter.legendgrouptitle = dict(text='CCI 비교')
@@ -162,12 +272,17 @@ class view_compare(interface_compare):
         fig.add_hrect(y0=-400, y1=-200, line_width=0, fillcolor='green', opacity=0.2, row=1, col=1)
 
         data = self.rel_vortex.copy()
-        meta = dform(data.index)
         for n, col in enumerate(data.columns):
             scatter = go.Scatter(
-                name=f'{col}', x=data.index, y=data[col], mode='lines', line=dict(color=CD_COLORS[n]),
-                showlegend=True, visible=True, legendgroup='VORTEX',
-                meta=meta, hovertemplate='날짜: %{meta}<br>' + col + ': %{y:.2f}[-]<extra></extra>'
+                name=f'{col}',
+                x=data.index,
+                y=data[col],
+                mode='lines',
+                line=dict(color=CD_COLORS[n]),
+                showlegend=True,
+                visible=True,
+                legendgroup='VORTEX',
+                hovertemplate=col + ': %{y:.2f}[-]<extra></extra>'
             )
             if not n :
                 scatter.legendgrouptitle = dict(text='VORTEX 비교')

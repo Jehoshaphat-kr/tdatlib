@@ -23,14 +23,11 @@ def _ipo_() -> pd.DataFrame:
     ipo.IPO = pd.to_datetime(ipo.IPO)
     return ipo
 
-
 def _cap_(td:str) -> pd.DataFrame:
     return get_market_cap_by_ticker(date=td, market="ALL", prev=True)
 
-
 def _mul_(td:str) -> pd.DataFrame:
     return get_market_fundamental(date=td, market="ALL", prev=True)
-
 
 def fetch_icm(td:str) -> pd.DataFrame:
     icm = pd.read_csv(DIR_ICM, index_col='종목코드', encoding='utf-8')
@@ -44,14 +41,28 @@ def fetch_icm(td:str) -> pd.DataFrame:
     icm.to_csv(DIR_ICM, index=True, encoding='utf-8')
     return icm.drop(columns=['날짜'])
 
-
 def fetch_theme() -> pd.DataFrame:
     df = pd.read_csv(DIR_THM, index_col='종목코드')
     df.index = df.index.astype(str).str.zfill(6)
     return df
 
+def fetch_kospi() -> list:
+    return get_index_portfolio_deposit_file(ticker='1001')
+
+def fetch_kospi200() -> list:
+    return get_index_portfolio_deposit_file(ticker='1028')
+
+def fetch_kospi_midcap() -> list:
+    return get_index_portfolio_deposit_file(ticker='1003')
+
 def fetch_kosdaq() -> list:
-    return get_index_portfolio_deposit_file('2001')
+    return get_index_portfolio_deposit_file(ticker='2001')
+
+def fetch_kosdaq150() -> list:
+    return get_index_portfolio_deposit_file(ticker='2203')
+
+def fetch_kosdaq_midcap() -> list:
+    return get_index_portfolio_deposit_file(ticker='2003')
 
 
 if __name__ == "__main__":

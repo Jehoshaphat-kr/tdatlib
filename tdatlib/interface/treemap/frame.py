@@ -1,4 +1,4 @@
-from tdatlib.fetch.market import market
+from tdatlib.fetch.market import fetch_market
 from pykrx.stock import get_index_portfolio_deposit_file
 import pandas as pd
 
@@ -14,7 +14,7 @@ CD_INDEX = {
 class frame(object):
 
     def __init__(self, category:str, sub_category:str=str(), market_data=None):
-        self.market = market_data if isinstance(market_data, market) else market()
+        self.market = market_data if isinstance(market_data, fetch_market) else fetch_market()
 
         if not category in ['WICS', 'WI26', 'ETF', 'THEME']:
             raise KeyError(f'입력 가능한 category: WICS, WI26, ETF, THEME')
@@ -205,7 +205,7 @@ if __name__ == "__main__":
     # tester = frame(category='WICS', sub_category=str(), market_data=market())
     # tester = frame(category='WI26', sub_category='1028', market_data=market())
 
-    tester = frame(category='ETF', sub_category=str(), market_data=market())
+    tester = frame(category='ETF', sub_category=str(), market_data=fetch_market())
 
     print(tester.mapframe)
     # tester.mapframe.to_csv(r'./test.csv', encoding='euc-kr', index=True)

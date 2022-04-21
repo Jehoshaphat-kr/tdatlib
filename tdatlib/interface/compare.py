@@ -1,4 +1,4 @@
-from tdatlib.fetch.market import market
+from tdatlib.fetch.market import fetch_market
 from tdatlib.interface.stock import interface_stock
 import pandas as pd
 import numpy as np
@@ -11,7 +11,7 @@ class interface_compare(object):
         for ticker in tickers:
             setattr(self, f'__{ticker}', interface_stock(ticker=ticker, period=period))
         self.names = [self.__getattribute__(f'__{ticker}').name for ticker in self.tickers]
-        self.market = market()
+        self.market = fetch_market()
         return
 
     @property
