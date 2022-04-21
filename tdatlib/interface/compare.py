@@ -320,7 +320,8 @@ class interface_compare(object):
 if __name__ == "__main__":
     # t_tickers = ['TSLA', 'MSFT', 'GOOG', 'ZM']
     # t_tickers = ['005930', '000660', '058470', '000990']
-    t_tickers = ['005930', '000660', '000990', '058470', '005290', '357780']
+    # t_tickers = ['005930', '000660', '000990', '058470', '005290', '357780']
+    t_tickers = ['105560', '055550', '316140', '024110']
 
     t_series = interface_compare(tickers=t_tickers, period=5)
     print(t_series.price)

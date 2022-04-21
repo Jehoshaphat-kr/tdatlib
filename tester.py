@@ -25,7 +25,3 @@ if __name__ == "__main__":
 
     # if tdatlib.is_etf_latest(run=False):
     #     tdatlib.etf_excel_to_csv()
-
-    ticker = '058470'
-
-    tdatlib.stock_analysis(ticker=ticker)

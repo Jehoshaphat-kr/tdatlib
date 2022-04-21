@@ -196,4 +196,8 @@ def fetch_nps(ticker:str) -> pd.DataFrame:
     data = data[data != '-']
     for col in data.columns:
         data[col] = data[col].astype(str).str.replace(',', '').astype(float)
+
+    missing = [col for col in ['EPS', 'BPS', 'EBITDAPS', '보통주DPS'] if not col in data.columns]
+    if missing:
+        data[missing] = np.nan
     return data
