@@ -1,5 +1,5 @@
 from tdatlib.interface.compare import interface_compare
-from tdatlib.viewer.common import CD_COLORS, CD_X_RANGER, save
+from tdatlib.viewer.common import CD_COLORS, CD_X_RANGER, save, dform
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 import numpy as np
@@ -100,34 +100,41 @@ class view_compare(interface_compare):
         )
 
         data = self.rel_rsi.copy()
+        meta = dform(data.index)
         for n, col in enumerate(data.columns):
-            d = data[col].dropna()
-            fig.add_trace(go.Scatter(
-                name=f'RSI: {col}', x=d.index, y=d, mode='lines', line=dict(color=CD_COLORS[n]),
-                meta=[f'{_.year}/{_.month}/{_.day}' for _ in d.index],
-                hovertemplate='날짜: %{meta}<br>' + col + ': %{y:.2f}%<extra></extra>'
-            ), row=1, col=1)
+            scatter = go.Scatter(
+                name=f'{col}', x=data.index, y=data[col], mode='lines', line=dict(color=CD_COLORS[n]),
+                legendgroup='RSI', showlegend=True, visible=True,
+                meta=meta, hovertemplate='날짜: %{meta}<br>' + col + ': %{y:.2f}%<extra></extra>'
+            )
+            if not n:
+                scatter.legendgrouptitle = dict(text='RSI 비교')
+            fig.add_trace(scatter, row=1, col=1)
         fig.add_hrect(y0=70, y1=80, line_width=0, fillcolor='red', opacity=0.2, row=1, col=1)
         fig.add_hrect(y0=20, y1=30, line_width=0, fillcolor='green', opacity=0.2, row=1, col=1)
 
         data = self.rel_stoch.copy()
+        meta = dform(data.index)
         for n, col in enumerate(data.columns):
-            d = data[col].dropna()
-            fig.add_trace(go.Scatter(
-                name=f'S-RSI: {col}', x=d.index, y=d, mode='lines', line=dict(color=CD_COLORS[n]),
-                meta=[f'{_.year}/{_.month}/{_.day}' for _ in d.index],
-                hovertemplate='날짜: %{meta}<br>' + col + ': %{y:.2f}[%]<extra></extra>'
-            ), row=2, col=1)
+            scatter = go.Scatter(
+                name=f'{col}', x=data.index, y=data[col], mode='lines', line=dict(color=CD_COLORS[n]),
+                legendgroup='Stochastic', showlegend=True, visible=True,
+                meta=meta, hovertemplate='날짜: %{meta}<br>' + col + ': %{y:.2f}[%]<extra></extra>'
+            )
+            if not n:
+                scatter.legendgrouptitle = dict(text='Stochastic RSI 비교')
+            fig.add_trace(scatter, row=2, col=1)
         fig.add_hrect(y0=80, y1=100, line_width=0, fillcolor='red', opacity=0.2, row=2, col=1)
         fig.add_hrect(y0=0, y1=20, line_width=0, fillcolor='green', opacity=0.2, row=2, col=1)
 
         fig.update_layout(
             title=f'RSI 비교',
             plot_bgcolor='white',
+            legend=dict(groupclick="toggleitem"),
             xaxis=dict(title='', showgrid=True, gridcolor='lightgrey', autorange=True, rangeselector=CD_X_RANGER),
             xaxis2=dict(title='날짜', showgrid=True, gridcolor='lightgrey', autorange=True),
             yaxis=dict(title='RSI[%]', showgrid=True, gridcolor='lightgrey', autorange=True),
-            yaxis2=dict(title='S-RSI[-]', showgrid=True, gridcolor='lightgrey', autorange=True)
+            yaxis2=dict(title='S-RSI[%]', showgrid=True, gridcolor='lightgrey', autorange=True)
         )
         return fig
 
@@ -139,30 +146,37 @@ class view_compare(interface_compare):
         )
 
         data = self.rel_cci.copy()
+        meta = dform(data.index)
         for n, col in enumerate(data.columns):
-            d = data[col].dropna()
-            fig.add_trace(go.Scatter(
-                name=f'CCI: {col}', x=d.index, y=d, mode='lines', line=dict(color=CD_COLORS[n]),
-                meta=[f'{_.year}/{_.month}/{_.day}' for _ in d.index],
-                hovertemplate='날짜: %{meta}<br>' + col + ': %{y:.2f}[-]<extra></extra>'
-            ), row=1, col=1)
+            scatter = go.Scatter(
+                name=f'{col}', x=data.index, y=data[col], mode='lines', line=dict(color=CD_COLORS[n]),
+                showlegend=True, visible=True, legendgroup='CCI',
+                meta=meta, hovertemplate='날짜: %{meta}<br>' + col + ': %{y:.2f}[-]<extra></extra>'
+            )
+            if not n:
+                scatter.legendgrouptitle = dict(text='CCI 비교')
+            fig.add_trace(scatter, row=1, col=1)
         fig.add_hrect(y0=200, y1=400, line_width=0, fillcolor='red', opacity=0.2, row=1, col=1)
         fig.add_hrect(y0=100, y1=200, line_width=0, fillcolor='brown', opacity=0.2, row=1, col=1)
         fig.add_hrect(y0=-200, y1=-100, line_width=0, fillcolor='lightgreen', opacity=0.4, row=1, col=1)
         fig.add_hrect(y0=-400, y1=-200, line_width=0, fillcolor='green', opacity=0.2, row=1, col=1)
 
         data = self.rel_vortex.copy()
+        meta = dform(data.index)
         for n, col in enumerate(data.columns):
-            d = data[col].dropna()
-            fig.add_trace(go.Scatter(
-                name=f'VORTEX: {col}', x=d.index, y=d, mode='lines', line=dict(color=CD_COLORS[n]),
-                meta=[f'{_.year}/{_.month}/{_.day}' for _ in d.index],
-                hovertemplate='날짜: %{meta}<br>' + col + ': %{y:.2f}[-]<extra></extra>'
-            ), row=2, col=1)
+            scatter = go.Scatter(
+                name=f'{col}', x=data.index, y=data[col], mode='lines', line=dict(color=CD_COLORS[n]),
+                showlegend=True, visible=True, legendgroup='VORTEX',
+                meta=meta, hovertemplate='날짜: %{meta}<br>' + col + ': %{y:.2f}[-]<extra></extra>'
+            )
+            if not n :
+                scatter.legendgrouptitle = dict(text='VORTEX 비교')
+            fig.add_trace(scatter, row=2, col=1)
 
         fig.update_layout(
             title=f'CCI / Vortex',
             plot_bgcolor='white',
+            legend=dict(groupclick="toggleitem"),
             xaxis=dict(title='', showgrid=True, gridcolor='lightgrey', autorange=True, rangeselector=CD_X_RANGER),
             xaxis2=dict(title='날짜', showgrid=True, gridcolor='lightgrey', autorange=True),
             yaxis=dict(title='CCI[%]', showgrid=True, gridcolor='lightgrey', autorange=True,
@@ -175,37 +189,44 @@ class view_compare(interface_compare):
     @property
     def fig_mfi_bb(self) -> go.Figure:
         fig = make_subplots(
-            rows=2, cols=1, vertical_spacing=0.11, subplot_titles=("MFI", "Bollinger Signal"), shared_xaxes=True,
+            rows=2, cols=1, vertical_spacing=0.11, subplot_titles=("MFI", "Bollinger-Band Signal"), shared_xaxes=True,
             specs=[[{"type": "xy"}], [{"type": "xy"}]]
         )
 
         data = self.rel_mfi.copy()
+        meta = dform(data.index)
         for n, col in enumerate(data.columns):
-            d = data[col].dropna()
-            fig.add_trace(go.Scatter(
-                name=f'MFI: {col}', x=d.index, y=d, mode='lines', line=dict(color=CD_COLORS[n]),
-                meta=[f'{_.year}/{_.month}/{_.day}' for _ in d.index],
-                hovertemplate='날짜: %{meta}<br>' + col + ': %{y:.2f}[%]<extra></extra>'
-            ), row=1, col=1)
+            scatter = go.Scatter(
+                name=f'{col}', x=data.index, y=data[col], mode='lines', line=dict(color=CD_COLORS[n]),
+                legendgroup='MFI', visible=True, showlegend=True,
+                meta=meta, hovertemplate='날짜: %{meta}<br>' + col + ': %{y:.2f}[%]<extra></extra>'
+            )
+            if not n :
+                scatter.legendgrouptitle = dict(text='MFI 비교')
+            fig.add_trace(scatter, row=1, col=1)
         fig.add_hrect(y0=80, y1=100, line_width=0, fillcolor='red', opacity=0.2, row=1, col=1)
         fig.add_hline(y=90, line_width=0.5, line_dash="dash", line_color="black", row=1, col=1)
         fig.add_hrect(y0=0, y1=20, line_width=0, fillcolor='lightgreen', opacity=0.4, row=1, col=1)
         fig.add_hline(y=10, line_width=0.5, line_dash="dash", line_color="black", row=1, col=1)
 
         data = self.rel_bb.copy()
+        meta = dform(data.index)
         for n, col in enumerate(data.columns):
-            d = data[col].dropna()
-            fig.add_trace(go.Scatter(
-                name=f'BB-Sig: {col}', x=d.index, y=d, mode='lines', line=dict(color=CD_COLORS[n]),
-                meta=[f'{_.year}/{_.month}/{_.day}' for _ in d.index],
-                hovertemplate='날짜: %{meta}<br>' + col + ': %{y:.2f}[-]<extra></extra>'
-            ), row=2, col=1)
+            scatter = go.Scatter(
+                name=f'{col}', x=data.index, y=data[col], mode='lines', line=dict(color=CD_COLORS[n]),
+                legendgroup='BB', visible=True, showlegend=True,
+                meta=meta, hovertemplate='날짜: %{meta}<br>' + col + ': %{y:.2f}[-]<extra></extra>'
+            )
+            if not n :
+                scatter.legendgrouptitle = dict(text='BB 신호 비교')
+            fig.add_trace(scatter, row=2, col=1)
         fig.add_hrect(y0=1, y1=1.5, line_width=0, fillcolor='red', opacity=0.2, row=2, col=1)
         fig.add_hrect(y0=-0.5, y1=0, line_width=0, fillcolor='lightgreen', opacity=0.4, row=2, col=1)
 
         fig.update_layout(
             title=f'MFI / Bollinger-Signal',
             plot_bgcolor='white',
+            legend=dict(groupclick="toggleitem"),
             xaxis=dict(title='', showgrid=True, gridcolor='lightgrey', autorange=True, rangeselector=CD_X_RANGER),
             xaxis2=dict(title='날짜', showgrid=True, gridcolor='lightgrey', autorange=True),
             yaxis=dict(title='MFI[%]', showgrid=True, gridcolor='lightgrey', autorange=True,
@@ -268,34 +289,52 @@ class view_compare(interface_compare):
             specs=[[{"type": "bar"}, {"type": "bar"}], [{"type": "bar"}, {"type": "bar"}]]
         )
 
-        profit = self.rel_profit.copy()
-        for n in range(len(profit)):
-            sliced = profit[profit.index.isin(profit.index[n:])].copy()
-            for m, col in enumerate(['영업이익률', '배당수익률', 'ROA', 'ROE']):
-                sub = sliced[col]
-                for o, name in enumerate(sub.columns):
-                    fig.add_trace(go.Bar(
-                        name=name, x=sub[name].index, y=sub[name], showlegend=False if m else True, legendgroup=name,
-                        marker=dict(color=CD_COLORS[o]), visible=False if n else True,
-                        texttemplate='%{y}%', hovertemplate=name + '<br>분기: %{x}<br>' + col + ': %{y}%<extra></extra>'
-                    ), row=1 if m < 2 else 2, col=2 if m % 2 else 1)
+        data = self.rel_profit.copy()
+        columns = list()
+        for y, col in data.columns:
+            if not y in columns:
+                columns.append(y)
+        col_vis = [col for col in columns if not '(' in col][-1]
 
-        steps = []
-        for i in range(len(profit)):
-            step = dict(
-                method="update",
-                args=[{"visible": [False] * len(fig.data)}, {"title": f"수익성 비교"}, {'showlegend': [False] * len(fig.data)}],
-                label=f'{profit.index[i]}{str() if i + 1 == len(profit) else "~"}'
-            )
-            for j in range(len(self.tickers) * 4):
-                step["args"][0]["visible"][(len(self.tickers) * 4) * i + j] = True
-                if j < 4:
-                    step["args"][2]["showlegend"][(len(self.tickers) * 4) * i + j] = True
-            steps.append(step)
-        sliders = [dict(active=0, currentvalue={"prefix": "비교 기간: "}, pad={"t": 50}, steps=steps)]
+        for n, col in enumerate(columns):
+            sub = data[col]
+            for m, key in enumerate(sub.columns):
+                fig.add_trace(go.Bar(
+                    name=col, x=sub.index, y=sub[key], visible=True if col == col_vis else 'legendonly',
+                    showlegend=False if m else True, legendgroup=col,
+                    texttemplate='%{y}%', hovertemplate='분기: ' + col + '<br>' + key + ': %{y}%<extra></extra>'
+                ), row=1 if m < 2 else 2, col=2 if m % 2 else 1)
 
-        fig.update_layout(plot_bgcolor='white', sliders=sliders)
-        fig.update_yaxes(title_text="[%]", showgrid=True, gridcolor='lightgrey')
+        fig.update_layout(title='수익성 비교', plot_bgcolor='white')
+        fig.update_yaxes(title_text="[-]", showgrid=True, gridcolor='lightgrey')
+        return fig
+
+    @property
+    def fig_growth(self) -> go.Figure:
+        fig = make_subplots(
+            rows=2, cols=2, vertical_spacing=0.11, horizontal_spacing=0.1,
+            subplot_titles=("매출성장율", "영업이익성장율", "EPS성장율", "PEG"),
+            specs=[[{"type": "bar"}, {"type": "bar"}], [{"type": "bar"}, {"type": "bar"}]]
+        )
+
+        data = self.rel_growth.copy()
+        columns = list()
+        for y, col in data.columns:
+            if not y in columns:
+                columns.append(y)
+
+        for n, col in enumerate(columns):
+            sub = data[col]
+            for m, key in enumerate(sub.columns):
+                u = '' if key == 'PEG' else '%'
+                fig.add_trace(go.Bar(
+                    name=col, x=sub.index, y=sub[key], visible=True if col.endswith('현재') else 'legendonly',
+                    showlegend=False if m else True, legendgroup=col, texttemplate='%{y}' + u,
+                    hovertemplate='분기: ' + col + '<br>' + key + ': %{y}' + u + '<extra></extra>'
+                ), row=1 if m < 2 else 2, col=2 if m % 2 else 1)
+
+        fig.update_layout(title='성장성 비교', plot_bgcolor='white')
+        fig.update_yaxes(title_text="[-]", showgrid=True, gridcolor='lightgrey')
         return fig
 
     @property
@@ -335,35 +374,6 @@ class view_compare(interface_compare):
         fig.update_yaxes(title_text="[-]", showgrid=True, gridcolor='lightgrey')
         return fig
 
-    @property
-    def fig_growth(self) -> go.Figure:
-        fig = make_subplots(
-            rows=2, cols=2, vertical_spacing=0.11, horizontal_spacing=0.1,
-            subplot_titles=("매출성장율", "영업이익성장율", "EPS성장율", "PEG"),
-            specs=[[{"type": "bar"}, {"type": "bar"}], [{"type": "bar"}, {"type": "bar"}]]
-        )
-
-        data = self.rel_growth.copy()
-        columns = list()
-        for y, col in data.columns:
-            if not y in columns:
-                columns.append(y)
-
-        for n, col in enumerate(columns):
-            sub = data[col]
-            for m, key in enumerate(sub.columns):
-                u = '' if key == 'PEG' else '%'
-                fig.add_trace(go.Bar(
-                    name=col, x=sub.index, y=sub[key], visible=True if col.endswith('현재') else 'legendonly',
-                    showlegend=False if m else True, legendgroup=col,
-                    texttemplate='%{y}' + u, hovertemplate='분기: ' + col + '<br>' + key + ': %{y}' + u + '<extra></extra>'
-                ), row=1 if m < 2 else 2, col=2 if m % 2 else 1)
-
-        fig.update_layout(title='투자배수 비교', plot_bgcolor='white')
-        fig.update_yaxes(title_text="[-]", showgrid=True, gridcolor='lightgrey')
-        return fig
-
-
 
 if __name__ == "__main__":
 
@@ -375,12 +385,12 @@ if __name__ == "__main__":
 
     t_compare = view_compare(tickers=t_tickers, period=5)
 
-    save(t_compare.fig_returns, filename='수익률 비교')
-    save(t_compare.fig_drawdown, filename='낙폭 비교')
-    save(t_compare.fig_rsi, filename='RSI 비교')
-    save(t_compare.fig_cci_vortex, filename='CCI_VORTEX')
-    save(t_compare.fig_mfi_bb, filename='MFI_B-Sig')
-    save(t_compare.fig_sharpe_ratio, filename='샤프비율 비교')
-    save(t_compare.fig_profit, filename='수익성 비교')
-    save(t_compare.fig_multiple, filename='투자배수 비교')
-    save(t_compare.fig_growth, filename='성장성 비교')
+    save(t_compare.fig_returns, filename='00_수익률 비교')
+    save(t_compare.fig_drawdown, filename='01_낙폭 비교')
+    save(t_compare.fig_rsi, filename='02_RSI 비교')
+    save(t_compare.fig_cci_vortex, filename='03_CCI_VORTEX')
+    save(t_compare.fig_mfi_bb, filename='04_MFI_B-Sig')
+    save(t_compare.fig_sharpe_ratio, filename='05_샤프비율 비교')
+    save(t_compare.fig_profit, filename='06_수익성 비교')
+    save(t_compare.fig_growth, filename='07_성장성 비교')
+    save(t_compare.fig_multiple, filename='08_투자배수 비교')

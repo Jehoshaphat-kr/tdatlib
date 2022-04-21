@@ -243,14 +243,57 @@ class interface_compare(object):
     def rel_profit(self) -> pd.DataFrame:
         """
         분기별 영업이익률, 배당수익률, ROA 및 ROE
-        :return: (주석 생략)
+        :return:
+                                              2017/12  ...                         2024/12(E)
+                   영업이익률 배당수익률   ROA    ROE  ...  영업이익률 배당수익률   ROA   ROE
+        KB금융          10.24       3.03  0.82  10.18  ...       35.29        NaN  0.71  8.91
+        신한지주        15.97       2.94  0.72   9.13  ...       39.97        NaN  0.69  8.50
+        우리금융지주      NaN        NaN   NaN    NaN  ...       36.03        NaN  0.63  9.24
+        기업은행        12.08       3.75  0.57   7.98  ...       31.05        NaN  0.63  8.31
         """
-        objs = dict()
+        profit = pd.DataFrame()
         for name, ticker in zip(self.names, self.tickers):
             data = self.__getattribute__(f'__{ticker}').annual_stat[['영업이익률', '배당수익률', 'ROA', 'ROE']]
-            for col in data.columns:
-                objs[(col, name)] = data[col]
-        return pd.concat(objs=objs, axis=1)[:-2]
+            objs = dict()
+            for i in data.index:
+                _data = data.loc[i].to_dict()
+                objs[i] = pd.DataFrame(data=_data, index=[name])
+            profit = pd.concat(objs=[profit, pd.concat(objs=objs, axis=1)], axis=0)
+        return profit
+
+    @property
+    def rel_growth(self) -> pd.DataFrame:
+        """
+        성장 지표
+        :return:
+                                                   2018/12  ...                                 2022/12(E)
+                 매출증가율 영업이익증가률 EPS증가율   PEG  ...  매출증가율 영업이익증가률 EPS증가율   PEG
+        KB금융        15.23           6.28     -7.56 -0.84  ...       13.05           6.45      7.30  0.72
+        신한지주      15.03          17.48      8.16  0.73  ...        6.90           7.32     11.09  0.44
+        우리금융지주    NaN            NaN       NaN   NaN  ...       15.29          11.24      7.47  0.56
+        기업은행      11.94          18.15     16.83  0.31  ...       14.23           5.90      5.08  0.70
+        """
+        icm = self.rel_icm
+        growth = pd.DataFrame()
+        for name, ticker in zip(self.names, self.tickers):
+            stat = self.__getattribute__(f'__{ticker}').annual_stat
+            key = [_ for _ in ['매출액', '순영업수익', '이자수익', '보험료수익'] if _ in stat.columns][0]
+            data = round(100 * stat[[key, '영업이익', 'EPS(원)']].pct_change(), 2)
+            data = data[1:].join(stat['PER'], how='left')
+            data['PEG'] = round(data['PER'] / data['EPS(원)'], 2)
+            data = data.drop(columns=['PER']).rename(columns={
+                key:'매출증가율', '영업이익':'영업이익증가률', 'EPS(원)':'EPS증가율'
+            })
+
+            objs = dict()
+            for i in data.index[:-2]:
+                _data = data.loc[i].to_dict()
+                objs[i] = pd.DataFrame(data=_data, index=[name])
+                if i.startswith(str(self.market.kr_date.year - 1)):
+                    _data['PEG'] = round(icm.loc[ticker, 'PER'] / _data['EPS증가율'], 2)
+                    objs[f'{self.market.kr_date.year}/현재'] = pd.DataFrame(data=_data, index=[name])
+            growth = pd.concat(objs=[growth, pd.concat(objs=objs, axis=1)], axis=0)
+        return growth
 
     @property
     def rel_multiple(self) -> pd.DataFrame:
@@ -280,42 +323,6 @@ class interface_compare(object):
         multiple['EV/EBITDA'] = round(multiple['종가'] / multiple['EBITDAPS'], 2)
         return multiple.set_index(keys='종목명')
 
-    @property
-    def rel_growth(self) -> pd.DataFrame:
-        """
-        성장 지표
-        :return:
-                 매출증가율  영업이익증가율  EPS증가율   PEG
-        종목명
-        삼성전자     18.07            43.45      50.40  0.35
-        SK하이닉스   34.79           147.58     101.93  0.16
-        DB하이텍     29.79            66.78      90.86  0.21
-        리노공업     39.20            50.32      87.45  0.56
-        동진쎄미켐   23.83             4.35      21.11  1.08
-        솔브레인    117.80            81.54     134.76  0.22
-        """
-        icm = self.rel_icm
-        growth = pd.DataFrame()
-        for name, ticker in zip(self.names, self.tickers):
-            stat = self.__getattribute__(f'__{ticker}').annual_stat
-            key = [_ for _ in ['매출액', '순영업수익', '이자수익', '보험료수익'] if _ in stat.columns][0]
-            data = round(100 * stat[[key, '영업이익', 'EPS(원)']].pct_change(), 2)
-            data = data[1:].join(stat['PER'], how='left')
-            data['PEG'] = round(data['PER'] / data['EPS(원)'], 2)
-            data = data.drop(columns=['PER']).rename(columns={
-                key:'매출증가율', '영업이익':'영업이익률', 'EPS(원)':'EPS증가율'
-            })
-
-            objs = dict()
-            for i in data.index[:-2]:
-                _data = data.loc[i].to_dict()
-                objs[i] = pd.DataFrame(data=_data, index=[name])
-                if i.startswith(str(self.market.kr_date.year - 1)):
-                    _data['PEG'] = round(icm.loc[ticker, 'PER'] / _data['EPS증가율'], 2)
-                    objs[f'{self.market.kr_date.year}/현재'] = pd.DataFrame(data=_data, index=[name])
-            growth = pd.concat(objs=[growth, pd.concat(objs=objs, axis=1)], axis=0)
-        return growth
-
 
 if __name__ == "__main__":
     # t_tickers = ['TSLA', 'MSFT', 'GOOG', 'ZM']
@@ -339,5 +346,5 @@ if __name__ == "__main__":
     print(t_series.rel_sharpe_ratio)
 
     print(t_series.rel_profit)
-    print(t_series.rel_multiple)
     print(t_series.rel_growth)
+    print(t_series.rel_multiple)
