@@ -297,5 +297,3 @@ if __name__ == "__main__":
     # print(tester.asset)
     # print(tester.profit)
     print(tester.trix_sign)
-
-    # tester.trix_sign.to_csv(r'test.csv', encoding='euc-kr', index=True)

@@ -53,14 +53,11 @@ def __fetch_etf_returns(tds:dict) -> pd.DataFrame:
 def __fetch_raw_performance(td:str) -> pd.DataFrame:
     performance = pd.read_csv(DIR_PERF, encoding='utf-8', index_col='종목코드')
     performance.index = performance.index.astype(str).str.zfill(6)
-    if str(performance['날짜'][0]) == td:
+    if str(performance['날짜'][0]) == td or (PM_DATE.strftime("%Y%m%d") == td) and C_MARKET_OPEN:
         return performance.drop(columns=['날짜'])
 
     tds = __fetch_trading_dates(td=td)
     performance = pd.concat(objs=[__fetch_stock_returns(tds=tds), __fetch_etf_returns(tds=tds)], axis=0)
-    if (PM_DATE == td) and C_MARKET_OPEN:
-        return performance
-
     performance['날짜'] = td
     performance.to_csv(DIR_PERF, encoding='utf-8', index=True)
     return performance.drop(columns=['날짜'])
