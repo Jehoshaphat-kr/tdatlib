@@ -99,10 +99,9 @@ class interface_market(fetch_market):
         return
 
     def get_axis_data(self, col:str, axis:str) -> pd.DataFrame:
-        data = self.baseline[col].copy()
-        norm = stats.norm.pdf(data, data.mean(), data.std())
-        df = pd.concat(objs=[data, pd.Series(data=norm, index=self.baseline.index, name=f'{axis}norm')], axis=1)
-        return df.sort_values(by=col, ascending=True)
+        data = self.baseline[['종목명', '섹터', '섹터색상', col]].copy()
+        data[f'{axis}norm'] = stats.norm.pdf(data[col], data[col].mean(), data[col].std())
+        return data
 
     def append(self, func) -> pd.DataFrame:
         self.__iscoll__()

@@ -178,6 +178,26 @@ class interface_compare(object):
         )
 
     @property
+    def rel_roc(self) -> pd.DataFrame:
+        """
+        상대 ROC 데이터
+        :return:
+                      삼성전자  SK하이닉스    리노공업    DB하이텍
+        날짜
+        2021-04-12         NaN         NaN         NaN        NaN
+        2021-04-13         NaN         NaN         NaN        NaN
+        2021-04-14         NaN         NaN         NaN        NaN
+        ...                ...         ...         ...        ...
+        2022-04-07 -211.335862 -130.311615 -200.256566 -77.915152
+        2022-04-08 -191.160809 -129.144852 -129.746884 -93.428571
+        2022-04-11 -166.514042 -124.137931 -132.607754 -97.206166
+        """
+        return pd.concat(
+            objs={n: self.__getattribute__(f'__{t}').ta.momentum_roc for n, t in zip(self.names, self.tickers)},
+            axis=1
+        )
+
+    @property
     def rel_vortex(self) -> pd.DataFrame:
         """
         상대 VORTEX 비교 데이터

@@ -347,3 +347,31 @@ def show_trix(
         xaxis3=set_x(title='날짜', label=True), yaxis3=set_y(title='TRIX'),
     )
     return base
+
+def show_ta(
+        name:str,
+        ticker:str,
+        base:go.Figure,
+        ta:pd.DataFrame,
+        indicator:str
+) -> go.Figure:
+
+    scatter = go.Scatter(
+        name=indicator,
+        x=ta.index,
+        y=ta[indicator],
+        visible=True,
+        showlegend=True,
+        hovertemplate='%{x}<br>' + indicator + '%{y:.2f}<extra></extra>'
+    )
+    base.add_trace(scatter, row=3, col=1)
+    base.update_layout(
+        title=f'{name}({ticker}) {indicator}',
+        xaxis3=dict(
+            title='날짜',
+            showgrid=True,
+            gridcolor='lightgrey',
+            autorange=True,
+            tickformat='%Y/%m/%d',
+        )
+    )

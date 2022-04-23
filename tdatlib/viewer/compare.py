@@ -22,7 +22,7 @@ class view_compare(interface_compare):
             for n, name in enumerate(self.names):
                 d = data[(col, name)].dropna()
                 p = price[price.index >= d.index[0]][name]
-                fig.add_trace(go.Scatter(
+                scatter = go.Scatter(
                     name=name,
                     x=d.index,
                     y=d,
@@ -32,7 +32,8 @@ class view_compare(interface_compare):
                     line=dict(color=CD_COLORS[n]),
                     customdata=p,
                     hovertemplate=name + '<br>%{y:.2f}% / %{customdata:,}원<extra></extra>'
-                ))
+                )
+                fig.add_trace(scatter)
 
         steps = []
         for i, gap in enumerate(gaps):
@@ -87,7 +88,7 @@ class view_compare(interface_compare):
             for n, name in enumerate(self.names):
                 d = data[(col, name)].dropna()
                 p = price[price.index >= d.index[0]][name]
-                fig.add_trace(go.Scatter(
+                scatter = go.Scatter(
                     name=name,
                     x=d.index,
                     y=d,
@@ -97,7 +98,8 @@ class view_compare(interface_compare):
                     line=dict(color=CD_COLORS[n]),
                     customdata=p,
                     hovertemplate=name + '<br>%{y:.2f}% / %{customdata:,}원<extra></extra>'
-                ))
+                )
+                fig.add_trace(scatter)
 
         steps = []
         for i, gap in enumerate(gaps):
@@ -161,16 +163,15 @@ class view_compare(interface_compare):
                 mode='lines',
                 line=dict(color=CD_COLORS[n]),
                 legendgroup='RSI',
+                legendgrouptitle=dict(text='RSI 비교') if not n else None,
                 showlegend=True,
                 visible=True,
                 hovertemplate=col + ': %{y:.2f}%<extra></extra>'
             )
-            if not n:
-                scatter.legendgrouptitle = dict(text='RSI 비교')
             fig.add_trace(scatter, row=1, col=1)
         fig.add_hrect(y0=70, y1=90, line_width=0, fillcolor='red', opacity=0.2, row=1, col=1)
-        fig.add_hline(y=80, line_width=0.5, line_dash="dash", line_color="black", row=1, col=1)
         fig.add_hrect(y0=10, y1=30, line_width=0, fillcolor='green', opacity=0.2, row=1, col=1)
+        fig.add_hline(y=80, line_width=0.5, line_dash="dash", line_color="black", row=1, col=1)
         fig.add_hline(y=20, line_width=0.5, line_dash="dash", line_color="black", row=1, col=1)
 
         data = self.rel_stoch.copy()
@@ -182,17 +183,16 @@ class view_compare(interface_compare):
                 mode='lines',
                 line=dict(color=CD_COLORS[n]),
                 legendgroup='Stochastic',
+                legendgrouptitle=dict(text='Stochastic RSI 비교') if not n else None,
                 showlegend=True,
                 visible=True,
                 hovertemplate=col + ': %{y:.2f}[%]<extra></extra>'
             )
-            if not n:
-                scatter.legendgrouptitle = dict(text='Stochastic RSI 비교')
             fig.add_trace(scatter, row=2, col=1)
         fig.add_hrect(y0=80, y1=100, line_width=0, fillcolor='red', opacity=0.2, row=2, col=1)
-        fig.add_hline(y=90, line_width=0.5, line_dash="dash", line_color="black", row=1, col=1)
         fig.add_hrect(y0=0, y1=20, line_width=0, fillcolor='green', opacity=0.2, row=2, col=1)
-        fig.add_hline(y=10, line_width=0.5, line_dash="dash", line_color="black", row=1, col=1)
+        fig.add_hline(y=90, line_width=0.5, line_dash="dash", line_color="black", row=2, col=1)
+        fig.add_hline(y=10, line_width=0.5, line_dash="dash", line_color="black", row=2, col=1)
 
         fig.update_layout(
             title=f'RSI 비교',
@@ -241,11 +241,11 @@ class view_compare(interface_compare):
         return fig
 
     @property
-    def fig_cci_vortex(self) -> go.Figure:
+    def fig_cci_roc(self) -> go.Figure:
         fig = make_subplots(
             rows=2, cols=1,
             vertical_spacing=0.1,
-            subplot_titles=("CCI", "VORTEX"),
+            subplot_titles=("CCI", "ROC"),
             shared_xaxes=True,
             specs=[[{"type": "xy"}], [{"type": "xy"}]]
         )
@@ -259,19 +259,18 @@ class view_compare(interface_compare):
                 mode='lines',
                 line=dict(color=CD_COLORS[n]),
                 showlegend=True,
+                legendgrouptitle=dict(text='CCI 비교') if not n else None,
                 visible=True,
                 legendgroup='CCI',
-                hovertemplate=col + ': %{y:.2f}[-]<extra></extra>'
+                hovertemplate=col + ': %{y:.2f}%<extra></extra>'
             )
-            if not n:
-                scatter.legendgrouptitle = dict(text='CCI 비교')
             fig.add_trace(scatter, row=1, col=1)
         fig.add_hrect(y0=200, y1=400, line_width=0, fillcolor='red', opacity=0.2, row=1, col=1)
         fig.add_hrect(y0=100, y1=200, line_width=0, fillcolor='brown', opacity=0.2, row=1, col=1)
         fig.add_hrect(y0=-200, y1=-100, line_width=0, fillcolor='lightgreen', opacity=0.4, row=1, col=1)
         fig.add_hrect(y0=-400, y1=-200, line_width=0, fillcolor='green', opacity=0.2, row=1, col=1)
 
-        data = self.rel_vortex.copy()
+        data = self.rel_roc.copy()
         for n, col in enumerate(data.columns):
             scatter = go.Scatter(
                 name=f'{col}',
@@ -280,24 +279,60 @@ class view_compare(interface_compare):
                 mode='lines',
                 line=dict(color=CD_COLORS[n]),
                 showlegend=True,
+                legendgrouptitle=dict(text='ROC 비교') if not n else None,
                 visible=True,
                 legendgroup='VORTEX',
-                hovertemplate=col + ': %{y:.2f}[-]<extra></extra>'
+                hovertemplate=col + ': %{y:.2f}%<extra></extra>'
             )
-            if not n :
-                scatter.legendgrouptitle = dict(text='VORTEX 비교')
             fig.add_trace(scatter, row=2, col=1)
+        fig.add_hrect(y0=20, y1=30, line_width=0, fillcolor='red', opacity=0.2, row=2, col=1)
+        fig.add_hrect(y0=10, y1=20, line_width=0, fillcolor='brown', opacity=0.2, row=2, col=1)
+        fig.add_hrect(y0=-20, y1=-10, line_width=0, fillcolor='lightgreen', opacity=0.4, row=2, col=1)
+        fig.add_hrect(y0=-30, y1=-20, line_width=0, fillcolor='green', opacity=0.2, row=2, col=1)
 
         fig.update_layout(
-            title=f'CCI / Vortex',
+            title='CCI / ROC 비교',
             plot_bgcolor='white',
             legend=dict(groupclick="toggleitem"),
-            xaxis=dict(title='', showgrid=True, gridcolor='lightgrey', autorange=True, rangeselector=CD_X_RANGER),
-            xaxis2=dict(title='날짜', showgrid=True, gridcolor='lightgrey', autorange=True),
-            yaxis=dict(title='CCI[%]', showgrid=True, gridcolor='lightgrey', autorange=True,
-                       zeroline=True, zerolinecolor='grey', zerolinewidth=0.5),
-            yaxis2=dict(title='Vortex[-]', showgrid=True, gridcolor='lightgrey', autorange=True,
-                        zeroline=True, zerolinecolor='grey', zerolinewidth=0.5)
+            hovermode="x",
+            hoverlabel=dict(font=dict(color='white')),
+            xaxis=dict(
+                showgrid=True,
+                gridcolor='lightgrey',
+                autorange=True,
+                showticklabels=True,
+                tickformat='%Y/%m/%d',
+                showspikes=True,
+                spikecolor="black",
+                spikesnap="cursor",
+                spikemode="across",
+                spikethickness=0.5,
+                rangeselector=CD_X_RANGER
+            ),
+            xaxis2=dict(
+                title='날짜',
+                showgrid=True,
+                gridcolor='lightgrey',
+                autorange=True,
+                tickformat='%Y/%m/%d',
+                showspikes=True,
+                spikecolor="black",
+                spikesnap="cursor",
+                spikemode="across",
+                spikethickness=0.5
+            ),
+            yaxis=dict(
+                title='CCI[%]',
+                showgrid=True,
+                gridcolor='lightgrey',
+                autorange=True
+            ),
+            yaxis2=dict(
+                title='ROC[%]',
+                showgrid=True,
+                gridcolor='lightgrey',
+                autorange=True
+            )
         )
         return fig
 
@@ -503,7 +538,7 @@ if __name__ == "__main__":
     save(t_compare.fig_returns, filename='00_수익률 비교')
     save(t_compare.fig_drawdown, filename='01_낙폭 비교')
     save(t_compare.fig_rsi, filename='02_RSI 비교')
-    save(t_compare.fig_cci_vortex, filename='03_CCI_VORTEX')
+    save(t_compare.fig_cci_roc, filename='03_CCI_ROC')
     save(t_compare.fig_mfi_bb, filename='04_MFI_B-Sig')
     save(t_compare.fig_sharpe_ratio, filename='05_샤프비율 비교')
     save(t_compare.fig_profit, filename='06_수익성 비교')

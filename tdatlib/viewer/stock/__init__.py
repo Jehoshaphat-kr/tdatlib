@@ -80,6 +80,12 @@ class view_stock(interface_stock):
             save(fig=fig, filename=filename, path=path)
         return
 
+    def ta_display(self, col:str):
+        return show_ta(
+            base=self.__base__(row_width=[0.3, 0.1, 0.6], vertical_spacing=0.02),
+            indicator=self.ta[col]
+        )
+
     @property
     def basic(self) -> go.Figure:
         return self.__show__(
