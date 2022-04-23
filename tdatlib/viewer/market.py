@@ -1,11 +1,54 @@
+from tdatlib.interface.treemap.frame import interface_treemap
 from tdatlib.interface.market import interface_market
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
+import plotly.offline as of
 
 
 class view_market(interface_market):
 
-    def view(self, x:str, y:str) -> go.Figure:
+    def treemap(
+            self,
+            category:str,
+            sub_category:str,
+            key:str='R1D',
+            save:bool or str=False
+    ):
+        """
+        :param category     : 지도 종류
+        :param sub_category : 하위 분류
+        :param key          : 키 값
+        :param save         : 저장 여부
+        :return:
+        """
+        unit = '' if key in ['PER', 'PBR'] else '%'
+        hdlr = interface_treemap(category=category, sub_category=sub_category)
+        frame = hdlr.mapframe
+
+        fig = go.Figure()
+        fig.add_trace(go.Treemap(
+            ids=frame['ID'],
+            labels=frame['종목명'],
+            parents=frame['분류'],
+            values=frame['크기'],
+            marker=dict(colors=frame[f'C{key}']),
+            textfont=dict(color='#ffffff'), textposition='middle center', texttemplate='%{label}<br>%{text}' + unit,
+            meta=frame['시가총액'], customdata=frame['종가'], text=frame[key],
+            branchvalues='total', opacity=0.9,
+            hovertemplate='%{label}<br>시총: %{meta}<br>종가: %{customdata}<br>' + key + ': %{text}' + unit + '<extra></extra>'
+        ))
+
+        title = f'[{hdlr.cat} / {hdlr.mapname}]: {self.td_date} 종가 기준 {key}'
+        fig.update_layout(title=title)
+        # if isinstance(save, bool) and save == True:
+        #     of.plot(fig, filename=rf'./{hdlr.cat}_{hdlr.mapname}.html', auto_open=False)
+        # elif isinstance(save, str):
+        #     of.plot(fig, filename=rf'{save}/{hdlr.cat}_{hdlr.mapname}.html', auto_open=False)
+        # else:
+        #     fig.show()
+        return fig
+
+    def scatter(self, x:str, y:str) -> go.Figure:
         fig = make_subplots(
             rows=2, cols=2,
             row_width=[0.12, 0.88],
@@ -128,7 +171,17 @@ class view_market(interface_market):
         return fig
 
 if __name__ == "__main__":
+    # '1028': '코스피200',
+    # '1003': '코스피 중형주',
+    # '1004': '코스피 소형주',
+    # '2203': '코스닥150',
+    # '2003': '코스닥 중형주'
 
     viewer = view_market()
 
-    viewer.view(x='PER', y='R1D').show()
+    viewer.treemap(
+        category='WICS',
+        sub_category=str(),
+        key='PER',
+    ).show()
+    # viewer.scatter(x='PER', y='R1D').show()

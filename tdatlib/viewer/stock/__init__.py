@@ -14,7 +14,8 @@ from tdatlib.viewer.stock.ohlcv import (
     show_cci,
     show_stc,
     show_vortex,
-    show_trix
+    show_trix,
+    show_ta
 )
 from tdatlib.viewer.stock.value import (
     show_overview,
@@ -82,8 +83,10 @@ class view_stock(interface_stock):
 
     def ta_display(self, col:str):
         return show_ta(
+            ticker=self.ticker, name=self.name,
             base=self.__base__(row_width=[0.3, 0.1, 0.6], vertical_spacing=0.02),
-            indicator=self.ta[col]
+            ta=self.ta,
+            indicator=col
         )
 
     @property
@@ -221,7 +224,7 @@ class view_stock(interface_stock):
 
 
 if __name__ == "__main__":
-    ticker = '001680'
+    ticker = '253450'
     # ticker = 'ARKG'
     viewer = view_stock(ticker=ticker, period=5)
 
@@ -236,10 +239,12 @@ if __name__ == "__main__":
     # save(fig=viewer.cci, filename=f'{viewer.name}_기술_06_CCI')
     # save(fig=viewer.vortex, filename=f'{viewer.name}_기술_07_VORTEX')
     # save(fig=viewer.stc, filename=f'{viewer.name}_기술_08_STC')
-    save(fig=viewer.trix, filename=f'{viewer.name}_기술_09_TRIX')
+    # save(fig=viewer.trix, filename=f'{viewer.name}_기술_09_TRIX')
     
     # save(fig=viewer.overview, filename=f'{viewer.name}_기본_01_기업개요')
     # save(fig=viewer.relative, filename=f'{viewer.name}_기본_02_벤치마크')
     # save(fig=viewer.supply, filename=f'{viewer.name}_기본_03_수급현황')
     # save(fig=viewer.cost, filename=f'{viewer.name}_기본_04_비용처리')
     # save(fig=viewer.multiples, filename=f'{viewer.name}_기본_05_투자배수')
+
+    viewer.ta_display(col='volatility_ui').show()

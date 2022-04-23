@@ -362,7 +362,7 @@ def show_ta(
         y=ta[indicator],
         visible=True,
         showlegend=True,
-        hovertemplate='%{x}<br>' + indicator + '%{y:.2f}<extra></extra>'
+        hovertemplate='%{x}<br>' + indicator + ': %{y:.2f}<extra></extra>'
     )
     base.add_trace(scatter, row=3, col=1)
     base.update_layout(
@@ -373,5 +373,13 @@ def show_ta(
             gridcolor='lightgrey',
             autorange=True,
             tickformat='%Y/%m/%d',
+        ),
+        yaxis3=dict(
+            title=f'{indicator}',
+            showgrid=True,
+            gridcolor='lightgrey',
+            autorange=True
         )
     )
+    return base
+

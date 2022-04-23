@@ -11,7 +11,7 @@ CD_INDEX = {
     '2003': '코스닥 중형주'
 }
 
-class frame(object):
+class interface_treemap(object):
 
     def __init__(self, category:str, sub_category:str=str(), market_data=None):
         self.market = market_data if isinstance(market_data, fetch_market) else fetch_market()

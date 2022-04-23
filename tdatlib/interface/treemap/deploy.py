@@ -1,4 +1,4 @@
-from tdatlib.interface.treemap.frame import frame
+from tdatlib.interface.treemap.frame import interface_treemap
 from tdatlib.fetch.market import fetch_market
 from datetime import datetime
 from pytz import timezone
@@ -40,7 +40,7 @@ class deploy(object):
     def __init__(self):
         market_data = fetch_market()
         for n, (c, s, var) in enumerate(CD_CATEGORY):
-            treemap = frame(category=c, sub_category=s, market_data=market_data)
+            treemap = interface_treemap(category=c, sub_category=s, market_data=market_data)
             print(f'[{n + 1}/{len(CD_CATEGORY)}] {c} / {treemap.mapname}')
 
             map_data = treemap.mapframe.copy()
