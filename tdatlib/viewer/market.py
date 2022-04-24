@@ -179,9 +179,9 @@ if __name__ == "__main__":
 
     viewer = view_market()
 
-    viewer.treemap(
-        category='WICS',
-        sub_category=str(),
-        key='PER',
-    ).show()
-    # viewer.scatter(x='PER', y='R1D').show()
+    # viewer.treemap(
+    #     category='WICS',
+    #     sub_category=str(),
+    #     key='PER',
+    # ).show()
+    viewer.scatter(x='R1D', y='R1Y').show()

@@ -21,6 +21,11 @@ from tdatlib.interface.stock.value import (
 import pandas as pd
 
 
+def ta_cols() -> pd.DataFrame:
+    from tdatlib.fetch.archive import root
+    return pd.read_csv(f'{root}/tacols.csv', encoding='utf-8').fillna('x')
+
+
 class interface_stock(fetch_stock):
 
     def __calc__(self, p: str, fname: str = str(), **kwargs):
@@ -317,6 +322,8 @@ if __name__ == "__main__":
     # t_ticker = 'TSLA'
     t_ticker = '001680'
 
+    # print(ta_cols())
+
     tester = interface_stock(ticker=t_ticker)
     # print(tester.ta)
     # print(tester.rr)
@@ -334,4 +341,4 @@ if __name__ == "__main__":
     # print(tester.asset)
     # print(tester.profit)
     # print(tester.trix_sign)
-    print(tester.ta.columns)
+    # print(tester.ta.columns)

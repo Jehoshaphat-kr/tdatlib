@@ -225,11 +225,11 @@ class view_stock(interface_stock):
 
 if __name__ == "__main__":
     ticker = '253450'
-    # ticker = 'ARKG'
+    # ticker = 'TSLA'
     viewer = view_stock(ticker=ticker, period=5)
 
-    # viewer.collect_techical_analysis()
-    # viewer.collect_fundamental_analysis()
+    viewer.collect_techical_analysis()
+    viewer.collect_fundamental_analysis()
 
     # save(fig=viewer.basic, filename=f'{viewer.name}_기술_01_기본형')
     # save(fig=viewer.bollinger_band, filename=f'{viewer.name}_기술_02_볼린저밴드')
@@ -247,4 +247,4 @@ if __name__ == "__main__":
     # save(fig=viewer.cost, filename=f'{viewer.name}_기본_04_비용처리')
     # save(fig=viewer.multiples, filename=f'{viewer.name}_기본_05_투자배수')
 
-    viewer.ta_display(col='volatility_ui').show()
+    # viewer.ta_display(col='volatility_ui').show()
