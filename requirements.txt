@@ -12,3 +12,4 @@ ta
 yfinance
 tqdm
 pytz
+matplotlib
