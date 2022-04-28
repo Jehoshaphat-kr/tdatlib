@@ -1,10 +1,11 @@
+from tdatlib.interface.toolkit import fit_timeseries
+from ta import add_all_ta_features
+from datetime import timedelta
+# from scipy.stats import linregress
+from scipy.signal import butter, filtfilt
 import pandas as pd
 import math, warnings
 import numpy as np
-from ta import add_all_ta_features
-from datetime import timedelta
-from scipy.stats import linregress
-from scipy.signal import butter, filtfilt
 warnings.simplefilter(action='ignore', category=FutureWarning)
 np.seterr(divide='ignore', invalid='ignore')
 
@@ -86,10 +87,17 @@ def calc_trix_sign(ta:pd.DataFrame) -> pd.DataFrame:
     calc['Bottom'] = bottom
     return calc.drop(columns=['Temp'])
 
+def calc_avg_trend(ohlcv:pd.DataFrame) -> pd.DataFrame:
+    objs = list()
+    for gap, days in [('2M', 61), ('3M', 92), ('6M', 183), ('1Y', 365)]:
+        since = ohlcv.index[-1] - timedelta(days)
+        basis = ohlcv[ohlcv.index >= since]
+        fit, _ = fit_timeseries(series=0.25 * (basis.시가 + basis.고가 + basis.저가 + basis.종가))
+        objs.append(fit.rename(columns={'Regression':gap}))
+    return pd.concat(objs=objs, axis=1)
+
 
 class calc_trend(object):
-
-    __avg_slope = dict()
 
     def __init__(self, ohlcv: pd.DataFrame):
         self.ohlcv = ohlcv
@@ -130,30 +138,6 @@ class calc_trend(object):
         r_error = math.sqrt((r_regress - price[key]).pow(2).sum())
         l_error = math.sqrt((l_regress - price[key]).pow(2).sum())
         return r_regress if r_error < l_error else l_regress
-
-    @property
-    def avg(self) -> pd.DataFrame:
-        if hasattr(self, '__avg'):
-            return self.__getattribute__('__avg')
-
-        objs = dict()
-        for gap, days in [('2M', 61), ('3M', 92), ('6M', 183), ('1Y', 365)]:
-            since = self.ohlcv.index[-1] - timedelta(days)
-            price = self.ohlcv[self.ohlcv.index >= since].reset_index(level=0).copy()
-            price['N'] = (price.날짜.diff()).dt.days.fillna(1).astype(int).cumsum()
-            price.set_index(keys='날짜', inplace=True)
-
-            price['Y'] = 0.25 * price.시가 + 0.25 * price.고가 + 0.25 * price.저가 + 0.25 * price.종가
-            self.__avg_slope[gap], i, _, _, _ = linregress(x=price.N, y=price.Y)
-            objs[gap] = self.__avg_slope[gap] * price.N + i
-        self.__setattr__('__avg', pd.concat(objs=objs, axis=1))
-        return self.__getattribute__('__avg')
-
-    @property
-    def avg_slope(self) -> dict:
-        if not self.__avg_slope:
-            _ = self.avg
-        return self.__avg_slope
 
     @property
     def bound(self) -> pd.DataFrame:

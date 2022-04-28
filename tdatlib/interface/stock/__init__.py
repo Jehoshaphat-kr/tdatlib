@@ -11,6 +11,7 @@ from tdatlib.interface.stock.ohlcv import (
     calc_cagr,
     calc_perf,
     calc_fiftytwo,
+    calc_avg_trend,
     calc_trend,
     calc_trix_sign
 )
@@ -232,7 +233,7 @@ class interface_stock(fetch_stock):
         2022-04-15  23436.252573  23335.154925  22549.787845  21481.016210
         2022-04-18  23498.877202  23380.967073  22533.141929  21424.600493
         """
-        return self.__calc__(inner().f_code.co_name, fname='trend', ohlcv=self.ohlcv).avg
+        return self.__calc__(inner().f_code.co_name, ohlcv=self.ohlcv)
 
     @property
     def avg_slope(self) -> dict:
@@ -335,7 +336,7 @@ if __name__ == "__main__":
     # print(tester.cagr)
     # print(tester.volatility)
     # print(tester.fiftytwo)
-    # print(tester.avg_trend)
+    print(tester.avg_trend)
     # print(tester.avg_slope)
     # print(tester.bnd_trend)
     # print(tester.asset)

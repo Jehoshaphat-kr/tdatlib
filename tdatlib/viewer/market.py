@@ -1,8 +1,8 @@
 from tdatlib.interface.treemap.frame import interface_treemap
 from tdatlib.interface.market import interface_market
+from tdatlib.viewer.common import save
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
-import plotly.offline as of
 
 
 class view_market(interface_market):
@@ -12,7 +12,6 @@ class view_market(interface_market):
             category:str,
             sub_category:str,
             key:str='R1D',
-            save:bool or str=False
     ):
         """
         :param category     : 지도 종류
@@ -40,12 +39,6 @@ class view_market(interface_market):
 
         title = f'[{hdlr.cat} / {hdlr.mapname}]: {self.td_date} 종가 기준 {key}'
         fig.update_layout(title=title)
-        # if isinstance(save, bool) and save == True:
-        #     of.plot(fig, filename=rf'./{hdlr.cat}_{hdlr.mapname}.html', auto_open=False)
-        # elif isinstance(save, str):
-        #     of.plot(fig, filename=rf'{save}/{hdlr.cat}_{hdlr.mapname}.html', auto_open=False)
-        # else:
-        #     fig.show()
         return fig
 
     def scatter(self, x:str, y:str) -> go.Figure:
@@ -115,6 +108,8 @@ class view_market(interface_market):
         )
 
         fig.add_trace(trace_main, row=1, col=2)
+        fig.add_vline(x=x_data.mean(), row=1, col=2, line_width=0.5, line_dash="dash", line_color="black")
+        fig.add_vline(x=y_data.mean(), row=1, col=2, line_width=0.5, line_dash="dash", line_color="black")
         fig.add_trace(trace_y, row=1, col=1)
         fig.add_trace(trace_x, row=2, col=2)
         fig.update_layout(
@@ -179,9 +174,40 @@ if __name__ == "__main__":
 
     viewer = view_market()
 
-    # viewer.treemap(
-    #     category='WICS',
-    #     sub_category=str(),
-    #     key='PER',
-    # ).show()
-    viewer.scatter(x='R1D', y='R1Y').show()
+    # save(
+    #     fig=viewer.treemap(
+    #         category='WICS',
+    #         sub_category=str(),
+    #         key='PER',
+    #     ),
+    #     filename=f'{viewer.td_date}_시장지도'
+    # )
+
+    from tdatlib import normalize, fit_timeseries
+    from tqdm import tqdm
+    import pandas as pd
+
+    def attr(obj: object, target: list):
+        attribs = list()
+        proc = tqdm(target)
+        for ticker in proc:
+            proc.set_description(desc=f'Set Attribute ... {ticker}')
+            attr = getattr(obj, f'A{ticker}')
+
+            # This is where you put external attributs
+            data = dict()
+            for lb, n in (('S1W', 5), ('S2W', 10), ('S1M', 20), ('S2M', 40), ('S3M', 60), ('S6M', 80)):
+                price = attr.ohlcv[-(n+1):]
+                series = 0.25 * (price.시가 + price.종가 + price.고가 + price.저가)
+                _, s = fit_timeseries(series=series, rel=True)
+                data[lb] = s
+            attribs.append(pd.DataFrame(data=data, index=[ticker]))
+        # return pd.Series(data=attribs, index=target, name='pt_mfi')
+        return pd.concat(objs=attribs, axis=0)
+    viewer.append(func=attr)
+
+    save(fig=viewer.scatter(x='S2W', y='S1W'), filename=f'산포도_S2W_S1W')
+    save(fig=viewer.scatter(x='S1M', y='S1W'), filename=f'산포도_S1M_S1W')
+    save(fig=viewer.scatter(x='S2M', y='S1W'), filename=f'산포도_S2M_S1W')
+    save(fig=viewer.scatter(x='S3M', y='S2W'), filename=f'산포도_S3M_S2W')
+    save(fig=viewer.scatter(x='S6M', y='S2W'), filename=f'산포도_S6M_S2W')

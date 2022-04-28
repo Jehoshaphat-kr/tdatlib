@@ -1,8 +1,9 @@
+from typing import Union
 from scipy.stats import linregress
 import pandas as pd
 
 
-def normalize(series:pd.Series, lim:list | tuple=None) -> pd.Series:
+def normalize(series:pd.Series, lim:Union[list, tuple]=None) -> pd.Series:
     """
     :param series : 시계열(index 날짜/시간) 1D 데이터
     :param lim    : 정규화 범위
