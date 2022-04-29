@@ -103,10 +103,10 @@ class interface_market(fetch_market):
         data[f'{axis}norm'] = stats.norm.pdf(data[col], data[col].mean(), data[col].std())
         return data
 
-    def append(self, func) -> pd.DataFrame:
+    def append(self, func) -> None:
         self.__iscoll__()
         self.__setattr__('__baseline', pd.concat(objs=[self.baseline, func(obj=self, target=self.target)], axis=1))
-        return self.__getattribute__('__baseline')
+        return
 
     @property
     def target(self) -> list:
