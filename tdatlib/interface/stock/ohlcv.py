@@ -136,10 +136,15 @@ def calc_backtest_return(ohlcv_ans:pd.DataFrame) -> pd.DataFrame:
     if ohlcv_ans.empty:
         return pd.DataFrame()
     if len(ohlcv_ans) > 20:
-        ohlcv_ans = ohlcv_ans[:20]
-    o = float(ohlcv_ans.시가[0])
-    print(o)
-    return pd.DataFrame()
+        ohlcv_ans = ohlcv_ans[:20].copy()
+
+    ohlcv_ans['등락'] = round(100 * ohlcv_ans['종가'].pct_change().fillna(0), 2)
+
+    span = ohlcv_ans[['시가', '고가', '저가', '종가']].values.flatten()
+    returns = [round(100 * (p / span[0] - 1), 2) for p in span]
+    ohlcv_ans['MAX20TD'] = max(returns)
+    ohlcv_ans['MIN20TD'] = min(returns)
+    return ohlcv_ans[['시가', '고가', '저가', '종가', '등락', 'MAX20TD', 'MIN20TD']]
 
 # def calc_trix_sign(ta:pd.DataFrame) -> pd.DataFrame:
 #     trix = ta.trend_trix

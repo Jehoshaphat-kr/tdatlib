@@ -410,7 +410,8 @@ if __name__ == "__main__":
     # '2203': '코스닥150',
     # '2003': '코스닥 중형주'
 
-    viewer = view_market()
+    # viewer = view_market()
+    viewer = view_market(date='20210430')
 
     # save(
     #     fig=viewer.treemap(
