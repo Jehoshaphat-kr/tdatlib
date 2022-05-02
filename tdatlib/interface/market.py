@@ -124,10 +124,10 @@ class interface_market(fetch_market):
         if not hasattr(self, '__baseline'):
             self.__iscoll__()
             wics = self.wics[self.wics.index.isin(self.target)][['종목명', '섹터']].copy()
-            icm  = self.icm.drop(columns=['종목명'])
+            icm  = self.icm.drop(columns=['종목명', '거래대금', '상장주식수', 'BPS', 'DPS'])
             perf = self.performance(tickers=self.target)
             df = wics.join(icm, how='left').join(perf, how='left')
-            df['시가총액'] = np.log(df.시가총액)
+            df['시가총액'] = round(np.log(df.시가총액), 2)
             colors = dict(zip(df.섹터.drop_duplicates().tolist(), CD_COLORS))
             df['섹터색상'] = df.섹터.apply(lambda x:colors[x])
             self.__setattr__('__baseline', df)
