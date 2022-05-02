@@ -46,7 +46,7 @@ class view_market(interface_market):
         fig.update_layout(title=title)
         return fig
 
-    def scatter(self, x:str, y:str) -> go.Figure:
+    def scatter(self, x:str, y:str, xu:str, yu:str) -> go.Figure:
         fig = make_subplots(
             rows=2, cols=2,
             row_width=[0.12, 0.88],
@@ -56,6 +56,7 @@ class view_market(interface_market):
             vertical_spacing=0,
             horizontal_spacing=0
         )
+        hov = '%{meta}(%{text})<br>업종: %{customdata}<br>'
 
         x_data = self.get_axis_data(col=x, axis='x')
         y_data = self.get_axis_data(col=y, axis='y')
@@ -77,7 +78,7 @@ class view_market(interface_market):
             meta=data.종목명,
             customdata=data.섹터,
             text=data.index,
-            hovertemplate='%{meta}(%{text})<br>업종: %{customdata}<br>' + x + ': %{x:.2f}%<br>' + y + ': %{y:.2f}%<extra></extra>'
+            hovertemplate=hov + x + ': %{x:.2f}' + xu + '<br>' + y + ': %{y:.2f}' + yu + '<extra></extra>'
         )
 
         trace_x = go.Scatter(
@@ -93,7 +94,7 @@ class view_market(interface_market):
             meta=x_data.종목명,
             customdata=x_data.섹터,
             text=x_data.index,
-            hovertemplate='%{meta}(%{text})<br>업종: %{customdata}<br>' + x + ': %{x:.2f}%<extra></extra>'
+            hovertemplate=hov + x + ': %{x:.2f}' + xu + '<extra></extra>'
         )
 
         trace_y = go.Scatter(
@@ -109,7 +110,7 @@ class view_market(interface_market):
             meta=y_data.종목명,
             customdata=y_data.섹터,
             text=y_data.index,
-            hovertemplate='%{meta}(%{text})<br>업종: %{customdata}<br>' + y + ': %{y:.2f}%<extra></extra>'
+            hovertemplate=hov + y + ': %{y:.2f}' + yu + '<extra></extra>'
         )
 
         fig.add_trace(trace_main, row=1, col=2)
@@ -177,12 +178,13 @@ class view_market(interface_market):
             x3:str, y3:str, x3u:str, y3u:str,
             x4:str, y4:str, x4u:str, y4u:str,
     ) -> go.Figure:
+
         fig = make_subplots(
             rows=2, cols=2,
             row_width=[0.5, 0.5],
             column_width=[0.5, 0.5],
             vertical_spacing=0.1,
-            horizontal_spacing=0.1
+            horizontal_spacing=0.06
         )
         hov = '%{meta}(%{text})<br>업종: %{customdata}<br>'
 
@@ -205,6 +207,9 @@ class view_market(interface_market):
             text=data.index,
             hovertemplate=hov + x1 + ': %{x:.2f}' + x1u + '<br>' + y1 + ': %{y:.2f}' + y1u + '<extra></extra>'
         )
+        fig.add_trace(trace=trace_nw, row=1, col=1)
+        fig.add_vline(x=data[x1].mean(), row=1, col=1, line_width=0.5, line_dash="dash", line_color="black")
+        fig.add_hline(y=data[y1].mean(), row=1, col=1, line_width=0.5, line_dash="dash", line_color="black")
 
         trace_ne = go.Scatter(
             name='ne',
@@ -224,9 +229,178 @@ class view_market(interface_market):
             text=data.index,
             hovertemplate=hov + x2 + ': %{x:.2f}' + x2u + '<br>' + y2 + ': %{y:.2f}' + y2u + '<extra></extra>'
         )
-
-        fig.add_trace(trace=trace_nw, row=1, col=1)
         fig.add_trace(trace=trace_ne, row=1, col=2)
+        fig.add_vline(x=data[x2].mean(), row=1, col=2, line_width=0.5, line_dash="dash", line_color="black")
+        fig.add_hline(y=data[y2].mean(), row=1, col=2, line_width=0.5, line_dash="dash", line_color="black")
+
+        trace_sw = go.Scatter(
+            name='sw',
+            x=data[x3], y=data[y3],
+            mode='markers',
+            marker=dict(
+                color=data.섹터색상,
+                size=data.시가총액 / 4,
+                symbol='circle',
+                line=dict(width=0)
+            ),
+            opacity=1.0,
+            visible=True,
+            showlegend=False,
+            meta=data.종목명,
+            customdata=data.섹터,
+            text=data.index,
+            hovertemplate=hov + x3 + ': %{x:.2f}' + x3u + '<br>' + y3 + ': %{y:.2f}' + y3u + '<extra></extra>'
+        )
+        fig.add_trace(trace=trace_sw, row=2, col=1)
+        fig.add_vline(x=data[x3].mean(), row=2, col=1, line_width=0.5, line_dash="dash", line_color="black")
+        fig.add_hline(y=data[y3].mean(), row=2, col=1, line_width=0.5, line_dash="dash", line_color="black")
+
+        trace_se = go.Scatter(
+            name='se',
+            x=data[x4], y=data[y4],
+            mode='markers',
+            marker=dict(
+                color=data.섹터색상,
+                size=data.시가총액 / 4,
+                symbol='circle',
+                line=dict(width=0)
+            ),
+            opacity=1.0,
+            visible=True,
+            showlegend=False,
+            meta=data.종목명,
+            customdata=data.섹터,
+            text=data.index,
+            hovertemplate=hov + x4 + ': %{x:.2f}' + x4u + '<br>' + y4 + ': %{y:.2f}' + y4u + '<extra></extra>'
+        )
+        fig.add_trace(trace=trace_se, row=2, col=2)
+        fig.add_vline(x=data[x4].mean(), row=2, col=2, line_width=0.5, line_dash="dash", line_color="black")
+        fig.add_hline(y=data[y4].mean(), row=2, col=2, line_width=0.5, line_dash="dash", line_color="black")
+
+        fig.update_layout(
+            plot_bgcolor='white',
+            margin=dict(l=20, r=20, t=40, b=10),
+            xaxis=dict(
+                title=f'{x1}[{x1u}]',
+                showticklabels=True,
+                autorange=True,
+                showgrid=True,
+                gridcolor='lightgrey',
+                gridwidth=0.5,
+                zeroline=True,
+                zerolinecolor='lightgrey',
+                zerolinewidth=0.5,
+                showline=True,
+                linewidth=1,
+                linecolor='grey',
+                mirror=False
+            ),
+            yaxis=dict(
+                title=f'{y1}[{y1u}]',
+                showticklabels=True,
+                autorange=True,
+                showgrid=True,
+                gridcolor='lightgrey',
+                gridwidth=0.5,
+                zeroline=True,
+                zerolinecolor='lightgrey',
+                zerolinewidth=0.5,
+                showline=True,
+                linewidth=1,
+                linecolor='grey',
+                mirror=False
+            ),
+            xaxis2=dict(
+                title=f'{x2}[{x2u}]',
+                showticklabels=True,
+                autorange=True,
+                showgrid=True,
+                gridcolor='lightgrey',
+                gridwidth=0.5,
+                zeroline=True,
+                zerolinecolor='lightgrey',
+                zerolinewidth=0.5,
+                showline=True,
+                linewidth=1,
+                linecolor='grey',
+                mirror=False
+            ),
+            yaxis2=dict(
+                title=f'{y2}[{y2u}]',
+                showticklabels=True,
+                autorange=True,
+                showgrid=True,
+                gridcolor='lightgrey',
+                gridwidth=0.5,
+                zeroline=True,
+                zerolinecolor='lightgrey',
+                zerolinewidth=0.5,
+                showline=True,
+                linewidth=1,
+                linecolor='grey',
+                mirror=False
+            ),
+            xaxis3=dict(
+                title=f'{x3}[{x3u}]',
+                showticklabels=True,
+                autorange=True,
+                showgrid=True,
+                gridcolor='lightgrey',
+                gridwidth=0.5,
+                zeroline=True,
+                zerolinecolor='lightgrey',
+                zerolinewidth=0.5,
+                showline=True,
+                linewidth=1,
+                linecolor='grey',
+                mirror=False
+            ),
+            yaxis3=dict(
+                title=f'{y3}[{y3u}]',
+                showticklabels=True,
+                autorange=True,
+                showgrid=True,
+                gridcolor='lightgrey',
+                gridwidth=0.5,
+                zeroline=True,
+                zerolinecolor='lightgrey',
+                zerolinewidth=0.5,
+                showline=True,
+                linewidth=1,
+                linecolor='grey',
+                mirror=False
+            ),
+            xaxis4=dict(
+                title=f'{x4}[{x4u}]',
+                showticklabels=True,
+                autorange=True,
+                showgrid=True,
+                gridcolor='lightgrey',
+                gridwidth=0.5,
+                zeroline=True,
+                zerolinecolor='lightgrey',
+                zerolinewidth=0.5,
+                showline=True,
+                linewidth=1,
+                linecolor='grey',
+                mirror=False
+            ),
+            yaxis4=dict(
+                title=f'{y4}[{y4u}]',
+                showticklabels=True,
+                autorange=True,
+                showgrid=True,
+                gridcolor='lightgrey',
+                gridwidth=0.5,
+                zeroline=True,
+                zerolinecolor='lightgrey',
+                zerolinewidth=0.5,
+                showline=True,
+                linewidth=1,
+                linecolor='grey',
+                mirror=False
+            ),
+        )
         return fig
 
 if __name__ == "__main__":
@@ -275,3 +449,10 @@ if __name__ == "__main__":
     # save(fig=viewer.scatter(x='S2M', y='S1W'), filename=f'산포도_S2M_S1W')
     # save(fig=viewer.scatter(x='S3M', y='S2W'), filename=f'산포도_S3M_S2W')
     # save(fig=viewer.scatter(x='S6M', y='S2W'), filename=f'산포도_S6M_S2W')
+
+    viewer.scatter2x2(
+        x1='R1Y', y1='R6M', x1u='%', y1u='%',
+        x2='R6M', y2='R3M', x2u='%', y2u='%',
+        x3='R3M', y3='R1M', x3u='%', y3u='%',
+        x4='R1M', y4='R1W', x4u='%', y4u='%',
+    ).show()

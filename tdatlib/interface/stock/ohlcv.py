@@ -13,6 +13,42 @@ np.seterr(divide='ignore', invalid='ignore')
 PM_KEY = '종가'
 
 
+def _calc_edge_line(price:pd.DataFrame, key:str) -> pd.Series:
+    tip_v = price[key].max() if key == '고가' else price[key].min()
+    tip = price[price[key] == tip_v]
+    tip_i, tip_n = tip.index[-1], tip['N'].values[-1]
+    regression = lambda x, y: ((y - tip_v) / (x - tip_n), y - ((y - tip_v) / (x - tip_n)) * x)
+
+    r_cond, l_cond = price.index > tip_i, price.index < tip_i
+    r_side = price[r_cond].drop_duplicates(keep='last').sort_values(by=key, ascending=not key == '고가')
+    l_side = price[l_cond].drop_duplicates(keep='first').sort_values(by=key, ascending=not key == '고가')
+
+    r_regress, l_regress = pd.Series(dtype=float), pd.Series(dtype=float)
+    for n, side in enumerate((r_side, l_side)):
+        n_prev = len(price)
+        for x, y in zip(side.N, side[key]):
+            slope, intercept = regression(x=x, y=y)
+            regress = slope * price.N + intercept
+            cond = \
+                price[key] >= regress if key == '고가' else price[key] <= regress
+
+            n_curr = len(price[cond])
+            if n_curr < n_prev and n_curr < 3:
+                if n:
+                    l_regress = regress
+                else:
+                    r_regress = regress
+                break
+            n_prev = n_curr
+
+    if r_regress.empty:
+        return l_regress
+    if l_regress.empty:
+        return r_regress
+    r_error = math.sqrt((r_regress - price[key]).pow(2).sum())
+    l_error = math.sqrt((l_regress - price[key]).pow(2).sum())
+    return r_regress if r_error < l_error else l_regress
+
 def calc_ta(ohlcv:pd.DataFrame) -> pd.DataFrame:
     return add_all_ta_features(ohlcv.copy(), open='시가', close='종가', low='저가', high='고가', volume='거래량')
 
@@ -71,22 +107,6 @@ def calc_fiftytwo(ohlcv:pd.DataFrame, ticker:str) -> pd.DataFrame:
     by_max, by_min = round(100 * (close/_max - 1), 2), round(100 * (close/_min - 1), 2)
     return pd.DataFrame(data={'52H': _max, '52L': _min, 'pct52H': by_max, 'pct52L': by_min}, index=[ticker])
 
-def calc_trix_sign(ta:pd.DataFrame) -> pd.DataFrame:
-    trix = ta.trend_trix
-    signal = trix.iloc[np.where(np.diff(np.sign(np.array(trix))))[0]]
-    raw_bottom = trix.iloc[np.where(np.diff(np.sign(np.array(trix.diff()))))[0]]
-    calc = pd.concat(objs={'trix':trix, 'Signal': signal, 'Temp':raw_bottom}, axis=1)
-
-    bottom = list()
-    for i in range(len(calc)):
-        if np.isnan(calc.iloc[i]['Temp']):
-            bottom.append(np.nan)
-            continue
-        bottom.append(calc.iloc[i]['trix'] if calc.iloc[i-1]['trix'] > calc.iloc[i]['trix'] else np.nan)
-
-    calc['Bottom'] = bottom
-    return calc.drop(columns=['Temp'])
-
 def calc_avg_trend(ohlcv:pd.DataFrame) -> pd.DataFrame:
     objs = list()
     for gap, days in [('2M', 61), ('3M', 92), ('6M', 183), ('1Y', 365)]:
@@ -96,62 +116,43 @@ def calc_avg_trend(ohlcv:pd.DataFrame) -> pd.DataFrame:
         objs.append(fit.rename(columns={'Regression':gap}))
     return pd.concat(objs=objs, axis=1)
 
+def calc_bound(ohlcv:pd.DataFrame) -> pd.DataFrame:
+    objs = dict()
+    for gap, days in [('2M', 61), ('3M', 92), ('6M', 183), ('1Y', 365)]:
+        since = ohlcv.index[-1] - timedelta(days)
+        price = ohlcv[ohlcv.index >= since].reset_index(level=0).copy()
+        price['N'] = (price.날짜.diff()).dt.days.fillna(1).astype(int).cumsum()
+        price.set_index(keys='날짜', inplace=True)
 
-class calc_trend(object):
+        objs[gap] = pd.concat(
+            objs={
+                'resist': _calc_edge_line(price=price, key='고가'),
+                'support': _calc_edge_line(price=price, key='저가')
+            }, axis=1
+        )
+    return pd.concat(objs=objs, axis=1)
 
-    def __init__(self, ohlcv: pd.DataFrame):
-        self.ohlcv = ohlcv
-        return
+def calc_backtest_return(ohlcv_ans:pd.DataFrame) -> pd.DataFrame:
+    if ohlcv_ans.empty:
+        return pd.DataFrame()
+    if len(ohlcv_ans) > 20:
+        ohlcv_ans = ohlcv_ans[:20]
+    o = float(ohlcv_ans.시가[0])
+    print(o)
+    return pd.DataFrame()
 
-    @staticmethod
-    def calcEdgeLine(price: pd.DataFrame, key: str) -> pd.Series:
-        tip_v = price[key].max() if key == '고가' else price[key].min()
-        tip = price[price[key] == tip_v]
-        tip_i, tip_n = tip.index[-1], tip['N'].values[-1]
-        regression = lambda x, y: ((y - tip_v) / (x - tip_n), y - ((y - tip_v) / (x - tip_n)) * x)
-
-        r_cond, l_cond = price.index > tip_i, price.index < tip_i
-        r_side = price[r_cond].drop_duplicates(keep='last').sort_values(by=key, ascending=not key == '고가')
-        l_side = price[l_cond].drop_duplicates(keep='first').sort_values(by=key, ascending=not key == '고가')
-
-        r_regress, l_regress = pd.Series(dtype=float), pd.Series(dtype=float)
-        for n, side in enumerate((r_side, l_side)):
-            n_prev = len(price)
-            for x, y in zip(side.N, side[key]):
-                slope, intercept = regression(x=x, y=y)
-                regress = slope * price.N + intercept
-                cond = price[key] >= regress if key == '고가' else price[key] <= regress
-
-                n_curr = len(price[cond])
-                if n_curr < n_prev and n_curr < 3:
-                    if n:
-                        l_regress = regress
-                    else:
-                        r_regress = regress
-                    break
-                n_prev = n_curr
-
-        if r_regress.empty:
-            return l_regress
-        if l_regress.empty:
-            return r_regress
-        r_error = math.sqrt((r_regress - price[key]).pow(2).sum())
-        l_error = math.sqrt((l_regress - price[key]).pow(2).sum())
-        return r_regress if r_error < l_error else l_regress
-
-    @property
-    def bound(self) -> pd.DataFrame:
-        objs = dict()
-        for gap, days in [('2M', 61), ('3M', 92), ('6M', 183), ('1Y', 365)]:
-            since = self.ohlcv.index[-1] - timedelta(days)
-            price = self.ohlcv[self.ohlcv.index >= since].reset_index(level=0).copy()
-            price['N'] = (price.날짜.diff()).dt.days.fillna(1).astype(int).cumsum()
-            price.set_index(keys='날짜', inplace=True)
-
-            objs[gap] = pd.concat(
-                objs={
-                    'resist': self.calcEdgeLine(price=price, key='고가'),
-                    'support': self.calcEdgeLine(price=price, key='저가')
-                }, axis=1
-            )
-        return pd.concat(objs=objs, axis=1)
+# def calc_trix_sign(ta:pd.DataFrame) -> pd.DataFrame:
+#     trix = ta.trend_trix
+#     signal = trix.iloc[np.where(np.diff(np.sign(np.array(trix))))[0]]
+#     raw_bottom = trix.iloc[np.where(np.diff(np.sign(np.array(trix.diff()))))[0]]
+#     calc = pd.concat(objs={'trix':trix, 'Signal': signal, 'Temp':raw_bottom}, axis=1)
+#
+#     bottom = list()
+#     for i in range(len(calc)):
+#         if np.isnan(calc.iloc[i]['Temp']):
+#             bottom.append(np.nan)
+#             continue
+#         bottom.append(calc.iloc[i]['trix'] if calc.iloc[i-1]['trix'] > calc.iloc[i]['trix'] else np.nan)
+#
+#     calc['Bottom'] = bottom
+#     return calc.drop(columns=['Temp'])

@@ -97,7 +97,7 @@ class view_stock(interface_stock):
             base=self.__base__(row_width=[0.15, 0.85], vertical_spacing=0.02),
             sma=self.sma,
             trend=self.avg_trend,
-            bound=self.bnd_trend
+            bound=self.bound
         )
 
     @property

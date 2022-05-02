@@ -1,8 +1,10 @@
+from tdatlib.fetch.archive import root
 from datetime import datetime, timedelta
 from pytz import timezone
 from pykrx import stock
 import yfinance as yf
 import pandas as pd
+import os
 
 
 def fetch_currency(ticker:str) -> str:
@@ -21,7 +23,7 @@ def fetch_name(ticker:str) -> str:
         return name
 
 
-def fetch_ohlcv(ticker:str, period:int=5) -> pd.DataFrame:
+def fetch_ohlcv_raw(ticker:str, period:int=5) -> pd.DataFrame:
     curr = datetime.now(timezone('Asia/Seoul' if ticker.isdigit() else 'US/Eastern'))
     prev = curr - timedelta(365 * period)
     if ticker.isdigit():
@@ -38,5 +40,27 @@ def fetch_ohlcv(ticker:str, period:int=5) -> pd.DataFrame:
     return ohlcv
 
 
-def fetch_related(ticker:str) -> list:
-    return list()
+def fetch_related(ticker:str) -> (list, list):
+    icm = pd.read_csv(os.path.join(root, f'common/icm.csv'), encoding='utf-8', index_col='종목코드')
+    icm.index = icm.index.astype(str).str.zfill(6)
+
+    wics = pd.read_csv(os.path.join(root, f'category/wics.csv'), encoding='utf-8', index_col='종목코드')
+    wics.index = wics.index.astype(str).str.zfill(6)
+
+    same_sector = wics[wics['섹터'] == wics.loc[ticker, '섹터']][['종목명', '섹터']].join(icm['시가총액'], how='left')
+    sames = same_sector.index.tolist()
+
+    n_curr = sames.index(ticker)
+    benchmark = same_sector.iloc[[0, 1, 2, 3, 4] if n_curr < 5 else [0, 1, 2, 3] + [n_curr]].index
+
+    if n_curr < 4:
+        similar_idx = [0, 1, 2, 3, 4]
+    elif n_curr == len(sames) - 1:
+        similar_idx = [0, 1, len(sames)-3, len(sames)-2, len(sames)-1]
+    else:
+        similar_idx = [0, 1, n_curr-1, n_curr, n_curr+1]
+    similar = same_sector.iloc[similar_idx].index
+    return benchmark.tolist(), similar.tolist()
+
+if __name__ == "__main__":
+    print(fetch_related(ticker='253450'))

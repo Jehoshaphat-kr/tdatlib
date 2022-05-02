@@ -53,17 +53,22 @@ CD_COLORS = [
 
 class interface_market(fetch_market):
 
+    def __init__(self, date:str=str()):
+        super().__init__()
+        self.date = date
+        return
+
     def __iscoll__(self):
         if not hasattr(self, 'is_coll'):
             for ticker in self.target:
-                self.__setattr__(f'A{ticker}', interface_stock(ticker=ticker, period=5))
+                self.__setattr__(f'A{ticker}', interface_stock(ticker=ticker, endate=self.date, period=5))
             self.__setattr__('is_coll', True)
         return
 
     def __reset__(self):
         for ticker in self.target:
             if not hasattr(self, f'A{ticker}'):
-                self.__setattr__(f'A{ticker}', interface_stock(ticker=ticker, period=5))
+                self.__setattr__(f'A{ticker}', interface_stock(ticker=ticker, endate=self.date, period=5))
         return
 
     def set_target(self, category_or_tickers:str or list):

@@ -1,10 +1,9 @@
 from tdatlib.fetch.stock.common import (
     fetch_currency,
     fetch_name,
-    fetch_ohlcv,
-    fetch_related
+    fetch_ohlcv_raw,
+    # fetch_related_benchmark
 )
-
 from tdatlib.fetch.stock.fnguide import (
     URL1, URL2,
     fetch_summary,
@@ -22,16 +21,17 @@ from tdatlib.fetch.stock.fnguide import (
     fetch_multiple_series,
     fetch_nps
 )
-
+from datetime import datetime
 from inspect import currentframe as inner
 import pandas as pd
 
 
 class fetch_stock(object):
 
-    def __init__(self, ticker:str, name:str=str(), period:int=5):
+    def __init__(self, ticker:str, name:str=str(), endate:str=str(), period:int=5):
         self.ticker = ticker
         self.__name = name
+        self.endate = datetime.strptime(endate, "%Y%m%d") if endate else endate
         self.period = period
         return
 
@@ -62,7 +62,7 @@ class fetch_stock(object):
         return self.__attr__(inner().f_code.co_name, ticker=self.ticker)
 
     @property
-    def ohlcv(self) -> pd.DataFrame:
+    def ohlcv_raw(self) -> pd.DataFrame:
         """
         시가 / 고가 / 저가 / 종가 / 거래량
         :return:
@@ -354,7 +354,7 @@ if __name__ == "__main__":
 
     print(tester.name)
     print(tester.currency)
-    print(tester.ohlcv)
+    print(tester.ohlcv_raw)
     print(tester.summary)
     print(tester.products)
     print(tester.annual_stat)
