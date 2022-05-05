@@ -173,10 +173,10 @@ class view_market(interface_market):
 
     def scatter2x2(
             self,
-            x1:str, y1:str, x1u:str, y1u:str,
-            x2:str, y2:str, x2u:str, y2u:str,
-            x3:str, y3:str, x3u:str, y3u:str,
-            x4:str, y4:str, x4u:str, y4u:str,
+            x1:str, y1:str, x1u:str, y1u:str, c1:str,
+            x2:str, y2:str, x2u:str, y2u:str, c2:str,
+            x3:str, y3:str, x3u:str, y3u:str, c3:str,
+            x4:str, y4:str, x4u:str, y4u:str, c4:str
     ) -> go.Figure:
 
         fig = make_subplots(
@@ -194,7 +194,7 @@ class view_market(interface_market):
             x=data[x1], y=data[y1],
             mode='markers',
             marker=dict(
-                color=data.섹터색상,
+                color=data[c1],
                 size=data.시가총액 / 4,
                 symbol='circle',
                 line=dict(width=0)
@@ -216,7 +216,7 @@ class view_market(interface_market):
             x=data[x2], y=data[y2],
             mode='markers',
             marker=dict(
-                color=data.섹터색상,
+                color=data[c2],
                 size=data.시가총액 / 4,
                 symbol='circle',
                 line=dict(width=0)
@@ -238,7 +238,7 @@ class view_market(interface_market):
             x=data[x3], y=data[y3],
             mode='markers',
             marker=dict(
-                color=data.섹터색상,
+                color=data[c3],
                 size=data.시가총액 / 4,
                 symbol='circle',
                 line=dict(width=0)
@@ -260,7 +260,7 @@ class view_market(interface_market):
             x=data[x4], y=data[y4],
             mode='markers',
             marker=dict(
-                color=data.섹터색상,
+                color=data[c4],
                 size=data.시가총액 / 4,
                 symbol='circle',
                 line=dict(width=0)
@@ -452,8 +452,8 @@ if __name__ == "__main__":
     # save(fig=viewer.scatter(x='S6M', y='S2W'), filename=f'산포도_S6M_S2W')
 
     viewer.scatter2x2(
-        x1='R1Y', y1='R6M', x1u='%', y1u='%',
-        x2='R6M', y2='R3M', x2u='%', y2u='%',
-        x3='R3M', y3='R1M', x3u='%', y3u='%',
-        x4='R1M', y4='R1W', x4u='%', y4u='%',
+        x1='R1Y', y1='R6M', x1u='%', y1u='%', c1='섹터색상',
+        x2='R6M', y2='R3M', x2u='%', y2u='%', c2='섹터색상',
+        x3='R3M', y3='R1M', x3u='%', y3u='%', c3='섹터색상',
+        x4='R1M', y4='R1W', x4u='%', y4u='%', c4='섹터색상'
     ).show()
