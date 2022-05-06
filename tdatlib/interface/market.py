@@ -1,6 +1,5 @@
-from tdatlib.interface.stock import interface_stock
+from tdatlib.viewer.stock import view_stock
 from tdatlib.fetch.market import fetch_market
-from tqdm import tqdm
 from scipy import stats
 import pandas as pd
 import numpy as np
@@ -61,14 +60,14 @@ class interface_market(fetch_market):
     def __iscoll__(self):
         if not hasattr(self, 'is_coll'):
             for ticker in self.target:
-                self.__setattr__(f'A{ticker}', interface_stock(ticker=ticker, endate=self.date, period=5))
+                self.__setattr__(f'A{ticker}', view_stock(ticker=ticker, endate=self.date, period=5))
             self.__setattr__('is_coll', True)
         return
 
     def __reset__(self):
         for ticker in self.target:
             if not hasattr(self, f'A{ticker}'):
-                self.__setattr__(f'A{ticker}', interface_stock(ticker=ticker, endate=self.date, period=5))
+                self.__setattr__(f'A{ticker}', view_stock(ticker=ticker, endate=self.date, period=5))
         return
 
     def set_target(self, category_or_tickers:str or list):

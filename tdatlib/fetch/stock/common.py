@@ -30,7 +30,8 @@ def fetch_ohlcv_raw(ticker:str, period:int=5) -> pd.DataFrame:
         func = stock.get_index_ohlcv_by_date if len(ticker) == 4 else stock.get_market_ohlcv_by_date
         ohlcv = func(fromdate=prev.strftime("%Y%m%d"), todate=curr.strftime("%Y%m%d"), ticker=ticker)
         trade_stop = ohlcv[ohlcv.시가 == 0].copy()
-        ohlcv.loc[trade_stop.index, ['시가', '고가', '저가']] = trade_stop['종가']
+        if not trade_stop.empty:
+            ohlcv.loc[trade_stop.index, ['시가', '고가', '저가']] = trade_stop['종가']
     else:
         o_names = ['Open', 'High', 'Low', 'Close', 'Volume']
         c_names = ['시가', '고가', '저가', '종가', '거래량']
