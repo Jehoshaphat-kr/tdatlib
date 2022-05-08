@@ -46,7 +46,14 @@ class view_market(interface_market):
         fig.update_layout(title=title)
         return fig
 
-    def scatter(self, x:str, y:str, xu:str, yu:str) -> go.Figure:
+    def scatter(
+            self,
+            x:str,
+            y:str,
+            xu:str,
+            yu:str,
+            color:str
+    ) -> go.Figure:
         fig = make_subplots(
             rows=2, cols=2,
             row_width=[0.12, 0.88],
@@ -67,7 +74,7 @@ class view_market(interface_market):
             x=data[x], y=data[y],
             mode='markers',
             marker=dict(
-                color=data.섹터색상,
+                color=data[color],
                 size=data.시가총액/4,
                 symbol='circle', 
                 line=dict(width=0)
@@ -86,7 +93,7 @@ class view_market(interface_market):
             x=x_data[x], y=x_data.xnorm,
             mode='markers',
             marker=dict(
-                color=x_data.섹터색상,
+                color=x_data[color],
                 line=dict(width=0)
             ),
             visible=True,
@@ -102,7 +109,7 @@ class view_market(interface_market):
             x=y_data.ynorm, y=y_data[y],
             mode='markers',
             marker=dict(
-                color=y_data.섹터색상,
+                color=y_data[color],
                 line=dict(width=0)
             ),
             visible=True,

@@ -1,4 +1,4 @@
-from tdatlib.interface.stock import interface_stock
+# from tdatlib.interface.stock import interface_stock
 from tdatlib.viewer.stock.ohlcv import (
     object_candle,
     object_prices,

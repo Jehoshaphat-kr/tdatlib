@@ -1,5 +1,5 @@
-import tdatlib
+from tdatlib.dataset import KRmarket
 
 
-kospi = tdatlib.view_stock(ticker='1028', endate='20210525', period=5)
-kospi.basic.show()
+market = KRmarket()
+print(market.trading_date)
