@@ -40,5 +40,5 @@ def calc_icm(trading_date:str, is_market_open:bool, write_ok:bool) -> pd.DataFra
     icm['날짜'] = trading_date
     icm.index.name = '종목코드'
     if write_ok:
-        icm.to_csv(_DIR_ICM, index=True, encoding='utf-8')
+        icm.to_csv(DIR_ICM, index=True, encoding='utf-8')
     return icm.drop(columns=['날짜'])
