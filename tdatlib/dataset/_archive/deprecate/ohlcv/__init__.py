@@ -239,7 +239,7 @@ class ohlcv(_ohlcv):
         """
         if not hasattr(self, f'trend_{gap}'):
             self.__setattr__(f'trend_{gap}', _trend(ohlcv=self.ohlcv, pivot=self.pivot, gap=gap))
-        return self.__getattribute__(f'trend_{gap}').bound
+        return self.__getattribute__(f'trend_{gap}').delimit
 
     def cagr(self, days:int=-1):
         """ CAGR """

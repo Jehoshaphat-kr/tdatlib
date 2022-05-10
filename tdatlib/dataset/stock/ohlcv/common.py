@@ -1,6 +1,6 @@
-from tdatlib.dataset.stock.ohlcv.toolkit import (
+from tdatlib.dataset.tools.tool import (
     fit,
-    bound
+    delimit
 )
 from datetime import datetime, timedelta
 from pytz import timezone
@@ -135,7 +135,7 @@ def calc_bound(ohlcv:pd.DataFrame) -> pd.DataFrame:
         price.set_index(keys='날짜', inplace=True)
 
         objs[gap] = pd.concat(
-            objs={'resist': bound(price=price, key='고가'), 'support': bound(price=price, key='저가')},
+            objs={'resist': delimit(price=price, key='고가'), 'support': delimit(price=price, key='저가')},
             axis=1
         )
     return pd.concat(objs=objs, axis=1)

@@ -1,5 +1,3 @@
-from tdatlib.dataset.market.kr.api import kr
-from tdatlib.dataset.market.kr.treemap.frame import treemap_frame
 from datetime import datetime
 from pytz import timezone
 import pandas as pd
@@ -38,17 +36,17 @@ class treemap_deploy(object):
     __labels, __covers, __ids, __bars = dict(), dict(), dict(), dict()
     __cover, __datum = list(), pd.DataFrame(columns=['종목코드'])
 
-    def __init__(self):
-        self.market = kr()
+    def __init__(self, market):
+        self.market = market
         for n, (c, s, var) in enumerate(CD_CATEGORY):
-            treemap = treemap_frame(category=c, sub_category=s, market=self.market)
-            print(f'[{n + 1}/{len(CD_CATEGORY)}] {c} / {treemap.mapname}')
+            mymap = self.market.treemap(category=c, sub_category=s)
+            print(f'[{n + 1}/{len(CD_CATEGORY)}] {c} / {mymap.mapname}')
 
-            map_data = treemap.mapframe.copy()
+            map_data = mymap.mapframe.copy()
             self.__labels[var] = map_data['종목코드'].tolist()
             self.__covers[var] = map_data['분류'].tolist()
             self.__ids[var] = map_data['ID'].tolist()
-            self.__bars[var] = treemap.barframe
+            self.__bars[var] = mymap.barframe
 
             self.__datum = pd.concat(
                 objs=[self.__datum, map_data[~map_data['종목코드'].isin(self.__datum['종목코드'])]],

@@ -1,5 +1,5 @@
 from tdatlib.viewer.stock import view_stock
-from tdatlib.dataset.fetch.market import fetch_market
+from tdatlib.dataset.archive.deprecate.fetch import fetch_market
 from scipy import stats
 import pandas as pd
 import numpy as np

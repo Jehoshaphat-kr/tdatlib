@@ -1,8 +1,8 @@
-from tdatlib.dataset import treemap_deploy, is_etf_latest
+from tdatlib.dataset import market
 
 
 if __name__ == "__main__":
+    myMarket = market.KR()
 
-    # is_etf_latest()
-    market_map = treemap_deploy()
-    market_map.to_js()
+    # myMarket.isetfokay()
+    myMarket.treemap_deploy()

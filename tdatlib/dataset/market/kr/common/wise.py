@@ -7,9 +7,9 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)
 DATE = str()
 URL_BASE = 'http://www.wiseindex.com/Index/Index#/G1010.0.Components'
 URL_WISE = 'http://www.wiseindex.com/Index/GetIndexComponets?ceil_yn=0&dt=%s&sec_cd=%s'
-DIR_THM  = f'{ROOT}/archive/category/theme.csv'
-DIR_WICS = f'{ROOT}/archive/category/wics.csv'
-DIR_WI26 = f'{ROOT}/archive/category/wi26.csv'
+DIR_THM  = f'{ROOT}/_archive/category/theme.csv'
+DIR_WICS = f'{ROOT}/_archive/category/wics.csv'
+DIR_WI26 = f'{ROOT}/_archive/category/wi26.csv'
 CD_WICS = {
     'G1010': '에너지',
     'G1510': '소재',

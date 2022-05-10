@@ -1,4 +1,4 @@
-from tdatlib.dataset.fetch.market import fetch_market
+from tdatlib.dataset.archive.deprecate.fetch import fetch_market
 from pykrx.stock import get_index_portfolio_deposit_file
 import pandas as pd
 

@@ -1,7 +1,12 @@
 from typing import Union
 from scipy.stats import linregress
 import pandas as pd
-import math
+import numpy as np
+import math, os
+
+
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+DIR_ETF = f'{ROOT}/archive/category/etf.csv'
 
 
 def normalize(series:pd.Series, lim:Union[list, tuple]=None) -> pd.Series:
@@ -32,7 +37,7 @@ def fit(series:pd.Series, rel:bool=False) -> (pd.Series, float):
     return _[['Time', 'Regression']].set_index(keys='Time'), s * (100 if rel else 1)
 
 
-def bound(price:pd.DataFrame, key:str) -> pd.Series:
+def delimit(price:pd.DataFrame, key:str) -> pd.Series:
     tip_v = price[key].max() if key == '고가' else price[key].min()
     tip = price[price[key] == tip_v]
     tip_i, tip_n = tip.index[-1], tip['N'].values[-1]
@@ -48,8 +53,7 @@ def bound(price:pd.DataFrame, key:str) -> pd.Series:
         for x, y in zip(side.N, side[key]):
             slope, intercept = regression(x=x, y=y)
             regress = slope * price.N + intercept
-            cond = \
-                price[key] >= regress if key == '고가' else price[key] <= regress
+            cond = price[key] >= regress if key == '고가' else price[key] <= regress
 
             n_curr = len(price[cond])
             if n_curr < n_prev and n_curr < 3:
@@ -67,3 +71,15 @@ def bound(price:pd.DataFrame, key:str) -> pd.Series:
     r_error = math.sqrt((r_regress - price[key]).pow(2).sum())
     l_error = math.sqrt((l_regress - price[key]).pow(2).sum())
     return r_regress if r_error < l_error else l_regress
+
+
+def intersect(series:pd.Series, point:float=0.0) -> pd.DataFrame:
+    f_fall = f_zc = lambda x: 1 if x < 0 else np.nan
+    f_rise = lambda x: 1 if x > 0 else np.nan
+
+    base = series - point
+    prod = base * base.shift(1)
+    cross = np.vectorize(f_zc)(prod) * series
+    rise = np.vectorize(f_rise)(cross) * cross
+    fall = np.vectorize(f_fall)(cross) * cross
+    return pd.concat(objs={series.name:series, 'crossing':cross, 'rise':rise, 'fall':fall}, axis=1)

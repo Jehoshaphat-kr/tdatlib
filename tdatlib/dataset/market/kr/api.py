@@ -1,14 +1,17 @@
-from tdatlib.dataset.market.kr.common.icm import calc_icm
-from tdatlib.dataset.market.kr.common.wise import (
+from tdatlib.dataset.market.kr.common import (
+    calc_icm,
     fetch_wics,
     fetch_wi26,
-    read_theme
-)
-from tdatlib.dataset.market.kr.common.etf import (
     fetch_etf_list,
-    read_etf_group
+    fetch_returns,
+    read_etf_group,
+    read_theme,
+    isetfokay
 )
-from tdatlib.dataset.market.kr.common.rtrn import fetch_returns
+from tdatlib.dataset.market.kr.treemap import (
+    treemap,
+    treemap_deploy
+)
 from pykrx.stock import (
     get_nearest_business_day_in_a_week,
     get_index_portfolio_deposit_file
@@ -29,7 +32,7 @@ CD_INDEX = {
 }
 
 
-class kr(object):
+class KR(object):
 
     def __init__(self, td:str=str()):
         _now = datetime.now(timezone('Asia/Seoul'))
@@ -146,7 +149,7 @@ class kr(object):
         """
         return fetch_etf_list()
 
-    def get_deposit(self, label:str):
+    def get_deposit(self, label:str) -> list:
         if not hasattr(self, f'__{label}'):
             self.__setattr__(f'__{label}', get_index_portfolio_deposit_file(CD_INDEX[label.lower()]))
         return self.__getattribute__(f'__{label}')
@@ -167,16 +170,77 @@ class kr(object):
             td=self.trading_date, tickers=tickers, is_market_open=self.__is_market_on, write_ok=self.__write_ok
         )
 
+    def treemap(self, category:str, sub_category:str=str()):
+        """
+        시장 지도 데이터프레임
+        :return:
+
+                          종목코드        종목명    분류  ...     CPER     CDIV            ID
+        0                   096770  SK이노베이션  에너지  ...  #F63538  #8B444E  SK이노베이션
+        1                   010950         S-Oil  에너지  ...  #35764E  #2F9E4F         S-Oil
+        2                   267250        HD현대  에너지  ...  #F63538  #30CC5A        HD현대
+        ..                     ...           ...     ...  ...      ...      ...           ...
+        716  화장품,의류_WI26_전체   화장품,의류    전체  ...  #8B444E  #414554   화장품,의류
+        717         화학_WI26_전체          화학    전체  ...  #8B444E  #414554          화학
+        718              WI26_전체          전체          ...  #C8C8C8  #C8C8C8          전체
+        """
+        if not hasattr(self, f'__treemap_{category}_{sub_category}'):
+            self.__setattr__(
+                f'__treemap_{category}_{sub_category}',
+                treemap(market=self, category=category, sub_category=sub_category)
+            )
+        return self.__getattribute__(f'__treemap_{category}_{sub_category}').mapframe
+
+    def sectors(self, category:str, sub_category:str=str()):
+        """
+        시장 지도 섹터별
+        :return:
+
+                          종목코드       종목명  분류  IPO  ...     CPBR     CPER     CDIV           ID
+        692       IT가전_WI26_전체       IT가전  전체  NaN  ...  #F63538  #F63538  #F63538       IT가전
+        693   IT하드웨어_WI26_전체   IT하드웨어  전체  NaN  ...  #BF4045  #BF4045  #BF4045   IT하드웨어
+        694     건강관리_WI26_전체     건강관리  전체  NaN  ...  #F63538  #F63538  #BF4045     건강관리
+        ...                    ...          ...   ...  ...  ...      ...      ...      ...          ...
+        715    호텔,레저_WI26_전체    호텔,레저  전체  NaN  ...  #BF4045  #F63538  #F63538    호텔,레저
+        716  화장품,의류_WI26_전체  화장품,의류  전체  NaN  ...  #8B444E  #8B444E  #414554  화장품,의류
+        717         화학_WI26_전체         화학  전체  NaN  ...  #8B444E  #8B444E  #414554         화학
+        """
+        if not hasattr(self, f'__treemap_{category}_{sub_category}'):
+            self.__setattr__(
+                f'__treemap_{category}_{sub_category}',
+                treemap(market=self, category=category, sub_category=sub_category)
+            )
+        mapframe = self.__getattribute__(f'__treemap_{category}_{sub_category}').mapframe
+        bars = self.__getattribute__(f'__treemap_{category}_{sub_category}').barframe
+        return mapframe[mapframe.종목코드.isin(bars)]
+
+    def treemap_deploy(self):
+        """
+        시장 지도 배포용 js 생성 '/dataset/archive/treemap/deploy/js'
+        :return: 
+        """
+        treemap_deploy(market=self).to_js()
+        return
+
+    def isetfokay(self):
+        """
+        수기 ETF 관리 최신화 여부
+        :return:
+        """
+        return isetfokay(curr=self.etf_list)
+
 
 if __name__ == '__main__':
-    market = kr()
+    market = KR()
     print(market.icm)
     print(market.wi26)
     print(market.wics)
     print(market.theme)
     print(market.etf_group)
     print(market.etf_list)
-    print(market.get_returns(tickers=market.theme.index))
+    # print(market.get_returns(tickers=market.theme.index))
+    print(market.treemap(category='WI26'))
+    print(market.sectors(category='WI26'))
 
-    market2 = kr(td='20210428')
-    print(market2.get_returns(tickers=market2.theme.index))
+    # market2 = KR(td='20210428')
+    # print(market2.get_returns(tickers=market2.theme.index))

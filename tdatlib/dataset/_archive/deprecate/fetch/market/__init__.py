@@ -1,4 +1,4 @@
-from tdatlib.dataset.fetch.market import (
+from tdatlib.dataset.archive.deprecate.fetch import (
     fetch_icm,
     fetch_theme,
     fetch_kospi,
@@ -8,18 +8,7 @@ from tdatlib.dataset.fetch.market import (
     fetch_kosdaq150,
     fetch_kosdaq_midcap
 )
-from tdatlib.dataset.fetch.market import (
-    fetch_wi_date,
-    fetch_wics,
-    fetch_wi26
-)
-from tdatlib.dataset.fetch.market import (
-    fetch_etf_list,
-    fetch_etf_group,
-    check_etf_handler,
-    convert_etf_xl2csv
-)
-from tdatlib.dataset.fetch.market import fetch_performance
+from tdatlib.dataset.archive.deprecate.fetch import fetch_performance
 from pykrx.stock import get_nearest_business_day_in_a_week
 from inspect import currentframe as inner
 from pytz import timezone

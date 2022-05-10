@@ -8,7 +8,7 @@ import os
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 URL_KRX = 'http://kind.krx.co.kr/corpgeneral/corpList.do?method=download'
-DIR_ICM = f'{ROOT}/archive/common/icm.csv'
+DIR_ICM = f'{ROOT}/_archive/common/icm.csv'
 
 
 def __fetchMarketCap(trading_date:str) -> pd.DataFrame:

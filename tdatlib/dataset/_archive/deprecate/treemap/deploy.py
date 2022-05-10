@@ -1,5 +1,5 @@
 from tdatlib.interface.treemap.frame import interface_treemap
-from tdatlib.dataset.fetch.market import fetch_market
+from tdatlib.dataset.archive.deprecate.fetch import fetch_market
 from datetime import datetime
 from pytz import timezone
 import pandas as pd

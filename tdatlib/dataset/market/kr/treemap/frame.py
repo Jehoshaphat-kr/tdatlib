@@ -1,4 +1,3 @@
-from tdatlib.dataset.market.kr.api import kr
 from pykrx.stock import get_index_portfolio_deposit_file
 import pandas as pd
 
@@ -11,10 +10,11 @@ CD_INDEX = {
     '2003': '코스닥 중형주'
 }
 
-class treemap_frame(object):
 
-    def __init__(self, category:str, sub_category:str=str(), market=None):
-        self.market = market if isinstance(market, kr) else kr()
+class treemap(object):
+
+    def __init__(self, market, category:str, sub_category:str=str()):
+        self.market = market
 
         if not category in ['WICS', 'WI26', 'ETF', 'THEME']:
             raise KeyError(f'입력 가능한 category: WICS, WI26, ETF, THEME')
@@ -200,12 +200,3 @@ class treemap_frame(object):
         if not self.cat == 'ETF':
             frame['PER'] = frame['PER'].apply(lambda val: val if not val == 0 else 'N/A')
         return frame
-
-if __name__ == "__main__":
-    # tester = frame(category='WICS', sub_category=str(), market_data=market())
-    # tester = frame(category='WI26', sub_category='1028', market_data=market())
-
-    tester = treemap_frame(category='ETF', sub_category=str())
-
-    print(tester.mapframe)
-    # tester.mapframe.to_csv(r'./test.csv', encoding='euc-kr', index=True)

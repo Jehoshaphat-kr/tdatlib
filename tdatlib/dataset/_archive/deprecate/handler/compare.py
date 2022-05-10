@@ -1,4 +1,4 @@
-from tdatlib.dataset.fetch.market import fetch_market
+from tdatlib.dataset.archive.deprecate.fetch import fetch_market
 from tdatlib.interface.stock import interface_stock
 import pandas as pd
 import numpy as np

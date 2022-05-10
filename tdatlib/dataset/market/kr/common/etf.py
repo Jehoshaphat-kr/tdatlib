@@ -5,7 +5,7 @@ import urllib.request as req
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 URL_ETF = 'https://finance.naver.com/api/sise/etfItemList.nhn'
-DIR_ETF = f'{ROOT}/archive/category/etf.csv'
+DIR_ETF = f'{ROOT}/_archive/category/etf.csv'
 
 
 def fetch_etf_list() -> pd.DataFrame:
@@ -21,9 +21,8 @@ def read_etf_group() -> pd.DataFrame:
     df.index = df.index.astype(str).str.zfill(6)
     return df
 
-
-def is_etf_latest() -> bool:
-    curr = fetch_etf_list()
+def isetfokay(curr:pd.DataFrame=None) -> bool:
+    curr = fetch_etf_list() if curr.empty else curr
     prev = pd.read_csv(DIR_ETF, index_col='종목코드', encoding='utf-8')
     prev.index = prev.index.astype(str).str.zfill(6)
     to_be_delete = prev[~prev.index.isin(curr.index)]

@@ -4,7 +4,7 @@ from pykrx.stock import (
     get_market_ohlcv_by_ticker,
     get_etf_ohlcv_by_ticker
 )
-from tdatlib.dataset.stock.ohlcv.api import technical
+from tdatlib.dataset.stock.ohlcv import technical
 from tqdm import tqdm
 from pytz import timezone
 from datetime import datetime, timedelta
@@ -13,7 +13,7 @@ import time, os
 
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-DIR_PERF = f'{ROOT}/archive/common/perf.csv'
+DIR_PERF = f'{ROOT}/_archive/common/perf.csv'
 PM_DATE = datetime.now(timezone('Asia/Seoul'))
 C_MARKET_OPEN = 900 <= int(PM_DATE.strftime("%H%M")) <= 1530
 
