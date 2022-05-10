@@ -5,8 +5,8 @@ import codecs, jsmin, os
 
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-DIR_SUFFIX = f'{ROOT}/archive/treemap/suffix.js'
-DIR_DEPLOY = f'{ROOT}/archive/treemap/deploy/js'
+DIR_SUFFIX = f'{ROOT}/_archive/treemap/suffix.js'
+DIR_DEPLOY = f'{ROOT}/_archive/treemap/deploy/js'
 CD_DATE = datetime.now(timezone('Asia/Seoul')).strftime("%Y%m%d")
 CD_CATEGORY = [
     ["WICS", '', "indful"],
@@ -39,17 +39,17 @@ class treemap_deploy(object):
     def __init__(self, market):
         self.market = market
         for n, (c, s, var) in enumerate(CD_CATEGORY):
-            mymap = self.market.treemap(category=c, sub_category=s)
             print(f'[{n + 1}/{len(CD_CATEGORY)}] {c} / {s}')
+            mymap = self.market.treemap(category=c, sub_category=s)
+            mybar = self.market.sectors(category=c, sub_category=s)['종목코드']
 
-            map_data = mymap.mapframe.copy()
-            self.__labels[var] = map_data['종목코드'].tolist()
-            self.__covers[var] = map_data['분류'].tolist()
-            self.__ids[var] = map_data['ID'].tolist()
-            self.__bars[var] = mymap.barframe
+            self.__labels[var] = mymap['종목코드'].tolist()
+            self.__covers[var] = mymap['분류'].tolist()
+            self.__ids[var] = mymap['ID'].tolist()
+            self.__bars[var] = mybar
 
             self.__datum = pd.concat(
-                objs=[self.__datum, map_data[~map_data['종목코드'].isin(self.__datum['종목코드'])]],
+                objs=[self.__datum, mymap[~mymap['종목코드'].isin(self.__datum['종목코드'])]],
                 axis=0, ignore_index=True
             )
         self.__datum.set_index(keys=['종목코드'], inplace=True)
