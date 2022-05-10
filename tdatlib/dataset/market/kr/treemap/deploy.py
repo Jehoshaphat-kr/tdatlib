@@ -40,8 +40,8 @@ class treemap_deploy(object):
         self.market = market
         for n, (c, s, var) in enumerate(CD_CATEGORY):
             print(f'[{n + 1}/{len(CD_CATEGORY)}] {c} / {s}')
-            mymap = self.market.treemap(category=c, sub_category=s)
-            mybar = self.market.sectors(category=c, sub_category=s)['종목코드']
+            mymap = self.market.treemap(category=c, sub_category=s).copy()
+            mybar = self.market.sectors(category=c, sub_category=s)['종목코드'].tolist()
 
             self.__labels[var] = mymap['종목코드'].tolist()
             self.__covers[var] = mymap['분류'].tolist()
