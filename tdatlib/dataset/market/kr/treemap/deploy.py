@@ -8,6 +8,13 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)
 DIR_SUFFIX = f'{ROOT}/_archive/treemap/suffix.js'
 DIR_DEPLOY = f'{ROOT}/_archive/treemap/deploy/js'
 CD_DATE = datetime.now(timezone('Asia/Seoul')).strftime("%Y%m%d")
+CD_INDEX = {
+    '1028': '코스피200',
+    '1003': '코스피 중형주',
+    '1004': '코스피 소형주',
+    '2203': '코스닥150',
+    '2003': '코스닥 중형주'
+}
 CD_CATEGORY = [
     ["WICS", '', "indful"],
     ["WICS", '1028', "indks2"],
@@ -39,7 +46,8 @@ class treemap_deploy(object):
     def __init__(self, market):
         self.market = market
         for n, (c, s, var) in enumerate(CD_CATEGORY):
-            print(f'[{n + 1}/{len(CD_CATEGORY)}] {c} / {s}')
+            label = '전체' if not s else CD_INDEX[s]
+            print(f'{c} / {label} ... ({n + 1}/{len(CD_CATEGORY)})')
             mymap = self.market.treemap(category=c, sub_category=s).copy()
             mybar = self.market.sectors(category=c, sub_category=s)['종목코드'].tolist()
 
