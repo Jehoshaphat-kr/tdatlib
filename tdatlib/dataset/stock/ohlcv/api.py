@@ -1,4 +1,4 @@
-from tdatlib.dataset.stock.ohlcv.common import (
+from tdatlib.dataset.stock.ohlcv.core import (
     fetch_ohlcv,
     calc_bt,
     calc_returns,
@@ -13,6 +13,11 @@ from tdatlib.dataset.stock.ohlcv.common import (
     calc_fiftytwo,
     calc_trend,
     calc_bound
+)
+from pykrx.stock import (
+    get_index_ticker_name,
+    get_market_ticker_name,
+    get_etf_ticker_name
 )
 from inspect import currentframe as inner
 from datetime import datetime
@@ -48,6 +53,25 @@ class technical(object):
         if not hasattr(self, f'__{_p}'):
             self.__setattr__(f'__{_p}', globals()[f"{fname if fname else 'calc'}_{_p}"](**kwargs))
         return self.__getattribute__(f'__{_p}')
+
+    @property
+    def label(self) -> str:
+        if not hasattr(self, '__name'):
+            if self.ticker.isalpha():
+                self.__setattr__('__name', self.ticker)
+            elif len(self.ticker) == 4:
+                self.__setattr__('__name', get_index_ticker_name(ticker=self.ticker))
+            elif len(self.ticker) == 6:
+                name = get_market_ticker_name(ticker=self.ticker)
+                if isinstance(name, pd.DataFrame):
+                    self.__setattr__('__name', get_etf_ticker_name(ticker=self.ticker))
+                self.__setattr__('__name', name)
+        return self.__getattribute__('__name')
+
+    @label.setter
+    def label(self, name):
+        self.__setattr__('__name', name)
+        return
 
     @property
     def currency(self) -> str:

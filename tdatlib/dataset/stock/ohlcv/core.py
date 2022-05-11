@@ -77,7 +77,7 @@ def calc_dd(ohlcv:pd.DataFrame) -> pd.DataFrame:
 
 
 def calc_sma(ohlcv:pd.DataFrame) -> pd.DataFrame:
-    return pd.concat(objs={f'SMA{w}D': ohlcv.종가.rolling(w).mean() for w in [5, 10, 20, 60, 120]}, axis=1)
+    return pd.concat(objs={f'SMA{w}D': ohlcv.종가.rolling(w).mean() for w in [5, 10, 20, 60, 120, 200]}, axis=1)
 
 
 def calc_ema(ohlcv:pd.DataFrame) -> pd.DataFrame:
@@ -89,7 +89,7 @@ def calc_iir(ohlcv:pd.DataFrame) -> pd.DataFrame:
     for win in [5, 10, 20, 60, 120]:
         cutoff = (252 / win) / (252 / 2)
         a, b = butter(N=1, Wn=cutoff)
-        objs[f'IIR{win}D'] = pd.Series(data=filtfilt(a, b, price), index=price.index)
+        objs[f'NC{win}D'] = pd.Series(data=filtfilt(a, b, price), index=price.index)
     return pd.concat(objs=objs, axis=1)
 
 
