@@ -77,7 +77,7 @@ def fetch_returns(td:str, tickers:list, is_market_open:bool, write_ok:bool) -> p
         while True:
             # noinspection PyBroadException
             try:
-                raw = pd.concat(objs=[raw, technical(ticker=ticker, period=2).returns], axis=0, ignore_index=False)
+                raw = pd.concat(objs=[raw, technical(ticker=ticker, period=2).ohlcv_returns], axis=0, ignore_index=False)
                 break
             except ConnectionError as e:
                 time.sleep(0.5)

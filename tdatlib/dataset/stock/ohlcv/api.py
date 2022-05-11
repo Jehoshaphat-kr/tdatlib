@@ -1,6 +1,6 @@
 from tdatlib.dataset.stock.ohlcv.common import (
     fetch_ohlcv,
-    calc_ohlcv_bt,
+    calc_bt,
     calc_returns,
     calc_ta,
     calc_rr,
@@ -44,9 +44,10 @@ class technical(object):
         return
 
     def __ref__(self, p:str, fname:str=str(), **kwargs):
-        if not hasattr(self, f'__{p}'):
-            self.__setattr__(f'__{p}', globals()[f"{fname if fname else 'calc'}_{p}"](**kwargs))
-        return self.__getattribute__(f'__{p}')
+        _p = p.replace('ohlcv_', '')
+        if not hasattr(self, f'__{_p}'):
+            self.__setattr__(f'__{_p}', globals()[f"{fname if fname else 'calc'}_{_p}"](**kwargs))
+        return self.__getattribute__(f'__{_p}')
 
     @property
     def ohlcv_bt(self) -> pd.DataFrame:
@@ -67,7 +68,7 @@ class technical(object):
         return self.__ref__(inner().f_code.co_name, ohlcv_ans=ohlcv_ans)
 
     @property
-    def returns(self) -> pd.DataFrame:
+    def ohlcv_returns(self) -> pd.DataFrame:
         """
         :return:
 
@@ -77,7 +78,7 @@ class technical(object):
         return self.__ref__(inner().f_code.co_name, ohlcv=self.ohlcv, ticker=self.ticker)
 
     @property
-    def ta(self) -> pd.DataFrame:
+    def ohlcv_ta(self) -> pd.DataFrame:
         """
         Technical Analysis
         volume          volatility        trend                       momentum               others
@@ -131,7 +132,7 @@ class technical(object):
         return self.__ref__(inner().f_code.co_name, ohlcv=self.ohlcv)
 
     @property
-    def rr(self) -> pd.DataFrame:
+    def ohlcv_rr(self) -> pd.DataFrame:
         """
         상대 수익률
         :return:
@@ -148,7 +149,7 @@ class technical(object):
         return self.__ref__(inner().f_code.co_name, ohlcv=self.ohlcv)
 
     @property
-    def dd(self) -> pd.DataFrame:
+    def ohlcv_dd(self) -> pd.DataFrame:
         """
         시계열 낙폭
         :return:
@@ -165,7 +166,7 @@ class technical(object):
         return self.__ref__(inner().f_code.co_name, ohlcv=self.ohlcv)
 
     @property
-    def sma(self) -> pd.DataFrame:
+    def ohlcv_sma(self) -> pd.DataFrame:
         """
         이동 평균선
         :return:
@@ -182,7 +183,7 @@ class technical(object):
         return self.__ref__(inner().f_code.co_name, ohlcv=self.ohlcv)
 
     @property
-    def ema(self) -> pd.DataFrame:
+    def ohlcv_ema(self) -> pd.DataFrame:
         """
         지수 이동 평균선
         :return:
@@ -199,7 +200,7 @@ class technical(object):
         return self.__ref__(inner().f_code.co_name, ohlcv=self.ohlcv)
 
     @property
-    def iir(self) -> pd.DataFrame:
+    def ohlcv_iir(self) -> pd.DataFrame:
         """
         IIR 필터선
         :return:
@@ -216,7 +217,7 @@ class technical(object):
         return self.__ref__(inner().f_code.co_name, ohlcv=self.ohlcv)
 
     @property
-    def cagr(self) -> pd.DataFrame:
+    def ohlcv_cagr(self) -> pd.DataFrame:
         """
         3M / 6M / 1Y / 2Y / 3Y / 5Y 연평균화 수익률
         :return:
@@ -227,7 +228,7 @@ class technical(object):
         return self.__ref__(inner().f_code.co_name, ohlcv=self.ohlcv, ticker=self.ticker)
 
     @property
-    def volatility(self) -> pd.DataFrame:
+    def ohlcv_volatility(self) -> pd.DataFrame:
         """
         3M / 6M / 1Y / 2Y / 3Y / 5Y 연평균화 변동성
         :return:
@@ -238,7 +239,7 @@ class technical(object):
         return self.__ref__(inner().f_code.co_name, ohlcv=self.ohlcv, ticker=self.ticker)
 
     @property
-    def fiftytwo(self) -> pd.DataFrame:
+    def ohlcv_fiftytwo(self) -> pd.DataFrame:
         """
         52주 최고/최저 가격 및 대비 수익률
         :return:
@@ -249,7 +250,7 @@ class technical(object):
         return self.__ref__(inner().f_code.co_name, ohlcv=self.ohlcv, ticker=self.ticker)
 
     @property
-    def trend(self) -> pd.DataFrame:
+    def ohlcv_trend(self) -> pd.DataFrame:
         """
         2M / 3M / 6M / 1Y 평균 추세
         :return:
@@ -267,7 +268,7 @@ class technical(object):
         return self.__ref__(inner().f_code.co_name, ohlcv=self.ohlcv)
 
     @property
-    def bound(self) -> pd.DataFrame:
+    def ohlcv_bound(self) -> pd.DataFrame:
         """
         2M / 3M / 6M / 1Y 지지선 추세선 (고, 저가 기준)
         :return:
@@ -292,15 +293,15 @@ if __name__ == "__main__":
 
     print(tech.ohlcv)
     print(tech.ohlcv_bt)
-    print(tech.returns)
-    print(tech.ta)
-    print(tech.rr)
-    print(tech.dd)
-    print(tech.sma)
-    print(tech.ema)
-    print(tech.iir)
-    print(tech.cagr)
-    print(tech.volatility)
-    print(tech.fiftytwo)
-    print(tech.trend)
-    print(tech.bound)
+    print(tech.ohlcv_returns)
+    print(tech.ohlcv_ta)
+    print(tech.ohlcv_rr)
+    print(tech.ohlcv_dd)
+    print(tech.ohlcv_sma)
+    print(tech.ohlcv_ema)
+    print(tech.ohlcv_iir)
+    print(tech.ohlcv_cagr)
+    print(tech.ohlcv_volatility)
+    print(tech.ohlcv_fiftytwo)
+    print(tech.ohlcv_trend)
+    print(tech.ohlcv_bound)

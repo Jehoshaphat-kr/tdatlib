@@ -33,7 +33,7 @@ def fetch_ohlcv(ticker:str, period:int=5) -> pd.DataFrame:
     return ohlcv
 
 
-def calc_ohlcv_bt(ohlcv_ans:pd.DataFrame) -> pd.DataFrame:
+def calc_bt(ohlcv_ans:pd.DataFrame) -> pd.DataFrame:
     columns = ['시가', '고가', '저가', '종가', '거래량', '등락', '누적', '최대', '최소']
     if ohlcv_ans.empty:
         return pd.DataFrame(columns=columns)
