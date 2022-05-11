@@ -17,7 +17,7 @@ CD_COLORS = [
     '#17becf'   # blue-teal
 ]
 
-CD_X_RANGER = dict(
+CD_RANGER = dict(
     buttons=list([
         dict(count=1, label="1m", step="month", stepmode="backward"),
         dict(count=3, label="3m", step="month", stepmode="backward"),

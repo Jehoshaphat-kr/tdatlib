@@ -50,6 +50,10 @@ class technical(object):
         return self.__getattribute__(f'__{_p}')
 
     @property
+    def currency(self) -> str:
+        return 'USD' if self.ticker.isalpha() else '원' if len(self.ticker) == 6 else 'pt'
+
+    @property
     def ohlcv_bt(self) -> pd.DataFrame:
         """
         :return:

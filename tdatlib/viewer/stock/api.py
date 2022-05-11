@@ -23,7 +23,7 @@ from tdatlib.viewer.stock.value import (
     show_cost,
     show_multiples
 )
-from tdatlib.viewer.common import save
+from tdatlib.viewer.tools import save
 from inspect import currentframe as inner
 from tqdm import tqdm
 import plotly.graph_objects as go
@@ -32,7 +32,7 @@ import plotly.graph_objects as go
 class view_stock(object):
 
     def __init__(self, ticker:str, name:str=str(), period:int=5, enddate:str=str()):
-        self.__data =
+        # self.__data =
         return
 
     def __show__(self, p: str, fname: str = str(), **kwargs):

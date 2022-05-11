@@ -1,5 +1,5 @@
 from tdatlib.interface.compare import interface_compare
-from tdatlib.viewer.common import CD_COLORS, CD_X_RANGER, save, dform
+from tdatlib.viewer.tools import CD_COLORS, CD_X_RANGER, save, dform
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 import numpy as np

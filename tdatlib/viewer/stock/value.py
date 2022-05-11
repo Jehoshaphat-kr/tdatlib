@@ -1,4 +1,4 @@
-from tdatlib.viewer.common import (
+from tdatlib.viewer.tools import (
     CD_COLORS,
     dform
 )
