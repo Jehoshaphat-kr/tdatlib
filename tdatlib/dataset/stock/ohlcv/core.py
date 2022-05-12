@@ -49,6 +49,17 @@ def calc_bt(ohlcv_ans:pd.DataFrame) -> pd.DataFrame:
     return ohlcv_ans[columns]
 
 
+def calc_btr(ohlcv:pd.DataFrame) -> pd.DataFrame:
+    data = list()
+    for n, i in enumerate(ohlcv[:-20].index):
+        sample = ohlcv[n + 1 : n + 21][['시가', '고가', '저가', '종가']]
+        span = sample.values.flatten()
+        returns = [round(100 * (p / span[0] - 1), 2) for p in span]
+        data.append({'날짜':i, '최대': max(returns), '최소': min(returns)})
+    btr = pd.DataFrame(data=data).set_index(keys='날짜')
+    return pd.concat(objs=[ohlcv, btr], axis=1)
+
+
 def calc_returns(ohlcv:pd.DataFrame, ticker:str) -> pd.DataFrame:
     val, data = ohlcv.종가, dict()
     for label, dt in (('R1D', 1), ('R1W', 5), ('R1M', 21), ('R3M', 63), ('R6M', 126), ('R1Y', 252)):

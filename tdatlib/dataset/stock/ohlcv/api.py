@@ -1,6 +1,7 @@
 from tdatlib.dataset.stock.ohlcv.core import (
     fetch_ohlcv,
     calc_bt,
+    calc_btr,
     calc_returns,
     calc_ta,
     calc_rr,
@@ -80,7 +81,7 @@ class technical(object):
     @property
     def ohlcv_bt(self) -> pd.DataFrame:
         """
-        :return:
+        :return: endate 이후 20TD 정답 데이터
 
                      시가   고가   저가   종가   거래량  등락   누적  최대  최소
         날짜
@@ -94,6 +95,22 @@ class technical(object):
         """
         ohlcv_ans = self.__raw[self.__raw.index > self.endate] if self.endate else pd.DataFrame()
         return self.__ref__(inner().f_code.co_name, ohlcv_ans=ohlcv_ans)
+
+    @property
+    def ohlcv_btr(self) -> pd.DataFrame:
+        """
+        :return:
+                     시가   고가   저가   종가  거래량   최대   최소
+        날짜
+        2017-05-15  21300  21700  21150  21600  487892   7.57 -11.47
+        2017-05-16  21800  21800  20650  20800  778107  13.29  -6.76
+        2017-05-17  20700  20900  20450  20650  572898  15.23  -5.16
+        ...           ...    ...    ...    ...     ...    ...    ...
+        2021-05-04  55100  55700  52700  55400  716587    NaN    NaN
+        2021-05-06  54700  55600  54300  55400  518715    NaN    NaN
+        2021-05-07  55700  56300  54900  55700  442683    NaN    NaN
+        """
+        return self.__ref__(inner().f_code.co_name, ohlcv=self.ohlcv)
 
     @property
     def ohlcv_returns(self) -> pd.DataFrame:
@@ -321,6 +338,7 @@ if __name__ == "__main__":
 
     print(tech.ohlcv)
     print(tech.ohlcv_bt)
+    print(tech.ohlcv_btr)
     print(tech.ohlcv_returns)
     print(tech.ohlcv_ta)
     print(tech.ohlcv_rr)
