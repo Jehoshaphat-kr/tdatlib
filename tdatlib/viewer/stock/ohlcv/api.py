@@ -13,6 +13,7 @@ class technical(object):
         self.__tech = data(ticker=ticker, period=period, endate=endate)
         if name:
             self.__tech.label = name
+        self.name = self.__tech.label
         return
 
     def __frm__(self, row_width: list = None):
@@ -422,10 +423,10 @@ class technical(object):
 
 if __name__ == "__main__":
 
-    path = r'\\kefico\keti\ENT\Softroom\Temp\J.H.Lee'
-    # path = str()
+    # path = r'\\kefico\keti\ENT\Softroom\Temp\J.H.Lee'
+    path = str()
 
 
-    viewer = technical(ticker='000990')
-    save(fig=viewer.fig_basis, filename='01_기본_차트', path=path)
-    save(fig=viewer.fig_bollinger_band, filename='02_볼린저_밴드', path=path)
+    viewer = technical(ticker='306620')
+    save(fig=viewer.fig_basis, filename=f'{viewer.ticker}({viewer.name})-01_기본_차트', path=path)
+    save(fig=viewer.fig_bollinger_band, filename=f'{viewer.ticker}({viewer.name})-02_볼린저_밴드', path=path)
