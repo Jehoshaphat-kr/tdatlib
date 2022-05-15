@@ -15,6 +15,7 @@ from tdatlib.dataset.stock.ohlcv.core import (
     calc_trend,
     calc_bound
 )
+from tdatlib.dataset.stock.ohlcv.bband import _bband
 from pykrx.stock import (
     get_index_ticker_name,
     get_market_ticker_name,
@@ -331,23 +332,33 @@ class technical(object):
         """
         return self.__ref__(inner().f_code.co_name, ohlcv=self.ohlcv)
 
+    @property
+    def ohlcv_bband(self) -> _bband:
+        """
+        볼린저 밴드 객체
+        :return: 
+        """
+        if not hasattr(self, '__bband'):
+            self.__setattr__('__bband', _bband(parent=self))
+        return self.__getattribute__('__bband')
+
 
 if __name__ == "__main__":
 
     tech = technical(ticker='000990', endate='20210509')
 
-    print(tech.ohlcv)
-    print(tech.ohlcv_bt)
-    print(tech.ohlcv_btr)
-    print(tech.ohlcv_returns)
-    print(tech.ohlcv_ta)
-    print(tech.ohlcv_rr)
-    print(tech.ohlcv_dd)
-    print(tech.ohlcv_sma)
-    print(tech.ohlcv_ema)
-    print(tech.ohlcv_iir)
-    print(tech.ohlcv_cagr)
-    print(tech.ohlcv_volatility)
-    print(tech.ohlcv_fiftytwo)
-    print(tech.ohlcv_trend)
-    print(tech.ohlcv_bound)
+    # print(tech.ohlcv)
+    # print(tech.ohlcv_bt)
+    # print(tech.ohlcv_btr)
+    # print(tech.ohlcv_returns)
+    # print(tech.ohlcv_ta)
+    # print(tech.ohlcv_rr)
+    # print(tech.ohlcv_dd)
+    # print(tech.ohlcv_sma)
+    # print(tech.ohlcv_ema)
+    # print(tech.ohlcv_iir)
+    # print(tech.ohlcv_cagr)
+    # print(tech.ohlcv_volatility)
+    # print(tech.ohlcv_fiftytwo)
+    # print(tech.ohlcv_trend)
+    # print(tech.ohlcv_bound)

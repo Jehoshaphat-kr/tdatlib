@@ -96,7 +96,7 @@ class technical(object):
         축 설정
         """
         title, label = '날짜' if rows == 2 else '', True if rows == 2 else False
-        fig.update_layout(go.Layout(
+        fig.update_layout(dict(
             plot_bgcolor='white',
             # legend=dict(groupclick="toggleitem"),
             legend=dict(tracegroupgap=5),
@@ -258,36 +258,63 @@ class technical(object):
 
     @property
     def fig_bollinger_band(self) -> go.Figure:
-        fig = self.__frm__(row_width=[0.15, 0.15, 0.2, 0.5])
+        fig = self.__frm__(row_width=[0.2, 0.2, 0.1, 0.5])
 
         """
         볼린저 밴드
         """
         for n, col, label in [
-            (0, 'volatility_bbh', '상단'),
-            (1, 'volatility_bbm', 'MA20'),
-            (2, 'volatility_bbl', '하단')
+            (0, 'upper2sd', '상단'),
+            (1, 'mid', 'MA20'),
+            (2, 'lower2sd', '하단')
         ]:
-            if not hasattr(self, f'__{label}'):
-                self.__setattr__(
-                    f'__{label}',
-                    go.Scatter(
-                        name='볼린저밴드',
-                        x=self.__tech.ohlcv_ta[col].index,
-                        y=self.__tech.ohlcv_ta[col],
-                        mode='lines',
-                        line=dict(color='rgb(184, 247, 212)'),
-                        fill='tonexty' if n > 0 else None,
-                        visible=True,
-                        showlegend=False if n > 0 else True,
-                        legendgroup='볼린저밴드',
-                        legendgrouptitle=None if n > 0 else dict(text='볼린저밴드'),
-                        xhoverformat='%Y/%m/%d',
-                        yhoverformat=',.2f',
-                        hovertemplate='%{x}<br>' + label + ': %{y}' + self.__tech.currency + '<extra></extra>',
-                    )
-                )
-            fig.add_trace(trace=self.__getattribute__(f'__{label}'), row=1, col=1)
+            scatter = go.Scatter(
+                name='볼린저밴드',
+                x=getattr(self.__tech.ohlcv_bband, col).index,
+                y=getattr(self.__tech.ohlcv_bband, col),
+                mode='lines',
+                line=dict(color='rgb(184, 247, 212)'),
+                fill='tonexty' if n > 0 else None,
+                visible=True,
+                showlegend=False if n > 0 else True,
+                legendgroup='볼린저밴드',
+                legendgrouptitle=None if n > 0 else dict(text='볼린저밴드'),
+                xhoverformat='%Y/%m/%d',
+                yhoverformat=',.2f',
+                hovertemplate='%{x}<br>' + label + ': %{y}' + self.__tech.currency + '<extra></extra>',
+            )
+            fig.add_trace(trace=scatter, row=1, col=1)
+
+        """
+        내부 추세 밴드
+        """
+        for n, col, label in [
+            (0, 'upper2sd', '상단'),
+            (1, 'upper1sd', '상단1SD'),
+            (2, 'lower1sd', '하단1SD'),
+            (3, 'lower2sd', '하단')
+        ]:
+            color = {
+                '상단': 'rgb(248, 233, 184)',
+                '상단1SD': 'rgb(248, 233, 184)',
+                '하단1SD': 'rgb(248, 187, 184)',
+                '하단': 'rgb(248, 187, 184)',
+            }
+            scatter = go.Scatter(
+                name='상단밴드' if n < 2 else '하단밴드',
+                x=getattr(self.__tech.ohlcv_bband, col).index,
+                y=getattr(self.__tech.ohlcv_bband, col),
+                mode='lines',
+                line=dict(color=color[label]),
+                fill='tonexty' if n % 2 else None,
+                visible='legendonly',
+                showlegend=False if n % 2 else True,
+                legendgroup='상단밴드' if n < 2 else '하단밴드',
+                xhoverformat='%Y/%m/%d',
+                yhoverformat=',.2f',
+                hovertemplate='%{x}<br>' + label + ': %{y}' + self.__tech.currency + '<extra></extra>',
+            )
+            fig.add_trace(trace=scatter, row=1, col=1)
 
         """
         볼린저 밴드 폭
@@ -297,8 +324,8 @@ class technical(object):
                 f'__bbwidth',
                 go.Scatter(
                     name='폭',
-                    x=self.__tech.ohlcv_ta.index,
-                    y=self.__tech.ohlcv_ta.volatility_bbw,
+                    x=getattr(self.__tech.ohlcv_bband, 'width').index,
+                    y=getattr(self.__tech.ohlcv_bband, 'width'),
                     visible=True,
                     showlegend=True,
                     xhoverformat='%Y/%m/%d',
@@ -316,8 +343,8 @@ class technical(object):
                 f'__bbsignal',
                 go.Scatter(
                     name='신호',
-                    x=self.__tech.ohlcv_ta.index,
-                    y=self.__tech.ohlcv_ta.volatility_bbp,
+                    x=getattr(self.__tech.ohlcv_bband, 'signal').index,
+                    y=getattr(self.__tech.ohlcv_bband, 'signal'),
                     visible=True,
                     showlegend=True,
                     xhoverformat='%Y/%m/%d',
@@ -327,43 +354,56 @@ class technical(object):
             )
         fig.add_trace(trace=self.__getattribute__(f'__bbsignal'), row=4, col=1)
 
-        mx = self.__tech.ohlcv_ta.volatility_bbp.max()
-        mn = self.__tech.ohlcv_ta.volatility_bbp.min()
+        mx = getattr(self.__tech.ohlcv_bband, 'signal').max()
+        mn = getattr(self.__tech.ohlcv_bband, 'signal').min()
         fig.add_hrect(y0=1, y1=mx, line_width=0, fillcolor='red', opacity=0.2, row=4, col=1)
         fig.add_hrect(y0=mn, y1=0, line_width=0, fillcolor='green', opacity=0.2, row=4, col=1)
 
-        if not hasattr(self, f'__bbpoint'):
-            self.__setattr__(f'__bbpoint', tools.intersect(self.__tech.ohlcv_ta.volatility_bbp, 0))
-
-        pt = self.__getattribute__(f'__bbpoint').rise.dropna()
-        rise_sig = go.Scatter(
-            name='저점-상승',
-            x=pt.index,
-            y=pt,
+        """
+        Squeeze & Break 지점
+        """
+        breakout = getattr(self.__tech.ohlcv_bband, 'hist_breakout')
+        hist_breakout = go.Scatter(
+            name='Break-Out 지점',
+            x=breakout.index,
+            y=self.__tech.ohlcv[self.__tech.ohlcv.index.isin(breakout.index)].종가,
             mode='markers',
-            marker=dict(symbol='triangle-up', color='lightgreen'),
+            marker=dict(symbol='triangle-up', color='red', size=8),
             visible='legendonly',
             showlegend=True,
-            legendgroup='매수지점',
+            legendgrouptitle=dict(text='백테스트 지점'),
             hoverinfo='skip'
         )
-        fig.add_trace(trace=rise_sig, row=4, col=1)
-
-        price = self.__tech.ohlcv[self.__tech.ohlcv.index.isin(pt.index)]
-        rise_price = go.Scatter(
-            name='저점-상승',
-            x=price.index,
-            y=price.종가,
-            mode='markers',
-            marker=dict(symbol='triangle-up', color='lightgreen'),
-            visible='legendonly',
-            showlegend=False,
-            legendgroup='매수지점',
-            xhoverformat='%Y/%m/%d',
-            yhoverformat=',' if self.__tech.currency == '원' else ',.2f',
-            hovertemplate='%{x}<br>매수가: %{y}<extra></extra>'
-        )
-        fig.add_trace(trace=rise_price, row=1, col=1)
+        fig.add_trace(trace=hist_breakout, row=1, col=1)
+        # pt = self.__getattribute__(f'__bbpoint').rise.dropna()
+        # rise_sig = go.Scatter(
+        #     name='저점-상승',
+        #     x=pt.index,
+        #     y=pt,
+        #     mode='markers',
+        #     marker=dict(symbol='triangle-up', color='lightgreen'),
+        #     visible='legendonly',
+        #     showlegend=True,
+        #     legendgroup='매수지점',
+        #     hoverinfo='skip'
+        # )
+        # fig.add_trace(trace=rise_sig, row=4, col=1)
+        #
+        # price = self.__tech.ohlcv[self.__tech.ohlcv.index.isin(pt.index)]
+        # rise_price = go.Scatter(
+        #     name='저점-상승',
+        #     x=price.index,
+        #     y=price.종가,
+        #     mode='markers',
+        #     marker=dict(symbol='triangle-up', color='lightgreen'),
+        #     visible='legendonly',
+        #     showlegend=False,
+        #     legendgroup='매수지점',
+        #     xhoverformat='%Y/%m/%d',
+        #     yhoverformat=',' if self.__tech.currency == '원' else ',.2f',
+        #     hovertemplate='%{x}<br>매수가: %{y}<extra></extra>'
+        # )
+        # fig.add_trace(trace=rise_price, row=1, col=1)
         
         fig.update_layout(
             title=f'{self.__tech.label}({self.ticker}) 볼린저 밴드',
@@ -427,6 +467,6 @@ if __name__ == "__main__":
     path = str()
 
 
-    viewer = technical(ticker='306620')
-    save(fig=viewer.fig_basis, filename=f'{viewer.ticker}({viewer.name})-01_기본_차트', path=path)
+    viewer = technical(ticker='096770', period=10)
+    # save(fig=viewer.fig_basis, filename=f'{viewer.ticker}({viewer.name})-01_기본_차트', path=path)
     save(fig=viewer.fig_bollinger_band, filename=f'{viewer.ticker}({viewer.name})-02_볼린저_밴드', path=path)
