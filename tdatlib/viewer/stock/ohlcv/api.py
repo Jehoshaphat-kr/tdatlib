@@ -362,19 +362,19 @@ class technical(object):
         """
         Squeeze & Break 지점
         """
-        breakout = getattr(self.__tech.ohlcv_bband, 'hist_breakout')
-        hist_breakout = go.Scatter(
-            name='Break-Out 지점',
-            x=breakout.index,
-            y=self.__tech.ohlcv[self.__tech.ohlcv.index.isin(breakout.index)].종가,
-            mode='markers',
-            marker=dict(symbol='triangle-up', color='red', size=8),
-            visible='legendonly',
-            showlegend=True,
-            legendgrouptitle=dict(text='백테스트 지점'),
-            hoverinfo='skip'
-        )
-        fig.add_trace(trace=hist_breakout, row=1, col=1)
+        # breakout = getattr(self.__tech.ohlcv_bband, 'hist_breakout')
+        # hist_breakout = go.Scatter(
+        #     name='Break-Out 지점',
+        #     x=breakout.index,
+        #     y=self.__tech.ohlcv[self.__tech.ohlcv.index.isin(breakout.index)].종가,
+        #     mode='markers',
+        #     marker=dict(symbol='triangle-up', color='red', size=8),
+        #     visible='legendonly',
+        #     showlegend=True,
+        #     legendgrouptitle=dict(text='백테스트 지점'),
+        #     hoverinfo='skip'
+        # )
+        # fig.add_trace(trace=hist_breakout, row=1, col=1)
         # pt = self.__getattribute__(f'__bbpoint').rise.dropna()
         # rise_sig = go.Scatter(
         #     name='저점-상승',
@@ -463,10 +463,10 @@ class technical(object):
 
 if __name__ == "__main__":
 
-    # path = r'\\kefico\keti\ENT\Softroom\Temp\J.H.Lee'
-    path = str()
+    path = r'\\kefico\keti\ENT\Softroom\Temp\J.H.Lee'
+    # path = str()
 
 
-    viewer = technical(ticker='096770', period=10)
+    viewer = technical(ticker='020150', period=10)
     # save(fig=viewer.fig_basis, filename=f'{viewer.ticker}({viewer.name})-01_기본_차트', path=path)
     save(fig=viewer.fig_bollinger_band, filename=f'{viewer.ticker}({viewer.name})-02_볼린저_밴드', path=path)

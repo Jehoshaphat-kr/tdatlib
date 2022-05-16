@@ -1,7 +1,7 @@
 from tdatlib.dataset.stock.ohlcv.core import (
     fetch_ohlcv,
-    calc_bt,
     calc_btr,
+    calc_btl,
     calc_returns,
     calc_ta,
     calc_rr,
@@ -15,7 +15,7 @@ from tdatlib.dataset.stock.ohlcv.core import (
     calc_trend,
     calc_bound
 )
-from tdatlib.dataset.stock.ohlcv.bband import _bband
+from tdatlib.dataset.stock.ohlcv._bband import bband
 from pykrx.stock import (
     get_index_ticker_name,
     get_market_ticker_name,
@@ -80,8 +80,9 @@ class technical(object):
         return 'USD' if self.ticker.isalpha() else '원' if len(self.ticker) == 6 else 'pt'
 
     @property
-    def ohlcv_bt(self) -> pd.DataFrame:
+    def ohlcv_btr(self) -> pd.DataFrame:
         """
+        Back Test Right-side
         :return: endate 이후 20TD 정답 데이터
 
                      시가   고가   저가   종가   거래량  등락   누적  최대  최소
@@ -98,8 +99,9 @@ class technical(object):
         return self.__ref__(inner().f_code.co_name, ohlcv_ans=ohlcv_ans)
 
     @property
-    def ohlcv_btr(self) -> pd.DataFrame:
+    def ohlcv_btl(self) -> pd.DataFrame:
         """
+        Back Test Left-side
         :return:
                      시가   고가   저가   종가  거래량   최대   최소
         날짜
@@ -333,13 +335,13 @@ class technical(object):
         return self.__ref__(inner().f_code.co_name, ohlcv=self.ohlcv)
 
     @property
-    def ohlcv_bband(self) -> _bband:
+    def ohlcv_bband(self) -> bband:
         """
         볼린저 밴드 객체
         :return: 
         """
         if not hasattr(self, '__bband'):
-            self.__setattr__('__bband', _bband(parent=self))
+            self.__setattr__('__bband', bband(parent=self))
         return self.__getattribute__('__bband')
 
 

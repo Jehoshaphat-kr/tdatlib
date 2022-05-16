@@ -150,8 +150,9 @@ class KR(object):
         return fetch_etf_list()
 
     def get_deposit(self, label:str) -> list:
+        ticker = label if label.isdigit() else CD_INDEX[label.lower()]
         if not hasattr(self, f'__{label}'):
-            self.__setattr__(f'__{label}', get_index_portfolio_deposit_file(CD_INDEX[label.lower()]))
+            self.__setattr__(f'__{label}', get_index_portfolio_deposit_file(ticker))
         return self.__getattribute__(f'__{label}')
 
     def get_returns(self, tickers) -> pd.DataFrame:
