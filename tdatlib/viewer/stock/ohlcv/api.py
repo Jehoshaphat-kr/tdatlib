@@ -339,12 +339,23 @@ class technical(object):
         볼린저 밴드 신호
         """
         if not hasattr(self, f'__bbsignal'):
+            temp = self.__tech.ohlcv_bband.est_band().copy()
             self.__setattr__(
                 f'__bbsignal',
+                # go.Scatter(
+                #     name='신호',
+                #     x=getattr(self.__tech.ohlcv_bband, 'signal').index,
+                #     y=getattr(self.__tech.ohlcv_bband, 'signal'),
+                #     visible=True,
+                #     showlegend=True,
+                #     xhoverformat='%Y/%m/%d',
+                #     yhoverformat='.2f',
+                #     hovertemplate='%{x}<br>신호: %{y}<extra></extra>'
+                # )
                 go.Scatter(
-                    name='신호',
-                    x=getattr(self.__tech.ohlcv_bband, 'signal').index,
-                    y=getattr(self.__tech.ohlcv_bband, 'signal'),
+                    name='Band-Embracing',
+                    x=temp.index,
+                    y=temp,
                     visible=True,
                     showlegend=True,
                     xhoverformat='%Y/%m/%d',
@@ -354,10 +365,10 @@ class technical(object):
             )
         fig.add_trace(trace=self.__getattribute__(f'__bbsignal'), row=4, col=1)
 
-        mx = getattr(self.__tech.ohlcv_bband, 'signal').max()
-        mn = getattr(self.__tech.ohlcv_bband, 'signal').min()
-        fig.add_hrect(y0=1, y1=mx, line_width=0, fillcolor='red', opacity=0.2, row=4, col=1)
-        fig.add_hrect(y0=mn, y1=0, line_width=0, fillcolor='green', opacity=0.2, row=4, col=1)
+        # mx = getattr(self.__tech.ohlcv_bband, 'signal').max()
+        # mn = getattr(self.__tech.ohlcv_bband, 'signal').min()
+        # fig.add_hrect(y0=1, y1=mx, line_width=0, fillcolor='red', opacity=0.2, row=4, col=1)
+        # fig.add_hrect(y0=mn, y1=0, line_width=0, fillcolor='green', opacity=0.2, row=4, col=1)
 
         """
         Squeeze & Break 지점

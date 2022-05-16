@@ -42,6 +42,21 @@ def _est_sqz_level(x:float):
     """
     return 1 if x <= 20 else (-1/80) * x + 1.25
 
+def _est_band_contain(block: pd.DataFrame):
+    """
+
+    """
+    if block.시가 >= block.upper and block.종가 >= block.upper:
+        return 100
+    if (block.시가 <= block.upper and block.종가 <= block.upper) and (block.시가 >= block.upper1sd and block.종가 >= block.upper1sd):
+        return 100
+    h_price = max([block.종가, block.시가])
+    l_price = min([block.종가, block.시가])
+
+    inner = min([block.upper, h_price]) - max([block.upper1sd, l_price])
+    return 100 * inner / (block.upper - block.upper1sd) if inner >= 0 else 0
+    # return 100 * inner / (block.upper - block.upper1sd)
+
 
 class bband(object):
 
@@ -58,10 +73,13 @@ class bband(object):
         self.width = ((self.upper2sd - self.lower2sd) / self.mid) * 100
         self.signal = (stp - self.lower2sd) / (self.upper2sd - self.lower2sd)
 
-        self.__base = self.__p.ohlcv.join(
-            other=pd.concat(objs=dict(width=self.width, upper=self.upper2sd, mid=self.mid), axis=1),
-            how='left'
+        objs = dict(
+            upper=self.upper2sd,
+            upper1sd=self.upper1sd,
+            mid=self.mid,
+            width=self.width
         )
+        self.__base = self.__p.ohlcv.join(other=pd.concat(objs=objs, axis=1), how='left')
         return
 
     def est_squeeze(self, span:str='last', win:int=5) -> pd.DataFrame:
@@ -95,6 +113,11 @@ class bband(object):
         else:
             raise KeyError
         return est
+
+    def est_band(self, span:str='last'):
+        est = self.__base.apply(lambda row: _est_band_contain(row), axis=1)
+        return est
+
 
 
 if __name__ == "__main__":
@@ -154,28 +177,40 @@ if __name__ == "__main__":
     # print(f'전체 정답률: {round(sum(ratio) / len(ratio), 2)}%')
 
 
-    # my = stock.KR('096770', period=10)
-    # df = my.ohlcv_bband.width.copy()
-    # df.name = 'width'
+    my = stock.KR('020150', period=10)
+    est = my.ohlcv_bband.est_band()
+    print(est)
+    # est = my.ohlcv_bband.est_squeeze(span='all')
+    # df = est.join(my.ohlcv_btl[['최대', '최소']], how='left').dropna()
+    # df['label'] = 'eval<br>----<br>sqz: ' + df.t_sqz.astype(str) + '<br>esc: ' + df.t_esc.astype(str) + '<br>vol: ' + df.k_vol.astype(str) + '<br>lvl: ' + df.k_lvl.astype(str)
     #
-    # win = 5
-    # x = np.arange(0, win, 1)
-    # frm = list()
-    # for n in range(win, len(df)):
-    #     r, i, rval, pval, stderr = linregress(x=x, y=df[n - win + 1 : n + 1])
-    #     frm.append(dict(
-    #         date=df.index[n],
-    #         slope=round(r, 2),
-    #         intercept=i,
-    #         rvalue=round(rval, 2),
-    #         pvalue=pval,
-    #         stderr=round(stderr, 2),
-    #         # intercept_stderr=i_stderr
-    #     ))
-    # lin = pd.DataFrame(data=frm).set_index(keys='date')
-    # df = pd.concat(objs=[df, lin], axis=1)
-    # df['label'] = 'slope: ' + df.slope.astype(str) + '<br>rvalue: ' + df.rvalue.astype(str) + '<br>stderr: ' + df.stderr.astype(str)
-    # print(df)
+    # summary = df[df.est >= 90].drop(columns=['label'])
+    # achieve = summary[summary.최대 >= 4]
+    # print(summary)
+    # print(
+    #     f'개수: {len(summary)}\n',
+    #     f'달성률:{round(100 * len(achieve) / len(summary), 2)}% ({len(achieve)}/{len(summary)})'
+    # )
+    #
+    # fig = go.Figure()
+    # scatter = go.Scatter(
+    #     name='all',
+    #     x=df.est,
+    #     y=df.최대,
+    #     mode='markers',
+    #     marker=dict(symbol='circle', color='royalblue', size=8, opacity=0.7),
+    #     meta=[f'{d.year}/{d.month}/{d.day}' for d in df.index],
+    #     customdata=df.label,
+    #     xhoverformat='.2f',
+    #     yhoverformat='.2f',
+    #     hovertemplate='%{meta}<br>%{y}%<br>%{customdata}<br>Eval: %{x}<extra></extra>'
+    # )
+    # fig.add_trace(trace=scatter)
+    # save(fig, filename='test-scatter', path=r'\\kefico\keti\ENT\Softroom\Temp\J.H.Lee')
+    # fig.show()
+
+
+    # my = stock.KR('096770', period=10)
     # fig = make_subplots(
     #     rows=4, cols=1,
     #     row_width=[0.2, 0.2, 0.2, 0.4],
@@ -254,33 +289,3 @@ if __name__ == "__main__":
     # )
     # save(fig, filename='test', path=r'\\kefico\keti\ENT\Softroom\Temp\J.H.Lee')
 
-
-    my = stock.KR('220100', period=10)
-    est = my.ohlcv_bband.est_squeeze(span='all')
-    df = est.join(my.ohlcv_btl[['최대', '최소']], how='left').dropna()
-    df['label'] = 'eval<br>----<br>sqz: ' + df.t_sqz.astype(str) + '<br>esc: ' + df.t_esc.astype(str) + '<br>vol: ' + df.k_vol.astype(str) + '<br>lvl: ' + df.k_lvl.astype(str)
-
-    summary = df[df.est >= 90].drop(columns=['label'])
-    achieve = summary[summary.최대 >= 4]
-    print(summary)
-    print(
-        f'개수: {len(summary)}\n',
-        f'달성률:{round(100 * len(achieve) / len(summary), 2)}% ({len(achieve)}/{len(summary)})'
-    )
-    #
-    # fig = go.Figure()
-    # scatter = go.Scatter(
-    #     name='all',
-    #     x=df.est,
-    #     y=df.최대,
-    #     mode='markers',
-    #     marker=dict(symbol='circle', color='royalblue', size=8, opacity=0.7),
-    #     meta=[f'{d.year}/{d.month}/{d.day}' for d in df.index],
-    #     customdata=df.label,
-    #     xhoverformat='.2f',
-    #     yhoverformat='.2f',
-    #     hovertemplate='%{meta}<br>%{y}%<br>%{customdata}<br>Eval: %{x}<extra></extra>'
-    # )
-    # fig.add_trace(trace=scatter)
-    # save(fig, filename='test-scatter', path=r'\\kefico\keti\ENT\Softroom\Temp\J.H.Lee')
-    # fig.show()
