@@ -28,11 +28,12 @@ def _est_sqz_price(block: pd.DataFrame):
 
 def _est_sqz_volume(array:pd.Series):
     """
-    Reflection factor by <20TD Volume>
+    Deduction factor by <20TD Volume>
       - Scale up to ~ 1 (Deduction Factor)
       - Insufficient volume level will be deducted
     """
-    return array[-1] / array.max()
+    mean = array.mean()
+    return array[-1] / array.max() if array[-1] < mean else 1
 
 def _est_sqz_level(x:float):
     """
@@ -44,18 +45,17 @@ def _est_sqz_level(x:float):
 
 def _est_band_contain(block: pd.DataFrame):
     """
-
+    Estimate <2SD~1SD Band Contains Price Band(Candlestick)>
     """
-    if block.시가 >= block.upper and block.종가 >= block.upper:
+    price_h = max([block.종가, block.시가])
+    price_l = min([block.종가, block.시가])
+    if price_l >= block.upper1sd:
         return 100
-    if (block.시가 <= block.upper and block.종가 <= block.upper) and (block.시가 >= block.upper1sd and block.종가 >= block.upper1sd):
-        return 100
-    h_price = max([block.종가, block.시가])
-    l_price = min([block.종가, block.시가])
-
-    inner = min([block.upper, h_price]) - max([block.upper1sd, l_price])
-    return 100 * inner / (block.upper - block.upper1sd) if inner >= 0 else 0
-    # return 100 * inner / (block.upper - block.upper1sd)
+    if block.고가 < block.upper1sd or price_h < block.mid:
+        return 0
+    if price_h < block.upper1sd <= block.고가:
+        return 100 * (block.고가 - block.upper1sd) / (block.고가 - block.저가)
+    return 100 * (price_h - block.upper1sd) / (price_h - price_l)
 
 
 class bband(object):
@@ -103,6 +103,8 @@ class bband(object):
             )
             est['est'] = est.k_lvl * est.k_vol * est.t_sqz * est.t_esc
         elif span == 'last':
+            if self.__base.empty or len(self.__base) <= 20:
+                return pd.DataFrame(columns=['t_sqz', 't_esc', 'k_vol', 'k_lvl', 'est'])
             index = [self.__base.index[-1]]
             t_sqz = _est_sqz_width(self.__base.width[-win:])
             t_esc = _est_sqz_price(self.__base.iloc[-1])
@@ -114,10 +116,9 @@ class bband(object):
             raise KeyError
         return est
 
-    def est_band(self, span:str='last'):
+    def est_band(self):
         est = self.__base.apply(lambda row: _est_band_contain(row), axis=1)
         return est
-
 
 
 if __name__ == "__main__":
@@ -133,10 +134,10 @@ if __name__ == "__main__":
 
 
     # market = market.KR()
-    # # kosdaq = market.get_deposit(label='kosdaq')
-    # # kospi_mid = market.get_deposit(label='1003')
-    # # kospi_small = market.get_deposit(label='1004')
-    # # stocks = market.icm[market.icm.index.isin(kosdaq)]
+    # kosdaq = market.get_deposit(label='kosdaq')
+    # kospi_mid = market.get_deposit(label='1003')
+    # kospi_small = market.get_deposit(label='1004')
+    # stocks = market.icm[market.icm.index.isin(kosdaq)]
     # stocks = market.icm[market.icm.시가총액 > 100000000000]
     # stocks = stocks[~stocks.종목명.isna()]
     #
@@ -144,7 +145,7 @@ if __name__ == "__main__":
     # proc = tqdm(stocks.index)
     # for ticker in proc:
     #     proc.set_description(desc=f'{stocks.loc[ticker, "종목명"]}({ticker}) ...')
-    #     my = stock.KR(ticker=ticker, period=2, endate='20220428')
+    #     my = stock.KR(ticker=ticker, period=2, endate='20220504')
     #     sqz = my.ohlcv_bband.est_squeeze(span='last', win=5)
     #     data.append({
     #         '종목코드': ticker,
@@ -178,35 +179,33 @@ if __name__ == "__main__":
 
 
     my = stock.KR('020150', period=10)
-    est = my.ohlcv_bband.est_band()
-    print(est)
-    # est = my.ohlcv_bband.est_squeeze(span='all')
-    # df = est.join(my.ohlcv_btl[['최대', '최소']], how='left').dropna()
-    # df['label'] = 'eval<br>----<br>sqz: ' + df.t_sqz.astype(str) + '<br>esc: ' + df.t_esc.astype(str) + '<br>vol: ' + df.k_vol.astype(str) + '<br>lvl: ' + df.k_lvl.astype(str)
-    #
-    # summary = df[df.est >= 90].drop(columns=['label'])
-    # achieve = summary[summary.최대 >= 4]
-    # print(summary)
-    # print(
-    #     f'개수: {len(summary)}\n',
-    #     f'달성률:{round(100 * len(achieve) / len(summary), 2)}% ({len(achieve)}/{len(summary)})'
-    # )
-    #
-    # fig = go.Figure()
-    # scatter = go.Scatter(
-    #     name='all',
-    #     x=df.est,
-    #     y=df.최대,
-    #     mode='markers',
-    #     marker=dict(symbol='circle', color='royalblue', size=8, opacity=0.7),
-    #     meta=[f'{d.year}/{d.month}/{d.day}' for d in df.index],
-    #     customdata=df.label,
-    #     xhoverformat='.2f',
-    #     yhoverformat='.2f',
-    #     hovertemplate='%{meta}<br>%{y}%<br>%{customdata}<br>Eval: %{x}<extra></extra>'
-    # )
-    # fig.add_trace(trace=scatter)
-    # save(fig, filename='test-scatter', path=r'\\kefico\keti\ENT\Softroom\Temp\J.H.Lee')
+    est = my.ohlcv_bband.est_squeeze(span='all')
+    df = est.join(my.ohlcv_btl[['최대', '최소']], how='left').dropna()
+    df['label'] = 'eval<br>----<br>sqz: ' + df.t_sqz.astype(str) + '<br>esc: ' + df.t_esc.astype(str) + '<br>vol: ' + df.k_vol.astype(str) + '<br>lvl: ' + df.k_lvl.astype(str)
+
+    summary = df[df.est >= 95].drop(columns=['label'])
+    achieve = summary[summary.최대 >= 4]
+    print(summary)
+    print(
+        f'개수: {len(summary)}\n',
+        f'달성률:{round(100 * len(achieve) / len(summary), 2)}% ({len(achieve)}/{len(summary)})'
+    )
+
+    fig = go.Figure()
+    scatter = go.Scatter(
+        name='all',
+        x=df.est,
+        y=df.최대,
+        mode='markers',
+        marker=dict(symbol='circle', color='royalblue', size=8, opacity=0.7),
+        meta=[f'{d.year}/{d.month}/{d.day}' for d in df.index],
+        customdata=df.label,
+        xhoverformat='.2f',
+        yhoverformat='.2f',
+        hovertemplate='%{meta}<br>%{y}%<br>%{customdata}<br>Eval: %{x}<extra></extra>'
+    )
+    fig.add_trace(trace=scatter)
+    save(fig, filename='test-scatter', path=r'\\kefico\keti\ENT\Softroom\Temp\J.H.Lee')
     # fig.show()
 
 
