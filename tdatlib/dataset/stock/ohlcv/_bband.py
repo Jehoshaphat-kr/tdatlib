@@ -32,8 +32,16 @@ def _est_sqz_volume(array:pd.Series):
       - Scale up to ~ 1 (Deduction Factor)
       - Insufficient volume level will be deducted
     """
-    mean = array.mean()
-    return array[-1] / array.max() if array[-1] < mean else 1
+    f_t = 0.75
+    _avg = array.mean()
+    _max = array.max()
+    _min = array.min()
+    m1 = (f_t - 0.1) / (_avg - _min)
+    m2 = (1 - f_t) / (_max - _avg)
+    c1 = f_t - m1 * _avg
+    c2 = 1 - m2 * _max
+    return m1 * array[-1] + c1 if array[-1] <= _avg else m2 * array[-1] + c2
+
 
 def _est_sqz_level(x:float):
     """
@@ -41,7 +49,9 @@ def _est_sqz_level(x:float):
       - Scale up to ~ 1 (Deduction Factor)
       - large width(high volatility) will be deducted
     """
-    return 1 if x <= 20 else (-1/80) * x + 1.25
+    w_c = 12
+    a = -0.9/(100 - w_c)
+    return 1 if x <= w_c else a * x + 1 - a * w_c
 
 def _est_band_contain(block: pd.DataFrame):
     """
@@ -104,7 +114,10 @@ class bband(object):
             est['est'] = est.k_lvl * est.k_vol * est.t_sqz * est.t_esc
         elif span == 'last':
             if self.__base.empty or len(self.__base) <= 20:
-                return pd.DataFrame(columns=['t_sqz', 't_esc', 'k_vol', 'k_lvl', 'est'])
+                return pd.DataFrame(
+                    data=dict(t_sqz=np.nan, t_esc=np.nan, k_vol=np.nan, k_lvl=np.nan, est=np.nan),
+                    index=[self.__base.index[-1]]
+                )
             index = [self.__base.index[-1]]
             t_sqz = _est_sqz_width(self.__base.width[-win:])
             t_esc = _est_sqz_price(self.__base.iloc[-1])
@@ -133,7 +146,7 @@ if __name__ == "__main__":
     # print(index.overall().kind)
 
 
-    # market = market.KR()
+    market = market.KR()
     # kosdaq = market.get_deposit(label='kosdaq')
     # kospi_mid = market.get_deposit(label='1003')
     # kospi_small = market.get_deposit(label='1004')
@@ -159,6 +172,11 @@ if __name__ == "__main__":
     # df = pd.DataFrame(data=data)
     # df.to_csv(r'./test.csv', encoding='euc-kr')
 
+    # my = stock.KR('389140', period=2, endate='20220504')
+    # sqz = my.ohlcv_bband.est_squeeze(span='last', win=5)
+    # print(sqz)
+    # print(sqz.t_sqz)
+
 
     # ratio = list()
     # for i in index.deposits(ticker='5412'):
@@ -178,34 +196,34 @@ if __name__ == "__main__":
     # print(f'전체 정답률: {round(sum(ratio) / len(ratio), 2)}%')
 
 
-    my = stock.KR('020150', period=10)
-    est = my.ohlcv_bband.est_squeeze(span='all')
-    df = est.join(my.ohlcv_btl[['최대', '최소']], how='left').dropna()
-    df['label'] = 'eval<br>----<br>sqz: ' + df.t_sqz.astype(str) + '<br>esc: ' + df.t_esc.astype(str) + '<br>vol: ' + df.k_vol.astype(str) + '<br>lvl: ' + df.k_lvl.astype(str)
-
-    summary = df[df.est >= 95].drop(columns=['label'])
-    achieve = summary[summary.최대 >= 4]
-    print(summary)
-    print(
-        f'개수: {len(summary)}\n',
-        f'달성률:{round(100 * len(achieve) / len(summary), 2)}% ({len(achieve)}/{len(summary)})'
-    )
-
-    fig = go.Figure()
-    scatter = go.Scatter(
-        name='all',
-        x=df.est,
-        y=df.최대,
-        mode='markers',
-        marker=dict(symbol='circle', color='royalblue', size=8, opacity=0.7),
-        meta=[f'{d.year}/{d.month}/{d.day}' for d in df.index],
-        customdata=df.label,
-        xhoverformat='.2f',
-        yhoverformat='.2f',
-        hovertemplate='%{meta}<br>%{y}%<br>%{customdata}<br>Eval: %{x}<extra></extra>'
-    )
-    fig.add_trace(trace=scatter)
-    save(fig, filename='test-scatter', path=r'\\kefico\keti\ENT\Softroom\Temp\J.H.Lee')
+    # my = stock.KR('020150', period=10)
+    # est = my.ohlcv_bband.est_squeeze(span='all')
+    # df = est.join(my.ohlcv_btl[['최대', '최소']], how='left').dropna()
+    # df['label'] = 'eval<br>----<br>sqz: ' + df.t_sqz.astype(str) + '<br>esc: ' + df.t_esc.astype(str) + '<br>vol: ' + df.k_vol.astype(str) + '<br>lvl: ' + df.k_lvl.astype(str)
+    #
+    # summary = df[df.est >= 95].drop(columns=['label'])
+    # achieve = summary[summary.최대 >= 4]
+    # print(summary)
+    # print(
+    #     f'개수: {len(summary)}\n',
+    #     f'달성률:{round(100 * len(achieve) / len(summary), 2)}% ({len(achieve)}/{len(summary)})'
+    # )
+    #
+    # fig = go.Figure()
+    # scatter = go.Scatter(
+    #     name='all',
+    #     x=df.est,
+    #     y=df.최대,
+    #     mode='markers',
+    #     marker=dict(symbol='circle', color='royalblue', size=8, opacity=0.7),
+    #     meta=[f'{d.year}/{d.month}/{d.day}' for d in df.index],
+    #     customdata=df.label,
+    #     xhoverformat='.2f',
+    #     yhoverformat='.2f',
+    #     hovertemplate='%{meta}<br>%{y}%<br>%{customdata}<br>Eval: %{x}<extra></extra>'
+    # )
+    # fig.add_trace(trace=scatter)
+    # save(fig, filename='test-scatter', path=r'\\kefico\keti\ENT\Softroom\Temp\J.H.Lee')
     # fig.show()
 
 
