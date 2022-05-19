@@ -1,4 +1,5 @@
-from tdatlib.dataset.stock.ohlcv import technical as data
+# from tdatlib.dataset.stock.ohlcv import technical as data
+from tdatlib.data
 from tdatlib.viewer.tools import CD_RANGER, save
 from tdatlib.dataset import tools
 from plotly.subplots import make_subplots
@@ -45,7 +46,7 @@ class technical(object):
                     legendgrouptitle=dict(text='캔들 차트'),
                     increasing_line=dict(color='red'), 
                     decreasing_line=dict(color='royalblue'),
-                    xhoverformat='%Y/%-m/%-d',
+                    xhoverformat='%Y/%m/%d',
                     yhoverformat=',' if self.__tech.currency == '원' else '.2f',
                 )
             )
@@ -469,6 +470,12 @@ class technical(object):
                 mirror=False
             ),
         )
+        return fig
+
+    @property
+    def fig_macd(self) -> go.Figure:
+        fig = self.__frm__(row_width=[0.3, 0.1, 0.6])
+
         return fig
 
 
