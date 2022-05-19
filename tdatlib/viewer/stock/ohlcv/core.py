@@ -42,7 +42,7 @@ class objs(technical):
                     showlegend=True,
                     xhoverformat='%Y/%m/%d',
                     yhoverformat=',' if self.currency == '원' else '.2f',
-                    legendgrouptitle=None if col == '시가' else dict(text='주가 차트'),
+                    legendgrouptitle=dict(text='주가 차트') if col == '시가' else None,
                     hovertemplate='%{x}<br>' + col + ': %{y}' + self.currency + '<extra></extra>'
                 )
             )
@@ -65,3 +65,21 @@ class objs(technical):
                 )
             )
         return self.__getattribute__(f'__volume')
+
+    def obj_ma(self, col:str) -> go.Scatter:
+        if not hasattr(self, f'__{col}'):
+            self.__setattr__(
+                f'__{col}',
+                go.Scatter(
+                    name=col,
+                    x=self.ohlcv_sma.index,
+                    y=self.ohlcv_sma[col],
+                    visible='legendonly' if col in ['MA5D', 'MA10D', 'MA20D'] else True,
+                    showlegend=True,
+                    legendgrouptitle=dict(text='이동 평균선') if col == 'MA5D' else None,
+                    xhoverformat='%Y/%m/%d',
+                    yhoverformat=',.0f',
+                    hovertemplate='%{x}<br>' + col + ': %{y}' + self.currency + '<extra></extra>'
+                )
+            )
+        return self.__getattribute__(f'__{col}')
