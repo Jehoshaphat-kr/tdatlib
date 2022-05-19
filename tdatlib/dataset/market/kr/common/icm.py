@@ -30,6 +30,7 @@ def __fetchIPO(trading_date:str) -> pd.DataFrame:
 def calc_icm(trading_date:str, is_market_open:bool, write_ok:bool) -> pd.DataFrame:
     icm = pd.read_csv(DIR_ICM, index_col='종목코드', encoding='utf-8')
     icm.index = icm.index.astype(str).str.zfill(6)
+    icm.IPO = pd.to_datetime(icm.IPO)
     if str(icm['날짜'][0]) == trading_date or is_market_open:
         return icm.drop(columns=['날짜'])
 

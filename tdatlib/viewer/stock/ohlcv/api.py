@@ -474,10 +474,15 @@ class technical(object):
 
 if __name__ == "__main__":
 
-    path = r'\\kefico\keti\ENT\Softroom\Temp\J.H.Lee'
-    # path = str()
+    # path = r'\\kefico\keti\ENT\Softroom\Temp\J.H.Lee'
+    path = str()
 
-
-    viewer = technical(ticker='020150', period=10)
+    # viewer = technical(ticker='020150', period=10)
     # save(fig=viewer.fig_basis, filename=f'{viewer.ticker}({viewer.name})-01_기본_차트', path=path)
-    save(fig=viewer.fig_bollinger_band, filename=f'{viewer.ticker}({viewer.name})-02_볼린저_밴드', path=path)
+    # save(fig=viewer.fig_bollinger_band, filename=f'{viewer.ticker}({viewer.name})-02_볼린저_밴드', path=path)
+
+
+    for ticker in ["011370", "104480", "048550", "130660", "052690", "045660", "091590", "344820", "014970", "063440", "069540"]:
+        viewer = technical(ticker=ticker, period=2)
+        # save(fig=viewer.fig_basis, filename=f'{viewer.ticker}({viewer.name})-01_기본_차트', path=path)
+        save(fig=viewer.fig_bollinger_band, filename=f'{viewer.ticker}({viewer.name})-02_볼린저_밴드', path=path)

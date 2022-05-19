@@ -42,7 +42,6 @@ def _est_sqz_volume(array:pd.Series):
     c2 = 1 - m2 * _max
     return m1 * array[-1] + c1 if array[-1] <= _avg else m2 * array[-1] + c2
 
-
 def _est_sqz_level(x:float):
     """
     Reflection factor by <Width Level: Absolute Volatility>
@@ -118,13 +117,15 @@ class bband(object):
                     data=dict(t_sqz=np.nan, t_esc=np.nan, k_vol=np.nan, k_lvl=np.nan, est=np.nan),
                     index=[self.__base.index[-1]]
                 )
-            index = [self.__base.index[-1]]
             t_sqz = _est_sqz_width(self.__base.width[-win:])
             t_esc = _est_sqz_price(self.__base.iloc[-1])
             k_vol = _est_sqz_volume(self.__base.거래량[-20:])
             k_lvl = _est_sqz_level(self.__base.width[-1])
             _est = k_lvl * k_vol * t_sqz * t_esc
-            est = pd.DataFrame(data=dict(t_sqz=t_sqz, t_esc=t_esc, k_vol=k_vol, k_lvl=k_lvl, est=_est), index=index)
+            est = pd.DataFrame(
+                data=dict(t_sqz=t_sqz, t_esc=t_esc, k_vol=k_vol, k_lvl=k_lvl, est=_est),
+                index=[self.__base.index[-1]]
+            )
         else:
             raise KeyError
         return est
@@ -140,6 +141,7 @@ if __name__ == "__main__":
     from tdatlib.dataset import market, stock, index
     from tdatlib.viewer.tools import save
     from tqdm import tqdm
+    from datetime import datetime
     import plotly.graph_objects as go
     from plotly.subplots import make_subplots
 
@@ -147,32 +149,34 @@ if __name__ == "__main__":
 
 
     market = market.KR()
+    endate = '20220504'
     # kosdaq = market.get_deposit(label='kosdaq')
     # kospi_mid = market.get_deposit(label='1003')
     # kospi_small = market.get_deposit(label='1004')
     # stocks = market.icm[market.icm.index.isin(kosdaq)]
-    # stocks = market.icm[market.icm.시가총액 > 100000000000]
-    # stocks = stocks[~stocks.종목명.isna()]
-    #
-    # data = list()
-    # proc = tqdm(stocks.index)
-    # for ticker in proc:
-    #     proc.set_description(desc=f'{stocks.loc[ticker, "종목명"]}({ticker}) ...')
-    #     my = stock.KR(ticker=ticker, period=2, endate='20220504')
-    #     sqz = my.ohlcv_bband.est_squeeze(span='last', win=5)
-    #     data.append({
-    #         '종목코드': ticker,
-    #         '종목명': stocks.loc[ticker, "종목명"],
-    #         'sqz_term': float(sqz.t_sqz),
-    #         'esc_term': float(sqz.t_esc),
-    #         'vol_fact': float(sqz.k_vol),
-    #         'lvl_fact': float(sqz.k_lvl),
-    #         'sqz_est': float(sqz.est)
-    #     })
-    # df = pd.DataFrame(data=data)
-    # df.to_csv(r'./test.csv', encoding='euc-kr')
+    stocks = market.icm[market.icm.시가총액 > 100000000000]
+    stocks = stocks[~stocks.종목명.isna()]
+    stocks = stocks[stocks.IPO < datetime.strptime(endate, "%Y%m%d")]
 
-    # my = stock.KR('389140', period=2, endate='20220504')
+    data = list()
+    proc = tqdm(stocks.index)
+    for ticker in proc:
+        proc.set_description(desc=f'{stocks.loc[ticker, "종목명"]}({ticker}) ...')
+        my = stock.KR(ticker=ticker, period=2, endate='20220504')
+        sqz = my.ohlcv_bband.est_squeeze(span='last', win=5)
+        data.append({
+            '종목코드': ticker,
+            '종목명': stocks.loc[ticker, "종목명"],
+            'sqz_term': float(sqz.t_sqz),
+            'esc_term': float(sqz.t_esc),
+            'vol_fact': float(sqz.k_vol),
+            'lvl_fact': float(sqz.k_lvl),
+            'sqz_est': float(sqz.est)
+        })
+    df = pd.DataFrame(data=data)
+    df.to_csv(r'./test.csv', encoding='euc-kr')
+
+    # my = stock.KR('389260', period=2, endate='20220504')
     # sqz = my.ohlcv_bband.est_squeeze(span='last', win=5)
     # print(sqz)
     # print(sqz.t_sqz)
