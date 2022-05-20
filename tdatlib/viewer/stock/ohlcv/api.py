@@ -28,70 +28,6 @@ class technical(object):
             vertical_spacing=0.02
         )
 
-        # """
-        # 캔들 차트
-        # """
-        # if not hasattr(self, '__candle'):
-        #     self.__setattr__(
-        #         '__candle',
-        #         go.Candlestick(
-        #             name='캔들 차트',
-        #             x=self._obj.ohlcv.index,
-        #             open=self._obj.ohlcv.시가,
-        #             high=self._obj.ohlcv.고가,
-        #             low=self._obj.ohlcv.저가,
-        #             close=self._obj.ohlcv.종가,
-        #             visible=True,
-        #             showlegend=True,
-        #             legendgrouptitle=dict(text='캔들 차트'),
-        #             increasing_line=dict(color='red'),
-        #             decreasing_line=dict(color='royalblue'),
-        #             xhoverformat='%Y/%m/%d',
-        #             yhoverformat=',' if self._obj.currency == '원' else '.2f',
-        #         )
-        #     )
-        # fig.add_trace(trace=self.__getattribute__('__candle'), row=1, col=1)
-        #
-        # """
-        # 주가 차트
-        # """
-        # for n, col in enumerate(['시가', '고가', '저가', '종가']):
-        #     if not hasattr(self, f'__{col}'):
-        #         self.__setattr__(
-        #             f'__{col}',
-        #             go.Scatter(
-        #                 name=col,
-        #                 x=self._obj.ohlcv.index,
-        #                 y=self._obj.ohlcv[col],
-        #                 visible='legendonly',
-        #                 showlegend=True,
-        #                 xhoverformat='%Y/%m/%d',
-        #                 yhoverformat=',' if self._obj.currency == '원' else '.2f',
-        #                 legendgrouptitle=None if n > 0 else dict(text='주가 차트'),
-        #                 hovertemplate='%{x}<br>' + col + ': %{y}' + self._obj.currency + '<extra></extra>'
-        #             )
-        #         )
-        #     fig.add_trace(trace=self.__getattribute__(f'__{col}'), row=1, col=1)
-        #
-        # """
-        # 거래량 차트
-        # """
-        # if not hasattr(self, f'__volume'):
-        #     self.__setattr__(
-        #         f'__volume',
-        #         go.Bar(
-        #             name='거래량',
-        #             x=self._obj.ohlcv.index,
-        #             y=self._obj.ohlcv.거래량,
-        #             marker=dict(color=self._obj.ohlcv.거래량.pct_change().apply(lambda x: 'blue' if x < 0 else 'red')),
-        #             visible=True,
-        #             showlegend=False,
-        #             xhoverformat='%Y/%m/%d',
-        #             yhoverformat=',',
-        #             hovertemplate='%{x}<br>거래량: %{y}<extra></extra>'
-        #         )
-        #     )
-        # fig.add_trace(trace=self.__getattribute__('__volume'), row=2, col=1)
 
         """
         축 설정
@@ -159,101 +95,34 @@ class technical(object):
     @property
     def fig_basis(self) -> go.Figure:
         fig = self.__frm__()
+
+        # Candle Stick
         fig.add_trace(self._obj.obj_candle(), row=1, col=1)
-        _ = [fig.add_trace(self._obj.obj_price(col=col), row=1, col=1) for col in ['시가', '고가', '저가', '종가']]
-        _ = [fig.add_trace(self._obj.obj_ma(col=col), row=1, col=1) for col in self._obj.ohlcv_sma.columns]
 
-        # """
-        # 이동 평균선
-        # """
-        # ma = self._obj.ohlcv_sma
-        # for n, col in enumerate(ma.columns):
-        #     scatter = go.Scatter(
-        #         name=col,
-        #         x=ma.index,
-        #         y=ma[col],
-        #         visible='legendonly' if col in ['MA5D', 'MA10D', 'MA20D'] else True,
-        #         showlegend=True,
-        #         legendgrouptitle=None if n > 0 else dict(text='이동 평균선'),
-        #         xhoverformat='%Y/%m/%d',
-        #         yhoverformat=',.0f',
-        #         hovertemplate='%{x}<br>' + col + ': %{y}' + self._obj.currency + '<extra></extra>'
-        #     )
-        #     fig.add_trace(trace=scatter, row=1, col=1)
+        # Price
+        for col in ['시가', '고가', '저가', '종가']:
+            fig.add_trace(self._obj.obj_price(col=col), row=1, col=1)
 
-        """
-        노이즈 제거선
-        """
-        nc = self._obj.ohlcv_iir
-        for n, col in enumerate(nc.columns):
-            scatter = go.Scatter(
-                name=col,
-                x=nc.index,
-                y=nc[col],
-                visible='legendonly',
-                showlegend=True,
-                legendgrouptitle=None if n > 0 else dict(text='노이즈 제거선'),
-                xhoverformat='%Y/%m/%d',
-                yhoverformat=',.0f',
-                hovertemplate='%{x}<br>' + col + ': %{y}' + self._obj.currency + '<extra></extra>'
-            )
-            fig.add_trace(trace=scatter, row=1, col=1)
+        # MA
+        for col in self._obj.ohlcv_sma.columns:
+            fig.add_trace(self._obj.obj_ma(col=col), row=1, col=1)
 
-        """
-        평균 추세선
-        """
-        trend = self._obj.ohlcv_trend
-        for n, col in enumerate(trend.columns):
-            tr = trend[col].dropna()
-            dx, dy = (tr.index[-1] - tr.index[0]).days, 100 * (tr[-1] / tr[0] - 1)
-            slope = round(dy / dx, 2)
-            scatter = go.Scatter(
-                name=col.replace('M', '개월').replace('Y', '년'),
-                x=tr.index,
-                y=tr,
-                mode='lines',
-                visible='legendonly',
-                showlegend=True,
-                legendgrouptitle=None if n > 0 else dict(text='평균 추세선'),
-                hovertemplate=f'{col} 평균 추세 강도: {slope}[%/days]<extra></extra>'
-            )
-            fig.add_trace(trace=scatter, row=1, col=1)
+        # NC
+        for col in self._obj.ohlcv_iir.columns:
+            fig.add_trace(self._obj.obj_nc(col=col), row=1, col=1)
 
-        """
-        지지/저항선
-        """
-        bound = self._obj.ohlcv_bound
-        for n, gap in enumerate(['2M', '3M', '6M', '1Y']):
-            name = gap.replace('M', '개월').replace('Y', '년')
-            resist = go.Scatter(
-                name=f'{name}',
-                x=bound.index,
-                y=bound[gap].resist,
-                mode='lines',
-                visible='legendonly',
-                showlegend=True,
-                legendgroup=gap,
-                legendgrouptitle=None if n > 0 else dict(text='지지/저항선'),
-                line=dict(dash='dot', color='blue'),
-                xhoverformat='%Y/%m/%d',
-                yhoverformat=',.0f',
-                hovertemplate='%{x}<br>저항: %{y}' + self._obj.currency + '<extra></extra>'
-            )
-            support = go.Scatter(
-                name=f'{name}',
-                x=bound.index,
-                y=bound[gap].support,
-                mode='lines',
-                visible='legendonly',
-                showlegend=False,
-                legendgroup=gap,
-                line=dict(dash='dot', color='red'),
-                xhoverformat='%Y/%m/%d',
-                yhoverformat=',.0f',
-                hovertemplate='%{x}<br>지지: %{y}' + self._obj.currency + '<extra></extra>'
-            )
-            fig.add_trace(trace=resist, row=1, col=1)
-            fig.add_trace(trace=support, row=1, col=1)
+        # Trend
+        for col in self._obj.ohlcv_trend.columns:
+            fig.add_trace(self._obj.obj_trend(col=col), row=1, col=1)
+
+        # Support / Resist
+        for col in ['2M', '3M', '6M', '1Y']:
+            resist, support = self._obj.obj_bound(col=col)
+            fig.add_trace(resist, row=1, col=1)
+            fig.add_trace(support, row=1, col=1)
+
+        # Volume
+        fig.add_trace(self._obj.obj_volume(), row=2, col=1)
 
         fig.update_layout(
             title=f'{self._obj.label}({self.ticker}) 기본 차트'
