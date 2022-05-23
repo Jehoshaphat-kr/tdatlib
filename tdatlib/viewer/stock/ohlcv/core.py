@@ -314,12 +314,73 @@ class chart(object):
                     visible='legendonly',
                     showlegend=True,
                     legendgrouptitle=dict(text='평가지표'),
-                    xhoverformat='%Y%m%d',
+                    xhoverformat='%Y/%m/%d',
                     yhoverformat=',d' if self._obj.currency == '원' else '.2f',
                     hovertemplate='%{x}<br>S-B: %{y}' + self._obj.currency + '<extra></extra>'
                 )
             )
         return self.__getattribute__('__breakout')
+
+    @property
+    def macd(self) -> go.Scatter:
+        if not hasattr(self, '__macd'):
+            self.__setattr__(
+                '__macd',
+                go.Scatter(
+                    name='MACD',
+                    x=self._obj.ohlcv_ta['trend_macd'].index,
+                    y=self._obj.ohlcv_ta['trend_macd'],
+                    visible=True,
+                    showlegend=True,
+                    legendgroup='MACD',
+                    legendgrouptitle=dict(text='MACD'),
+                    xhoverformat='%Y/%m/%d',
+                    yhoverformat='.2f',
+                    hovertemplate='%{x}<br>MACD: %{y}<extra></extra>'
+                )
+            )
+        return self.__getattribute__('__macd')
+
+    @property
+    def macd_sig(self) -> go.Scatter:
+        if not hasattr(self, '__macdsig'):
+            self.__setattr__(
+                '__macdsig',
+                go.Scatter(
+                    name='Signal',
+                    x=self._obj.ohlcv_ta['trend_macd_signal'].index,
+                    y=self._obj.ohlcv_ta['trend_macd_signal'],
+                    visible=True,
+                    showlegend=True,
+                    legendgroup='MACD',
+                    xhoverformat='%Y/%m/%d',
+                    yhoverformat='.2f',
+                    hovertemplate='%{x}<br>Signal: %{y}<extra></extra>'
+                )
+            )
+        return self.__getattribute__('__macdsig')
+
+    @property
+    def macd_diff(self) -> go.Bar:
+        if not hasattr(self, '__macddiff'):
+            self.__setattr__(
+                '__macddiff',
+                go.Bar(
+                    name='Diff',
+                    x=self._obj.ohlcv_ta['trend_macd_diff'].index,
+                    y=self._obj.ohlcv_ta['trend_macd_diff'],
+                    visible=True,
+                    showlegend=True,
+                    legendgroup='MACD',
+                    marker=dict(
+                        color=['blue' if v <= 0 else 'red' for v in self._obj.ohlcv_ta.trend_macd_diff.pct_change()]
+                    ),
+                    xhoverformat='%Y/%m/%d',
+                    yhoverformat='.2f',
+                    hovertemplate='%{x}<br>Signal: %{y}<extra></extra>'
+                )
+            )
+        return self.__getattribute__('__macddiff')
 
 
 

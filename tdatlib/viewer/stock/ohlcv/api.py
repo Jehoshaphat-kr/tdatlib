@@ -120,11 +120,8 @@ class technical(object):
         # Squeeze Break - Point
         fig.add_trace(self._cht.bb_breakout, row=1, col=1)
 
-        """
-        Squeeze & Break 지점
-        """
         fig.update_layout(
-            title=f'{self._src.label}({self.ticker}) 기본 차트',
+            title=f'{self._src.label}({self.ticker}) Bollinger Band',
             plot_bgcolor='white',
             # legend=dict(groupclick="toggleitem"),
             legend=dict(tracegroupgap=5),
@@ -144,20 +141,62 @@ class technical(object):
 
     @property
     def fig_macd(self) -> go.Figure:
-        fig = self.__frm__(row_width=[0.3, 0.1, 0.6])
+        fig = make_subplots(
+            rows=3,
+            cols=1,
+            row_width=[0.3, 0.1, 0.6],
+            shared_xaxes=True,
+            vertical_spacing=0.02
+        )
 
+        # Candle Stick
+        fig.add_trace(self._cht.candle, row=1, col=1)
+
+        # Price
+        for trace in self._cht.price.values():
+            fig.add_trace(trace, row=1, col=1)
+
+        # MA
+        for ch in self._cht.ma.values():
+            fig.add_trace(ch, row=1, col=1)
+
+        # Volume
+        fig.add_trace(self._cht.volume, row=2, col=1)
+
+        # MACD
+        fig.add_trace(self._cht.macd, row=3, col=1)
+        fig.add_trace(self._cht.macd_sig, row=3, col=1)
+        fig.add_trace(self._cht.macd_diff, row=3, col=1)
+        fig.add_hline(y=0, row=3, col=1, line_width=0.5, line_dash="dot", line_color="black")
+
+        fig.update_layout(
+            title=f'{self._src.label}({self.ticker}) MACD',
+            plot_bgcolor='white',
+            legend=dict(
+                groupclick="toggleitem",
+                tracegroupgap=5
+            ),
+            xaxis=self._skh.x_axis(rangeselector=True),
+            yaxis=self._skh.y_axis(title=self._src.currency),
+            xaxis2=self._skh.x_axis(),
+            yaxis2=self._skh.y_axis(title='거래량'),
+            xaxis3=self._skh.x_axis(title='날짜', showticklabels=True),
+            yaxis3=self._skh.y_axis(title='MACD'),
+            xaxis_rangeslider=dict(visible=False)
+        )
         return fig
 
 
 if __name__ == "__main__":
 
-    path = r'\\kefico\keti\ENT\Softroom\Temp\J.H.Lee'
-    # path = str()
+    # path = r'\\kefico\keti\ENT\Softroom\Temp\J.H.Lee'
+    path = str()
 
     viewer = technical(ticker='185750', period=3)
     # viewer.fig_basis.show()
     # save(fig=viewer.fig_basis, filename=f'{viewer.ticker}({viewer.name})-01_기본_차트', path=path)
-    save(fig=viewer.fig_bollinger_band, filename=f'{viewer.ticker}({viewer.name})-02_볼린저_밴드', path=path)
+    # save(fig=viewer.fig_bollinger_band, filename=f'{viewer.ticker}({viewer.name})-02_볼린저_밴드', path=path)
+    save(fig=viewer.fig_macd, filename=f'{viewer.ticker}({viewer.name})-03_MACD', path=path)
 
 
     # for ticker in ["011370", "104480", "048550", "130660", "052690", "045660", "091590", "344820", "014970", "063440", "069540"]:
