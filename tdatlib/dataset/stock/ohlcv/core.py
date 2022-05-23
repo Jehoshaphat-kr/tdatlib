@@ -134,7 +134,14 @@ def calc_trend(ohlcv:pd.DataFrame) -> pd.DataFrame:
         basis = ohlcv[ohlcv.index >= since]
         fitted, _ = fit(series=0.25 * (basis.시가 + basis.고가 + basis.저가 + basis.종가))
         objs.append(fitted.rename(columns={'Regression':gap}))
-    return pd.concat(objs=objs, axis=1)
+    df = pd.concat(objs=objs, axis=1)
+
+    for col in df.columns:
+        tr = df[col].dropna()
+        dx, dy = (tr.index[-1] - tr.index[0]).days, 100 * (tr[-1] / tr[0] - 1)
+        slope = round(dy / dx, 2)
+        df[f'{col}-Slope'] = slope
+    return df
 
 
 def calc_bound(ohlcv:pd.DataFrame) -> pd.DataFrame:

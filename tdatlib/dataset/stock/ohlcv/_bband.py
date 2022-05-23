@@ -142,34 +142,38 @@ if __name__ == "__main__":
 
     # print(index.overall().kind)
 
+    my = stock.KR(ticker='000660', period=2)
+    breakout = my.ohlcv_bband.squeeze_break
+    print(breakout)
 
-    market = market.KR()
-    endate = '20220504'
+
+    # market = market.KR()
+    # endate = '20220504'
     # kosdaq = market.get_deposit(label='kosdaq')
     # kospi_mid = market.get_deposit(label='1003')
     # kospi_small = market.get_deposit(label='1004')
     # stocks = market.icm[market.icm.index.isin(kosdaq)]
-    stocks = market.icm[market.icm.시가총액 > 100000000000]
-    stocks = stocks[~stocks.종목명.isna()]
-    stocks = stocks[stocks.IPO < datetime.strptime(endate, "%Y%m%d")]
-
-    data = list()
-    proc = tqdm(stocks.index)
-    for ticker in proc:
-        proc.set_description(desc=f'{stocks.loc[ticker, "종목명"]}({ticker}) ...')
-        my = stock.KR(ticker=ticker, period=2, endate='20220504')
-        sqz = my.ohlcv_bband.est_squeeze(span='last', win=5)
-        data.append({
-            '종목코드': ticker,
-            '종목명': stocks.loc[ticker, "종목명"],
-            'sqz_term': float(sqz.t_sqz),
-            'esc_term': float(sqz.t_esc),
-            'vol_fact': float(sqz.k_vol),
-            'lvl_fact': float(sqz.k_lvl),
-            'sqz_est': float(sqz.est)
-        })
-    df = pd.DataFrame(data=data)
-    df.to_csv(r'./test.csv', encoding='euc-kr')
+    # stocks = market.icm[market.icm.시가총액 > 100000000000]
+    # stocks = stocks[~stocks.종목명.isna()]
+    # stocks = stocks[stocks.IPO < datetime.strptime(endate, "%Y%m%d")]
+    #
+    # data = list()
+    # proc = tqdm(stocks.index)
+    # for ticker in proc:
+    #     proc.set_description(desc=f'{stocks.loc[ticker, "종목명"]}({ticker}) ...')
+    #     my = stock.KR(ticker=ticker, period=2, endate='20220504')
+    #     sqz = my.ohlcv_bband.est_squeeze(span='last', win=5)
+    #     data.append({
+    #         '종목코드': ticker,
+    #         '종목명': stocks.loc[ticker, "종목명"],
+    #         'sqz_term': float(sqz.t_sqz),
+    #         'esc_term': float(sqz.t_esc),
+    #         'vol_fact': float(sqz.k_vol),
+    #         'lvl_fact': float(sqz.k_lvl),
+    #         'sqz_est': float(sqz.est)
+    #     })
+    # df = pd.DataFrame(data=data)
+    # df.to_csv(r'./test.csv', encoding='euc-kr')
 
     # my = stock.KR('389260', period=2, endate='20220504')
     # sqz = my.ohlcv_bband.est_squeeze(span='last', win=5)

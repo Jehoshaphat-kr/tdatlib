@@ -5,11 +5,12 @@ import plotly.graph_objects as go
 import pandas as pd
 
 
-class _price(object):
+class chart(object):
 
     def __init__(self, obj:technical):
         self._obj = obj
 
+    @property
     def candle(self) -> go.Candlestick:
         if not hasattr(self, '__candle'):
             self.__setattr__(
@@ -32,6 +33,7 @@ class _price(object):
             )
         return self.__getattribute__('__candle')
 
+    @property
     def volume(self) -> go.Bar:
         if not hasattr(self, f'__volume'):
             self.__setattr__(
@@ -50,128 +52,135 @@ class _price(object):
             )
         return self.__getattribute__(f'__volume')
 
-    def price(self, col:str) -> go.Scatter:
-        if not hasattr(self, f'__{col}'):
+    @property
+    def price(self) -> dict:
+        if not hasattr(self, f'__price'):
             self.__setattr__(
-                f'__{col}',
-                go.Scatter(
-                    name=col,
-                    x=self._obj.ohlcv.index,
-                    y=self._obj.ohlcv[col],
-                    visible='legendonly',
-                    showlegend=True,
-                    xhoverformat='%Y/%m/%d',
-                    yhoverformat=',' if self._obj.currency == '원' else '.2f',
-                    legendgrouptitle=dict(text='주가 차트') if col == '시가' else None,
-                    hovertemplate='%{x}<br>' + col + ': %{y}' + self._obj.currency + '<extra></extra>'
-                )
-            )
-        return self.__getattribute__(f'__{col}')
-
-    def ma(self, col:str) -> go.Scatter:
-        if not hasattr(self, f'__{col}'):
-            self.__setattr__(
-                f'__{col}',
-                go.Scatter(
-                    name=col,
-                    x=self._obj.ohlcv_sma.index,
-                    y=self._obj.ohlcv_sma[col],
-                    visible='legendonly' if col in ['MA5D', 'MA10D', 'MA20D'] else True,
-                    showlegend=True,
-                    legendgrouptitle=dict(text='이동 평균선') if col == 'MA5D' else None,
-                    xhoverformat='%Y/%m/%d',
-                    yhoverformat=',.0f',
-                    hovertemplate='%{x}<br>' + col + ': %{y}' + self._obj.currency + '<extra></extra>'
-                )
-            )
-        return self.__getattribute__(f'__{col}')
-
-    def nc(self, col:str) -> go.Scatter:
-        if not hasattr(self, f'__{col}'):
-            self.__setattr__(
-                f'__{col}',
-                go.Scatter(
-                    name=col,
-                    x=self._obj.ohlcv_iir.index,
-                    y=self._obj.ohlcv_iir[col],
-                    visible='legendonly',
-                    showlegend=True,
-                    legendgrouptitle=dict(text='노이즈 제거선') if col == 'NC5D' else None,
-                    xhoverformat='%Y/%m/%d',
-                    yhoverformat=',.0f',
-                    hovertemplate='%{x}<br>' + col + ': %{y}' + self._obj.currency + '<extra></extra>'
-                )
-            )
-        return self.__getattribute__(f'__{col}')
-
-    def trend(self, col:str) -> go.Scatter:
-        if not hasattr(self, f'__tr{col}'):
-            tr = self._obj.ohlcv_trend[col].dropna()
-            dx, dy = (tr.index[-1] - tr.index[0]).days, 100 * (tr[-1] / tr[0] - 1)
-            slope = round(dy / dx, 2)
-            self.__setattr__(
-                f'__tr{col}',
-                go.Scatter(
-                    name=col.replace('M', '개월').replace('Y', '년'),
-                    x=tr.index,
-                    y=tr,
-                    mode='lines',
-                    line=dict(
-                        width=2,
-                        dash='dot'
-                    ),
-                    visible='legendonly',
-                    showlegend=True,
-                    legendgrouptitle=dict(text='평균 추세선') if col == '1M' else None,
-                    hovertemplate=f'{col} 평균 추세 강도: {slope}[%/days]<extra></extra>'
-                )
-            )
-        return self.__getattribute__(f'__tr{col}')
-
-    def bound(self, col:str) -> tuple:
-        if not hasattr(self, f'__bd{col}'):
-            name = col.replace('M', '개월').replace('Y', '년')
-            self.__setattr__(
-                f'__bd{col}',
-                (
-                    go.Scatter(
-                        name=f'{name}',
-                        x=self._obj.ohlcv_bound.index,
-                        y=self._obj.ohlcv_bound[col].resist,
-                        mode='lines',
+                f'__price',
+                {
+                    col:go.Scatter(
+                        name=col,
+                        x=self._obj.ohlcv.index,
+                        y=self._obj.ohlcv[col],
                         visible='legendonly',
                         showlegend=True,
-                        legendgroup=col,
-                        legendgrouptitle=dict(text='지지/저항선') if col == '2M' else None,
-                        line=dict(dash='dot', color='blue'),
                         xhoverformat='%Y/%m/%d',
-                        yhoverformat=',.0f',
-                        hovertemplate='%{x}<br>저항: %{y}' + self._obj.currency + '<extra></extra>'
-                    ),
-                    go.Scatter(
-                        name=f'{name}',
-                        x=self._obj.ohlcv_bound.index,
-                        y=self._obj.ohlcv_bound[col].support,
-                        mode='lines',
-                        visible='legendonly',
-                        showlegend=False,
-                        legendgroup=col,
-                        line=dict(dash='dot', color='red'),
-                        xhoverformat='%Y/%m/%d',
-                        yhoverformat=',.0f',
-                        hovertemplate='%{x}<br>지지: %{y}' + self._obj.currency + '<extra></extra>'
-                    )
-                )
+                        yhoverformat=',' if self._obj.currency == '원' else '.2f',
+                        legendgrouptitle=dict(text='주가 차트') if col == '시가' else None,
+                        hovertemplate='%{x}<br>' + col + ': %{y}' + self._obj.currency + '<extra></extra>'
+                    ) for col in ['시가', '고가', '저가', '종가']
+                }
             )
-        return self.__getattribute__(f'__bd{col}')
+        return self.__getattribute__(f'__price')
 
+    @property
+    def ma(self) -> dict:
+        if not hasattr(self, f'__ma'):
+            self.__setattr__(
+                f'__ma',
+                {
+                    col: go.Scatter(
+                        name=col,
+                        x=self._obj.ohlcv_sma.index,
+                        y=self._obj.ohlcv_sma[col],
+                        visible='legendonly' if col in ['MA5D', 'MA10D', 'MA20D'] else True,
+                        showlegend=True,
+                        legendgrouptitle=dict(text='이동 평균선') if col == 'MA5D' else None,
+                        xhoverformat='%Y/%m/%d',
+                        yhoverformat=',.0f',
+                        hovertemplate='%{x}<br>' + col + ': %{y}' + self._obj.currency + '<extra></extra>'
+                    ) for col in self._obj.ohlcv_sma.columns
+                }
+            )
+        return self.__getattribute__(f'__ma')
 
-class _bollinger(object):
+    @property
+    def nc(self) -> dict:
+        if not hasattr(self, f'__nc'):
+            self.__setattr__(
+                f'__nc',
+                {
+                    col:go.Scatter(
+                        name=col,
+                        x=self._obj.ohlcv_iir.index,
+                        y=self._obj.ohlcv_iir[col],
+                        visible='legendonly',
+                        showlegend=True,
+                        legendgrouptitle=dict(text='노이즈 제거선') if col == 'NC5D' else None,
+                        xhoverformat='%Y/%m/%d',
+                        yhoverformat=',.0f',
+                        hovertemplate='%{x}<br>' + col + ': %{y}' + self._obj.currency + '<extra></extra>'
+                    ) for col in self._obj.ohlcv_iir.columns
+                }
+            )
+        return self.__getattribute__(f'__nc')
 
-    def __init__(self, obj:technical):
-        self._obj = obj
+    @property
+    def trend(self) -> dict:
+        if not hasattr(self, f'__trend'):
+            self.__setattr__(
+                f'__trend',
+                {
+                    col:go.Scatter(
+                        name=col.replace('M', '개월').replace('Y', '년'),
+                        x=self._obj.ohlcv_trend[col].index,
+                        y=self._obj.ohlcv_trend[col],
+                        mode='lines',
+                        line=dict(
+                            width=2,
+                            dash='dot'
+                        ),
+                        visible='legendonly',
+                        showlegend=True,
+                        legendgrouptitle=dict(text='평균 추세선') if col == '1M' else None,
+                        meta=self._obj.ohlcv_trend[f'{col}-Slope'],
+                        hovertemplate=f'{col}' + ' 추세 강도: %{meta}[%/days]<extra></extra>'
+                    ) for col in self._obj.ohlcv_trend.columns if not col.endswith('Slope')
+                }
+            )
+        return self.__getattribute__(f'__trend')
 
-    def obj_bband(self) -> list:
+    @property
+    def bound(self) -> dict:
+        if not hasattr(self, f'__bound'):
+            self.__setattr__(
+                f'__bound',
+                {
+                    col:(
+                        go.Scatter(
+                            name=col.replace('M', '개월').replace('Y', '년'),
+                            x=self._obj.ohlcv_bound.index,
+                            y=self._obj.ohlcv_bound[col].resist,
+                            mode='lines',
+                            visible='legendonly',
+                            showlegend=True,
+                            legendgroup=col,
+                            legendgrouptitle=dict(text='지지/저항선') if col == '2M' else None,
+                            line=dict(dash='dot', color='blue'),
+                            xhoverformat='%Y/%m/%d',
+                            yhoverformat=',.0f',
+                            hovertemplate='%{x}<br>저항: %{y}' + self._obj.currency + '<extra></extra>'
+                        ),
+                        go.Scatter(
+                            name=col.replace('M', '개월').replace('Y', '년'),
+                            x=self._obj.ohlcv_bound.index,
+                            y=self._obj.ohlcv_bound[col].support,
+                            mode='lines',
+                            visible='legendonly',
+                            showlegend=False,
+                            legendgroup=col,
+                            line=dict(dash='dot', color='red'),
+                            xhoverformat='%Y/%m/%d',
+                            yhoverformat=',.0f',
+                            hovertemplate='%{x}<br>지지: %{y}' + self._obj.currency + '<extra></extra>'
+                        )
+                    ) for col in ['2M', '3M', '6M', '1Y']
+                }
+            )
+        return self.__getattribute__(f'__bound')
+
+    @property
+    def bb(self) -> list:
         if not hasattr(self, f'__objbband'):
             graphs = list()
             for n, col, label in [
@@ -197,7 +206,8 @@ class _bollinger(object):
             self.__setattr__(f'__objbband', graphs)
         return self.__getattribute__(f'__objbband')
 
-    def obj_bband_inner(self) -> list:
+    @property
+    def bb_inner(self) -> list:
         if not hasattr(self, f'__objbbandinner'):
             graphs = list()
             for n, col, label in [
@@ -229,7 +239,8 @@ class _bollinger(object):
             self.__setattr__('__objbbandinner', graphs)
         return self.__getattribute__(f'__objbbandinner')
 
-    def obj_bband_width(self) -> go.Scatter:
+    @property
+    def bb_width(self) -> go.Scatter:
         if not hasattr(self, f'__objbbandwidth'):
             self.__setattr__(
                 f'__objbbandwidth',
@@ -246,7 +257,8 @@ class _bollinger(object):
             )
         return self.__getattribute__('__objbbandwidth')
 
-    def obj_bband_tag(self) -> go.Scatter:
+    @property
+    def bb_tag(self) -> go.Scatter:
         if not hasattr(self, f'__objbbandtag'):
             self.__setattr__(
                 f'__objbbandtag',
@@ -263,7 +275,8 @@ class _bollinger(object):
             )
         return self.__getattribute__('__objbbandtag')
 
-    def obj_bband_contain(self) -> go.Scatter:
+    @property
+    def bb_contain(self) -> go.Scatter:
         if not hasattr(self, f'__objbbandcont'):
             self.__setattr__(
                 f'__objbbandcont',
@@ -280,9 +293,37 @@ class _bollinger(object):
             )
         return self.__getattribute__(f'__objbbandcont')
 
+    @property
+    def bb_breakout(self) -> go.Scatter:
+        if not hasattr(self, '__breakout'):
+            breakout = self._obj.ohlcv_bband.squeeze_break
+            breakout = breakout[breakout.est >= 90]
+            breakout = self._obj.ohlcv[self._obj.ohlcv.index.isin(breakout.index)].copy()
+            self.__setattr__(
+                '__breakout',
+                go.Scatter(
+                    name='Breakout',
+                    x=breakout.index,
+                    y=breakout.종가,
+                    mode='markers',
+                    marker=dict(
+                        symbol='triangle-up',
+                        color='yellow',
+                        size=8
+                    ),
+                    visible='legendonly',
+                    showlegend=True,
+                    legendgrouptitle=dict(text='평가지표'),
+                    xhoverformat='%Y%m%d',
+                    yhoverformat=',d' if self._obj.currency == '원' else '.2f',
+                    hovertemplate='%{x}<br>S-B: %{y}' + self._obj.currency + '<extra></extra>'
+                )
+            )
+        return self.__getattribute__('__breakout')
+
+
 
 class sketch(object):
-
     def __init__(self):
         self.__x_axis = dict(
             showticklabels=False,
