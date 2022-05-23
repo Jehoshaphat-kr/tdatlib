@@ -91,46 +91,41 @@ class bband(object):
         self.__base = self.__p.ohlcv.join(other=pd.concat(objs=objs, axis=1), how='left')
         return
 
-    def est_squeeze(self, span:str='last', win:int=5) -> pd.DataFrame:
-        """
-        Estimation for Squeezed-Escape Method
-          - Valid Score Range: (est) >= 95
-        :param: span
-                - all  : for all time span
-                - last : only for last time stamp
-        :param: win: the number of windows of width-data rolling
-        """
-        if span == 'all':
-            est = pd.concat(
-                objs=dict(
-                    t_sqz=self.__base.width.rolling(window=win).apply(lambda arr: _est_sqz_width(arr)),
-                    t_esc=self.__base.apply(lambda row: _est_sqz_price(row), axis=1),
-                    k_vol=self.__base.거래량.rolling(window=20).apply(lambda arr: _est_sqz_volume(arr)),
-                    k_lvl=self.__base.width.apply(lambda x:_est_sqz_level(x)),
-                ),
-                axis=1
-            )
-            est['est'] = est.k_lvl * est.k_vol * est.t_sqz * est.t_esc
-        elif span == 'last':
-            if self.__base.empty or len(self.__base) <= 20:
-                return pd.DataFrame(
-                    data=dict(t_sqz=np.nan, t_esc=np.nan, k_vol=np.nan, k_lvl=np.nan, est=np.nan),
-                    index=[self.__base.index[-1]]
-                )
-            t_sqz = _est_sqz_width(self.__base.width[-win:])
-            t_esc = _est_sqz_price(self.__base.iloc[-1])
-            k_vol = _est_sqz_volume(self.__base.거래량[-20:])
-            k_lvl = _est_sqz_level(self.__base.width[-1])
-            _est = k_lvl * k_vol * t_sqz * t_esc
-            est = pd.DataFrame(
-                data=dict(t_sqz=t_sqz, t_esc=t_esc, k_vol=k_vol, k_lvl=k_lvl, est=_est),
-                index=[self.__base.index[-1]]
-            )
-        else:
-            raise KeyError
+    @property
+    def squeeze_break(self) -> pd.DataFrame:
+        win = 5
+        est = pd.concat(
+            objs=dict(
+                t_sqz=self.__base.width.rolling(window=win).apply(lambda arr: _est_sqz_width(arr)),
+                t_esc=self.__base.apply(lambda row: _est_sqz_price(row), axis=1),
+                k_vol=self.__base.거래량.rolling(window=20).apply(lambda arr: _est_sqz_volume(arr)),
+                k_lvl=self.__base.width.apply(lambda x: _est_sqz_level(x)),
+            ),
+            axis=1
+        )
+        est['est'] = est.k_lvl * est.k_vol * est.t_sqz * est.t_esc
         return est
 
-    def est_band(self):
+    @property
+    def est_squeeze_break(self) -> pd.DataFrame:
+        win = 5
+        if self.__base.empty or len(self.__base) <= 20:
+            return pd.DataFrame(
+                data=dict(t_sqz=np.nan, t_esc=np.nan, k_vol=np.nan, k_lvl=np.nan, est=np.nan),
+                index=[self.__base.index[-1]]
+            )
+        t_sqz = _est_sqz_width(self.__base.width[-win:])
+        t_esc = _est_sqz_price(self.__base.iloc[-1])
+        k_vol = _est_sqz_volume(self.__base.거래량[-20:])
+        k_lvl = _est_sqz_level(self.__base.width[-1])
+        _est = k_lvl * k_vol * t_sqz * t_esc
+        return pd.DataFrame(
+            data=dict(t_sqz=t_sqz, t_esc=t_esc, k_vol=k_vol, k_lvl=k_lvl, est=_est),
+            index=[self.__base.index[-1]]
+        )
+
+    @property
+    def inner_band(self):
         est = self.__base.apply(lambda row: _est_band_contain(row), axis=1)
         return est
 
