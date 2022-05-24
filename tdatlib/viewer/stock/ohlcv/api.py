@@ -186,17 +186,65 @@ class technical(object):
         )
         return fig
 
+    @property
+    def fig_rsi(self) -> go.Figure:
+        fig = make_subplots(
+            rows=4,
+            cols=1,
+            row_width=[0.25, 0.25, 0.1, 0.4],
+            shared_xaxes=True,
+            vertical_spacing=0.02
+        )
+
+        # Candle Stick
+        fig.add_trace(self._cht.candle, row=1, col=1)
+
+        # Price
+        for trace in self._cht.price.values():
+            fig.add_trace(trace, row=1, col=1)
+
+        # MA
+        for ch in self._cht.ma.values():
+            fig.add_trace(ch, row=1, col=1)
+
+        # Volume
+        fig.add_trace(self._cht.volume, row=2, col=1)
+
+        # RSI
+        fig.add_trace(self._cht.rsi, row=3, col=1)
+
+        fig.update_layout(
+            title=f'{self._src.label}({self.ticker}) RSI',
+            plot_bgcolor='white',
+            legend=dict(
+                groupclick="toggleitem",
+                tracegroupgap=5
+            ),
+            xaxis=self._skh.x_axis(rangeselector=True),
+            yaxis=self._skh.y_axis(title=self._src.currency),
+            xaxis2=self._skh.x_axis(),
+            yaxis2=self._skh.y_axis(title='거래량'),
+            xaxis3=self._skh.x_axis(),
+            yaxis3=self._skh.y_axis(title='RSI'),
+            xaxis4=self._skh.x_axis(title='날짜', showticklabels=True),
+            yaxis4=self._skh.y_axis(title='Stoch-RSI'),
+            xaxis_rangeslider=dict(visible=False)
+        )
+        return fig
+
 
 if __name__ == "__main__":
 
-    # path = r'\\kefico\keti\ENT\Softroom\Temp\J.H.Lee'
-    path = str()
+    path = r'\\kefico\keti\ENT\Softroom\Temp\J.H.Lee'
+    # path = str()
 
-    viewer = technical(ticker='185750', period=3)
+    # viewer = technical(ticker='185750', period=3)
+    viewer = technical(ticker='TSLA', period=3)
     # viewer.fig_basis.show()
     # save(fig=viewer.fig_basis, filename=f'{viewer.ticker}({viewer.name})-01_기본_차트', path=path)
     # save(fig=viewer.fig_bollinger_band, filename=f'{viewer.ticker}({viewer.name})-02_볼린저_밴드', path=path)
-    save(fig=viewer.fig_macd, filename=f'{viewer.ticker}({viewer.name})-03_MACD', path=path)
+    # save(fig=viewer.fig_macd, filename=f'{viewer.ticker}({viewer.name})-03_MACD', path=path)
+    save(fig=viewer.fig_rsi, filename=f'{viewer.ticker}({viewer.name})-04_RSI', path=path)
 
 
     # for ticker in ["011370", "104480", "048550", "130660", "052690", "045660", "091590", "344820", "014970", "063440", "069540"]:

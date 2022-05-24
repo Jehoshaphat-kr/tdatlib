@@ -382,6 +382,25 @@ class chart(object):
             )
         return self.__getattribute__('__macddiff')
 
+    @property
+    def rsi(self) -> go.Scatter:
+        if not hasattr(self, '__rsi'):
+            self.__setattr__(
+                '__rsi',
+                go.Scatter(
+                    name='RSI',
+                    x=self._obj.ohlcv_ta['momentum_rsi'].index,
+                    y=self._obj.ohlcv_ta['momentum_rsi'],
+                    visible=True,
+                    showlegend=True,
+                    legendgrouptitle=dict(text='RSI'),
+                    xhoverformat='%Y/%m/%d',
+                    yhoverformat='.2f',
+                    hovertemplate='%{x}<br>RSI: %{y}<extra></extra>'
+                )
+            )
+        return self.__getattribute__('__rsi')
+
 
 
 class sketch(object):
