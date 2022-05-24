@@ -16,7 +16,7 @@ from tdatlib.viewer.stock.ohlcv import (
     show_trix,
     show_ta
 )
-from tdatlib.viewer.stock.value import (
+from tdatlib.viewer.stock.depr_value import (
     show_overview,
     show_relative,
     show_supply,

@@ -1,8 +1,6 @@
 from tdatlib.dataset.stock.ohlcv import technical
 from tdatlib.viewer.tools import CD_RANGER
-from tdatlib.dataset import tools
 import plotly.graph_objects as go
-import pandas as pd
 
 
 class chart(object):
@@ -393,6 +391,7 @@ class chart(object):
                     y=self._obj.ohlcv_ta['momentum_rsi'],
                     visible=True,
                     showlegend=True,
+                    legendgroup='RSI',
                     legendgrouptitle=dict(text='RSI'),
                     xhoverformat='%Y/%m/%d',
                     yhoverformat='.2f',
@@ -400,6 +399,46 @@ class chart(object):
                 )
             )
         return self.__getattribute__('__rsi')
+
+    @property
+    def stoch_rsi(self) -> go.Scatter:
+        if not hasattr(self, '__stoch_rsi'):
+            self.__setattr__(
+                '__stoch_rsi',
+                go.Scatter(
+                    name='(S)RSI',
+                    x=self._obj.ohlcv_ta['momentum_stoch'].index,
+                    y=self._obj.ohlcv_ta['momentum_stoch'],
+                    visible=True,
+                    showlegend=True,
+                    legendgroup='RSI',
+                    xhoverformat='%Y/%m/%d',
+                    yhoverformat='.2f',
+                    hovertemplate='%{x}<br>(S)RSI: %{y}<extra></extra>'
+                )
+            )
+        return self.__getattribute__('__stoch_rsi')
+
+    @property
+    def stoch_rsi_sig(self) -> go.Scatter:
+        if not hasattr(self, '__stoch_rsi_sig'):
+            self.__setattr__(
+                '__stoch_rsi_sig',
+                go.Scatter(
+                    name='(S)RSI-Signal',
+                    x=self._obj.ohlcv_ta['momentum_stoch_signal'].index,
+                    y=self._obj.ohlcv_ta['momentum_stoch_signal'],
+                    visible=True,
+                    showlegend=True,
+                    legendgroup='RSI',
+                    xhoverformat='%Y/%m/%d',
+                    yhoverformat='.2f',
+                    hovertemplate='%{x}<br>(S)RSI-Sig: %{y}<extra></extra>'
+                )
+            )
+        return self.__getattribute__('__stoch_rsi_sig')
+
+
 
 
 

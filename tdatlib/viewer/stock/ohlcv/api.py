@@ -212,6 +212,14 @@ class technical(object):
 
         # RSI
         fig.add_trace(self._cht.rsi, row=3, col=1)
+        fig.add_hrect(y0=70, y1=80, line_width=0, fillcolor='red', opacity=0.2, row=3, col=1)
+        fig.add_hrect(y0=20, y1=30, line_width=0, fillcolor='green', opacity=0.2, row=3, col=1)
+
+        # Stochastic RSI
+        fig.add_trace(self._cht.stoch_rsi, row=4, col=1)
+        fig.add_trace(self._cht.stoch_rsi_sig, row=4, col=1)
+        fig.add_hrect(y0=80, y1=100, line_width=0, fillcolor='red', opacity=0.2, row=4, col=1)
+        fig.add_hrect(y0=0, y1=20, line_width=0, fillcolor='green', opacity=0.2, row=4, col=1)
 
         fig.update_layout(
             title=f'{self._src.label}({self.ticker}) RSI',
