@@ -1,4 +1,3 @@
-from tdatlib.dataset.stock.ohlcv import technical as src
 from tdatlib.viewer.stock.ohlcv.core import (
     sketch,
     chart
@@ -10,18 +9,18 @@ import plotly.graph_objects as go
 import pandas as pd
 
 
-class technical(object):
+class ohlcv(chart):
 
     _skh = sketch()
-    def __init__(self, ticker:str, name:str=str(), period:int=5, endate:str=str()):
-        self.ticker = ticker
-
-        self._src = src(ticker=ticker, period=period, endate=endate)
-        self._cht = chart(obj=self._src)
-        if name:
-            self._src.label = name
-        self.name = self._src.label
-        return
+    # def __init__(self, ticker:str, name:str=str(), period:int=5, endate:str=str()):
+    #     self.ticker = ticker
+    #
+    #     self._src = src(ticker=ticker, period=period, endate=endate)
+    #     self._cht = chart(obj=self._src)
+    #     if name:
+    #         self._src.label = name
+    #     self.name = self._src.label
+    #     return
 
     @property
     def fig_basis(self) -> go.Figure:
@@ -34,42 +33,42 @@ class technical(object):
         )
 
         # Candle Stick
-        fig.add_trace(self._cht.candle, row=1, col=1)
+        fig.add_trace(self.candle, row=1, col=1)
 
         # Price
-        for ch in self._cht.price.values():
+        for ch in self.price.values():
             fig.add_trace(ch, row=1, col=1)
 
         # MA
-        for ch in self._cht.ma.values():
+        for ch in self.ma.values():
             fig.add_trace(ch, row=1, col=1)
 
         # NC
-        for ch in self._cht.nc.values():
+        for ch in self.nc.values():
             fig.add_trace(ch, row=1, col=1)
 
         # Trend
-        for ch in self._cht.trend.values():
+        for ch in self.trend.values():
             fig.add_trace(ch, row=1, col=1)
 
         # Support / Resist
-        for ch in self._cht.bound.values():
+        for ch in self.bound.values():
             resist, support = ch
             fig.add_trace(resist, row=1, col=1)
             fig.add_trace(support, row=1, col=1)
 
         # Volume
-        fig.add_trace(self._cht.volume, row=2, col=1)
+        fig.add_trace(self.volume, row=2, col=1)
 
         fig.update_layout(
-            title=f'{self._src.label}({self.ticker}) 기본 차트',
+            title=f'{self.src.label}({self.src.ticker}) 기본 차트',
             plot_bgcolor='white',
             legend=dict(
-                groupclick="toggleitem",
+                # groupclick="toggleitem",
                 tracegroupgap=5
             ),
             xaxis=self._skh.x_axis(rangeselector=True),
-            yaxis=self._skh.y_axis(title=self._src.currency),
+            yaxis=self._skh.y_axis(title=self.src.currency),
             xaxis2=self._skh.x_axis(title='날짜', showticklabels=True),
             yaxis2=self._skh.y_axis(title='거래량'),
             xaxis_rangeslider=dict(visible=False)
@@ -87,46 +86,46 @@ class technical(object):
         )
 
         # Candle Stick
-        fig.add_trace(self._cht.candle, row=1, col=1)
+        fig.add_trace(self.candle, row=1, col=1)
 
         # Price
-        for trace in self._cht.price.values():
+        for trace in self.price.values():
             fig.add_trace(trace, row=1, col=1)
 
         # Bollinger-Band
-        for trace in self._cht.bb:
+        for trace in self.bb:
             fig.add_trace(trace=trace, row=1, col=1)
 
         # Inner Band
-        for trace in self._cht.bb_inner:
+        for trace in self.bb_inner:
             fig.add_trace(trace=trace, row=1, col=1)
 
         # Volume
-        fig.add_trace(self._cht.volume, row=2, col=1)
+        fig.add_trace(self.volume, row=2, col=1)
 
         # Width
-        fig.add_trace(self._cht.bb_width, row=3, col=1)
+        fig.add_trace(self.bb_width, row=3, col=1)
 
         # Tag
-        fig.add_trace(self._cht.bb_tag, row=4, col=1)
-        mx = getattr(self._src.ohlcv_bband, 'signal').max()
-        mn = getattr(self._src.ohlcv_bband, 'signal').min()
+        fig.add_trace(self.bb_tag, row=4, col=1)
+        mx = getattr(self.src.ohlcv_bband, 'signal').max()
+        mn = getattr(self.src.ohlcv_bband, 'signal').min()
         fig.add_hrect(y0=1, y1=mx, line_width=0, fillcolor='red', opacity=0.2, row=4, col=1)
         fig.add_hrect(y0=mn, y1=0, line_width=0, fillcolor='green', opacity=0.2, row=4, col=1)
 
         # Inner Band Contain
-        fig.add_trace(self._cht.bb_contain, row=5, col=1)
+        fig.add_trace(self.bb_contain, row=5, col=1)
 
         # Squeeze Break - Point
-        fig.add_trace(self._cht.bb_breakout, row=1, col=1)
+        fig.add_trace(self.bb_breakout, row=1, col=1)
 
         fig.update_layout(
-            title=f'{self._src.label}({self.ticker}) Bollinger Band',
+            title=f'{self.src.label}({self.src.ticker}) Bollinger Band',
             plot_bgcolor='white',
             # legend=dict(groupclick="toggleitem"),
             legend=dict(tracegroupgap=5),
             xaxis=self._skh.x_axis(rangeselector=True),
-            yaxis=self._skh.y_axis(title=self._src.currency),
+            yaxis=self._skh.y_axis(title=self.src.currency),
             xaxis2=self._skh.x_axis(),
             yaxis2=self._skh.y_axis(title='거래량'),
             xaxis3=self._skh.x_axis(),
@@ -150,34 +149,34 @@ class technical(object):
         )
 
         # Candle Stick
-        fig.add_trace(self._cht.candle, row=1, col=1)
+        fig.add_trace(self.candle, row=1, col=1)
 
         # Price
-        for trace in self._cht.price.values():
+        for trace in self.price.values():
             fig.add_trace(trace, row=1, col=1)
 
         # MA
-        for ch in self._cht.ma.values():
+        for ch in self.ma.values():
             fig.add_trace(ch, row=1, col=1)
 
         # Volume
-        fig.add_trace(self._cht.volume, row=2, col=1)
+        fig.add_trace(self.volume, row=2, col=1)
 
         # MACD
-        fig.add_trace(self._cht.macd, row=3, col=1)
-        fig.add_trace(self._cht.macd_sig, row=3, col=1)
-        fig.add_trace(self._cht.macd_diff, row=3, col=1)
+        fig.add_trace(self.macd, row=3, col=1)
+        fig.add_trace(self.macd_sig, row=3, col=1)
+        fig.add_trace(self.macd_diff, row=3, col=1)
         fig.add_hline(y=0, row=3, col=1, line_width=0.5, line_dash="dot", line_color="black")
 
         fig.update_layout(
-            title=f'{self._src.label}({self.ticker}) MACD',
+            title=f'{self.src.label}({self.src.ticker}) MACD',
             plot_bgcolor='white',
             legend=dict(
                 groupclick="toggleitem",
                 tracegroupgap=5
             ),
             xaxis=self._skh.x_axis(rangeselector=True),
-            yaxis=self._skh.y_axis(title=self._src.currency),
+            yaxis=self._skh.y_axis(title=self.src.currency),
             xaxis2=self._skh.x_axis(),
             yaxis2=self._skh.y_axis(title='거래량'),
             xaxis3=self._skh.x_axis(title='날짜', showticklabels=True),
@@ -197,39 +196,39 @@ class technical(object):
         )
 
         # Candle Stick
-        fig.add_trace(self._cht.candle, row=1, col=1)
+        fig.add_trace(self.candle, row=1, col=1)
 
         # Price
-        for trace in self._cht.price.values():
+        for trace in self.price.values():
             fig.add_trace(trace, row=1, col=1)
 
         # MA
-        for ch in self._cht.ma.values():
+        for ch in self.ma.values():
             fig.add_trace(ch, row=1, col=1)
 
         # Volume
-        fig.add_trace(self._cht.volume, row=2, col=1)
+        fig.add_trace(self.volume, row=2, col=1)
 
         # RSI
-        fig.add_trace(self._cht.rsi, row=3, col=1)
+        fig.add_trace(self.rsi, row=3, col=1)
         fig.add_hrect(y0=70, y1=80, line_width=0, fillcolor='red', opacity=0.2, row=3, col=1)
         fig.add_hrect(y0=20, y1=30, line_width=0, fillcolor='green', opacity=0.2, row=3, col=1)
 
         # Stochastic RSI
-        fig.add_trace(self._cht.stoch_rsi, row=4, col=1)
-        fig.add_trace(self._cht.stoch_rsi_sig, row=4, col=1)
+        fig.add_trace(self.stoch_rsi, row=4, col=1)
+        fig.add_trace(self.stoch_rsi_sig, row=4, col=1)
         fig.add_hrect(y0=80, y1=100, line_width=0, fillcolor='red', opacity=0.2, row=4, col=1)
         fig.add_hrect(y0=0, y1=20, line_width=0, fillcolor='green', opacity=0.2, row=4, col=1)
 
         fig.update_layout(
-            title=f'{self._src.label}({self.ticker}) RSI',
+            title=f'{self.src.label}({self.src.ticker}) RSI',
             plot_bgcolor='white',
             legend=dict(
                 groupclick="toggleitem",
                 tracegroupgap=5
             ),
             xaxis=self._skh.x_axis(rangeselector=True),
-            yaxis=self._skh.y_axis(title=self._src.currency),
+            yaxis=self._skh.y_axis(title=self.src.currency),
             xaxis2=self._skh.x_axis(),
             yaxis2=self._skh.y_axis(title='거래량'),
             xaxis3=self._skh.x_axis(),
@@ -242,17 +241,21 @@ class technical(object):
 
 
 if __name__ == "__main__":
+    from tdatlib.dataset.stock.ohlcv import technical
 
-    path = r'\\kefico\keti\ENT\Softroom\Temp\J.H.Lee'
-    # path = str()
+    # path = r'\\kefico\keti\ENT\Softroom\Temp\J.H.Lee'
+    path = str()
 
-    # viewer = technical(ticker='185750', period=3)
-    viewer = technical(ticker='TSLA', period=3)
-    # viewer.fig_basis.show()
+    # data = technical(ticker='185750', period=3)
+    data = technical(ticker='TSLA', period=3)
+
+    viewer = ohlcv(src = data)
+    viewer.fig_basis.show()
+
     # save(fig=viewer.fig_basis, filename=f'{viewer.ticker}({viewer.name})-01_기본_차트', path=path)
     # save(fig=viewer.fig_bollinger_band, filename=f'{viewer.ticker}({viewer.name})-02_볼린저_밴드', path=path)
     # save(fig=viewer.fig_macd, filename=f'{viewer.ticker}({viewer.name})-03_MACD', path=path)
-    save(fig=viewer.fig_rsi, filename=f'{viewer.ticker}({viewer.name})-04_RSI', path=path)
+    # save(fig=viewer.fig_rsi, filename=f'{viewer.ticker}({viewer.name})-04_RSI', path=path)
 
 
     # for ticker in ["011370", "104480", "048550", "130660", "052690", "045660", "091590", "344820", "014970", "063440", "069540"]:

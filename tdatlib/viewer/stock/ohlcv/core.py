@@ -1,12 +1,11 @@
-from tdatlib.dataset.stock.ohlcv import technical
 from tdatlib.viewer.tools import CD_RANGER
 import plotly.graph_objects as go
 
 
 class chart(object):
 
-    def __init__(self, obj:technical):
-        self._obj = obj
+    def __init__(self, src):
+        self.src = src
 
     @property
     def candle(self) -> go.Candlestick:
@@ -15,18 +14,18 @@ class chart(object):
                 '__candle',
                 go.Candlestick(
                     name='캔들 차트',
-                    x=self._obj.ohlcv.index,
-                    open=self._obj.ohlcv.시가,
-                    high=self._obj.ohlcv.고가,
-                    low=self._obj.ohlcv.저가,
-                    close=self._obj.ohlcv.종가,
+                    x=self.src.ohlcv.index,
+                    open=self.src.ohlcv.시가,
+                    high=self.src.ohlcv.고가,
+                    low=self.src.ohlcv.저가,
+                    close=self.src.ohlcv.종가,
                     visible=True,
                     showlegend=True,
                     legendgrouptitle=dict(text='캔들 차트'),
                     increasing_line=dict(color='red'),
                     decreasing_line=dict(color='royalblue'),
                     xhoverformat='%Y/%m/%d',
-                    yhoverformat=',' if self._obj.currency == '원' else '.2f',
+                    yhoverformat=',' if self.src.currency == '원' else '.2f',
                 )
             )
         return self.__getattribute__('__candle')
@@ -38,9 +37,9 @@ class chart(object):
                 f'__volume',
                 go.Bar(
                     name='거래량',
-                    x=self._obj.ohlcv.index,
-                    y=self._obj.ohlcv.거래량,
-                    marker=dict(color=self._obj.ohlcv.거래량.pct_change().apply(lambda x: 'blue' if x < 0 else 'red')),
+                    x=self.src.ohlcv.index,
+                    y=self.src.ohlcv.거래량,
+                    marker=dict(color=self.src.ohlcv.거래량.pct_change().apply(lambda x: 'blue' if x < 0 else 'red')),
                     visible=True,
                     showlegend=False,
                     xhoverformat='%Y/%m/%d',
@@ -58,14 +57,14 @@ class chart(object):
                 {
                     col:go.Scatter(
                         name=col,
-                        x=self._obj.ohlcv.index,
-                        y=self._obj.ohlcv[col],
+                        x=self.src.ohlcv.index,
+                        y=self.src.ohlcv[col],
                         visible='legendonly',
                         showlegend=True,
                         xhoverformat='%Y/%m/%d',
-                        yhoverformat=',' if self._obj.currency == '원' else '.2f',
+                        yhoverformat=',' if self.src.currency == '원' else '.2f',
                         legendgrouptitle=dict(text='주가 차트') if col == '시가' else None,
-                        hovertemplate='%{x}<br>' + col + ': %{y}' + self._obj.currency + '<extra></extra>'
+                        hovertemplate='%{x}<br>' + col + ': %{y}' + self.src.currency + '<extra></extra>'
                     ) for col in ['시가', '고가', '저가', '종가']
                 }
             )
@@ -79,15 +78,15 @@ class chart(object):
                 {
                     col: go.Scatter(
                         name=col,
-                        x=self._obj.ohlcv_sma.index,
-                        y=self._obj.ohlcv_sma[col],
+                        x=self.src.ohlcv_sma.index,
+                        y=self.src.ohlcv_sma[col],
                         visible='legendonly' if col in ['MA5D', 'MA10D', 'MA20D'] else True,
                         showlegend=True,
                         legendgrouptitle=dict(text='이동 평균선') if col == 'MA5D' else None,
                         xhoverformat='%Y/%m/%d',
                         yhoverformat=',.0f',
-                        hovertemplate='%{x}<br>' + col + ': %{y}' + self._obj.currency + '<extra></extra>'
-                    ) for col in self._obj.ohlcv_sma.columns
+                        hovertemplate='%{x}<br>' + col + ': %{y}' + self.src.currency + '<extra></extra>'
+                    ) for col in self.src.ohlcv_sma.columns
                 }
             )
         return self.__getattribute__(f'__ma')
@@ -100,15 +99,15 @@ class chart(object):
                 {
                     col:go.Scatter(
                         name=col,
-                        x=self._obj.ohlcv_iir.index,
-                        y=self._obj.ohlcv_iir[col],
+                        x=self.src.ohlcv_iir.index,
+                        y=self.src.ohlcv_iir[col],
                         visible='legendonly',
                         showlegend=True,
                         legendgrouptitle=dict(text='노이즈 제거선') if col == 'NC5D' else None,
                         xhoverformat='%Y/%m/%d',
                         yhoverformat=',.0f',
-                        hovertemplate='%{x}<br>' + col + ': %{y}' + self._obj.currency + '<extra></extra>'
-                    ) for col in self._obj.ohlcv_iir.columns
+                        hovertemplate='%{x}<br>' + col + ': %{y}' + self.src.currency + '<extra></extra>'
+                    ) for col in self.src.ohlcv_iir.columns
                 }
             )
         return self.__getattribute__(f'__nc')
@@ -121,8 +120,8 @@ class chart(object):
                 {
                     col:go.Scatter(
                         name=col.replace('M', '개월').replace('Y', '년'),
-                        x=self._obj.ohlcv_trend[col].index,
-                        y=self._obj.ohlcv_trend[col],
+                        x=self.src.ohlcv_trend[col].index,
+                        y=self.src.ohlcv_trend[col],
                         mode='lines',
                         line=dict(
                             width=2,
@@ -131,9 +130,9 @@ class chart(object):
                         visible='legendonly',
                         showlegend=True,
                         legendgrouptitle=dict(text='평균 추세선') if col == '1M' else None,
-                        meta=self._obj.ohlcv_trend[f'{col}-Slope'],
+                        meta=self.src.ohlcv_trend[f'{col}-Slope'],
                         hovertemplate=f'{col}' + ' 추세 강도: %{meta}[%/days]<extra></extra>'
-                    ) for col in self._obj.ohlcv_trend.columns if not col.endswith('Slope')
+                    ) for col in self.src.ohlcv_trend.columns if not col.endswith('Slope')
                 }
             )
         return self.__getattribute__(f'__trend')
@@ -147,8 +146,8 @@ class chart(object):
                     col:(
                         go.Scatter(
                             name=col.replace('M', '개월').replace('Y', '년'),
-                            x=self._obj.ohlcv_bound.index,
-                            y=self._obj.ohlcv_bound[col].resist,
+                            x=self.src.ohlcv_bound.index,
+                            y=self.src.ohlcv_bound[col].resist,
                             mode='lines',
                             visible='legendonly',
                             showlegend=True,
@@ -157,12 +156,12 @@ class chart(object):
                             line=dict(dash='dot', color='blue'),
                             xhoverformat='%Y/%m/%d',
                             yhoverformat=',.0f',
-                            hovertemplate='%{x}<br>저항: %{y}' + self._obj.currency + '<extra></extra>'
+                            hovertemplate='%{x}<br>저항: %{y}' + self.src.currency + '<extra></extra>'
                         ),
                         go.Scatter(
                             name=col.replace('M', '개월').replace('Y', '년'),
-                            x=self._obj.ohlcv_bound.index,
-                            y=self._obj.ohlcv_bound[col].support,
+                            x=self.src.ohlcv_bound.index,
+                            y=self.src.ohlcv_bound[col].support,
                             mode='lines',
                             visible='legendonly',
                             showlegend=False,
@@ -170,7 +169,7 @@ class chart(object):
                             line=dict(dash='dot', color='red'),
                             xhoverformat='%Y/%m/%d',
                             yhoverformat=',.0f',
-                            hovertemplate='%{x}<br>지지: %{y}' + self._obj.currency + '<extra></extra>'
+                            hovertemplate='%{x}<br>지지: %{y}' + self.src.currency + '<extra></extra>'
                         )
                     ) for col in ['2M', '3M', '6M', '1Y']
                 }
@@ -188,8 +187,8 @@ class chart(object):
             ]:
                 graphs.append(go.Scatter(
                     name='볼린저밴드',
-                    x=getattr(self._obj.ohlcv_bband, col).index,
-                    y=getattr(self._obj.ohlcv_bband, col),
+                    x=getattr(self.src.ohlcv_bband, col).index,
+                    y=getattr(self.src.ohlcv_bband, col),
                     mode='lines',
                     line=dict(color='rgb(184, 247, 212)'),
                     fill='tonexty' if n > 0 else None,
@@ -199,7 +198,7 @@ class chart(object):
                     legendgrouptitle=None if n > 0 else dict(text='볼린저밴드'),
                     xhoverformat='%Y/%m/%d',
                     yhoverformat=',.2f',
-                    hovertemplate='%{x}<br>' + label + ': %{y}' + self._obj.currency + '<extra></extra>',
+                    hovertemplate='%{x}<br>' + label + ': %{y}' + self.src.currency + '<extra></extra>',
                 ))
             self.__setattr__(f'__objbband', graphs)
         return self.__getattribute__(f'__objbband')
@@ -222,8 +221,8 @@ class chart(object):
                 }
                 graphs.append(go.Scatter(
                     name='상단밴드' if n < 2 else '하단밴드',
-                    x=getattr(self._obj.ohlcv_bband, col).index,
-                    y=getattr(self._obj.ohlcv_bband, col),
+                    x=getattr(self.src.ohlcv_bband, col).index,
+                    y=getattr(self.src.ohlcv_bband, col),
                     mode='lines',
                     line=dict(color=color[label]),
                     fill='tonexty' if n % 2 else None,
@@ -232,7 +231,7 @@ class chart(object):
                     legendgroup='상단밴드' if n < 2 else '하단밴드',
                     xhoverformat='%Y/%m/%d',
                     yhoverformat=',.2f',
-                    hovertemplate='%{x}<br>' + label + ': %{y}' + self._obj.currency + '<extra></extra>',
+                    hovertemplate='%{x}<br>' + label + ': %{y}' + self.src.currency + '<extra></extra>',
                 ))
             self.__setattr__('__objbbandinner', graphs)
         return self.__getattribute__(f'__objbbandinner')
@@ -244,8 +243,8 @@ class chart(object):
                 f'__objbbandwidth',
                 go.Scatter(
                     name='폭',
-                    x=getattr(self._obj.ohlcv_bband, 'width').index,
-                    y=getattr(self._obj.ohlcv_bband, 'width'),
+                    x=getattr(self.src.ohlcv_bband, 'width').index,
+                    y=getattr(self.src.ohlcv_bband, 'width'),
                     visible=True,
                     showlegend=True,
                     xhoverformat='%Y/%m/%d',
@@ -262,8 +261,8 @@ class chart(object):
                 f'__objbbandtag',
                 go.Scatter(
                     name='신호',
-                    x=getattr(self._obj.ohlcv_bband, 'signal').index,
-                    y=getattr(self._obj.ohlcv_bband, 'signal'),
+                    x=getattr(self.src.ohlcv_bband, 'signal').index,
+                    y=getattr(self.src.ohlcv_bband, 'signal'),
                     visible=True,
                     showlegend=True,
                     xhoverformat='%Y/%m/%d',
@@ -280,8 +279,8 @@ class chart(object):
                 f'__objbbandcont',
                 go.Scatter(
                     name='내부밴드추세',
-                    x=getattr(self._obj.ohlcv_bband, 'inner_band').index,
-                    y=getattr(self._obj.ohlcv_bband, 'inner_band'),
+                    x=getattr(self.src.ohlcv_bband, 'inner_band').index,
+                    y=getattr(self.src.ohlcv_bband, 'inner_band'),
                     visible=True,
                     showlegend=True,
                     xhoverformat='%Y/%m/%d',
@@ -294,9 +293,9 @@ class chart(object):
     @property
     def bb_breakout(self) -> go.Scatter:
         if not hasattr(self, '__breakout'):
-            breakout = self._obj.ohlcv_bband.squeeze_break
+            breakout = self.src.ohlcv_bband.squeeze_break
             breakout = breakout[breakout.est >= 90]
-            breakout = self._obj.ohlcv[self._obj.ohlcv.index.isin(breakout.index)].copy()
+            breakout = self.src.ohlcv[self.src.ohlcv.index.isin(breakout.index)].copy()
             self.__setattr__(
                 '__breakout',
                 go.Scatter(
@@ -313,8 +312,8 @@ class chart(object):
                     showlegend=True,
                     legendgrouptitle=dict(text='평가지표'),
                     xhoverformat='%Y/%m/%d',
-                    yhoverformat=',d' if self._obj.currency == '원' else '.2f',
-                    hovertemplate='%{x}<br>S-B: %{y}' + self._obj.currency + '<extra></extra>'
+                    yhoverformat=',d' if self.src.currency == '원' else '.2f',
+                    hovertemplate='%{x}<br>S-B: %{y}' + self.src.currency + '<extra></extra>'
                 )
             )
         return self.__getattribute__('__breakout')
@@ -326,8 +325,8 @@ class chart(object):
                 '__macd',
                 go.Scatter(
                     name='MACD',
-                    x=self._obj.ohlcv_ta['trend_macd'].index,
-                    y=self._obj.ohlcv_ta['trend_macd'],
+                    x=self.src.ohlcv_ta['trend_macd'].index,
+                    y=self.src.ohlcv_ta['trend_macd'],
                     visible=True,
                     showlegend=True,
                     legendgroup='MACD',
@@ -346,8 +345,8 @@ class chart(object):
                 '__macdsig',
                 go.Scatter(
                     name='Signal',
-                    x=self._obj.ohlcv_ta['trend_macd_signal'].index,
-                    y=self._obj.ohlcv_ta['trend_macd_signal'],
+                    x=self.src.ohlcv_ta['trend_macd_signal'].index,
+                    y=self.src.ohlcv_ta['trend_macd_signal'],
                     visible=True,
                     showlegend=True,
                     legendgroup='MACD',
@@ -365,13 +364,13 @@ class chart(object):
                 '__macddiff',
                 go.Bar(
                     name='Diff',
-                    x=self._obj.ohlcv_ta['trend_macd_diff'].index,
-                    y=self._obj.ohlcv_ta['trend_macd_diff'],
+                    x=self.src.ohlcv_ta['trend_macd_diff'].index,
+                    y=self.src.ohlcv_ta['trend_macd_diff'],
                     visible=True,
                     showlegend=True,
                     legendgroup='MACD',
                     marker=dict(
-                        color=['blue' if v <= 0 else 'red' for v in self._obj.ohlcv_ta.trend_macd_diff.pct_change()]
+                        color=['blue' if v <= 0 else 'red' for v in self.src.ohlcv_ta.trend_macd_diff.pct_change()]
                     ),
                     xhoverformat='%Y/%m/%d',
                     yhoverformat='.2f',
@@ -387,8 +386,8 @@ class chart(object):
                 '__rsi',
                 go.Scatter(
                     name='RSI',
-                    x=self._obj.ohlcv_ta['momentum_rsi'].index,
-                    y=self._obj.ohlcv_ta['momentum_rsi'],
+                    x=self.src.ohlcv_ta['momentum_rsi'].index,
+                    y=self.src.ohlcv_ta['momentum_rsi'],
                     visible=True,
                     showlegend=True,
                     legendgroup='RSI',
@@ -407,8 +406,8 @@ class chart(object):
                 '__stoch_rsi',
                 go.Scatter(
                     name='(S)RSI',
-                    x=self._obj.ohlcv_ta['momentum_stoch'].index,
-                    y=self._obj.ohlcv_ta['momentum_stoch'],
+                    x=self.src.ohlcv_ta['momentum_stoch'].index,
+                    y=self.src.ohlcv_ta['momentum_stoch'],
                     visible=True,
                     showlegend=True,
                     legendgroup='RSI',
@@ -426,8 +425,8 @@ class chart(object):
                 '__stoch_rsi_sig',
                 go.Scatter(
                     name='(S)RSI-Signal',
-                    x=self._obj.ohlcv_ta['momentum_stoch_signal'].index,
-                    y=self._obj.ohlcv_ta['momentum_stoch_signal'],
+                    x=self.src.ohlcv_ta['momentum_stoch_signal'].index,
+                    y=self.src.ohlcv_ta['momentum_stoch_signal'],
                     visible=True,
                     showlegend=True,
                     legendgroup='RSI',

@@ -201,3 +201,16 @@ def fetch_nps(ticker:str) -> pd.DataFrame:
     if missing:
         data[missing] = np.nan
     return data
+
+def interface_asset(table:pd.DataFrame) -> pd.DataFrame:
+    asset = table[['자산총계', '부채총계', '자본총계']].dropna().astype(int).copy()
+    for col in asset.columns:
+        asset[f'{col}LB'] = asset[col].apply(lambda x: f'{x}억원' if x < 10000 else f'{str(x)[:-4]}조 {str(x)[-4:]}억원')
+    return asset
+
+def interface_profit(table:pd.DataFrame) -> pd.DataFrame:
+    key = [_ for _ in ['매출액', '순영업수익', '이자수익', '보험료수익'] if _ in table.columns][0]
+    profit = table[[key, '영업이익', '당기순이익']].dropna().astype(int)
+    for col in [key, '영업이익', '당기순이익']:
+        profit[f'{col}LB'] = profit[col].apply(lambda x: f'{x}억원' if x < 10000 else f'{str(x)[:-4]}조 {str(x)[-4:]}억원')
+    return profit

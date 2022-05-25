@@ -14,7 +14,9 @@ from tdatlib.dataset.stock.fnguide import (
     fetch_expenses,
     fetch_multiple_band,
     fetch_multiple_series,
-    fetch_nps
+    fetch_nps,
+    interface_asset,
+    interface_profit
 )
 from inspect import currentframe as inner
 import pandas as pd
@@ -306,6 +308,37 @@ class KR(technical):
         """
         return self.__load__(inner().f_code.co_name, ticker=self.ticker)
 
+    @property
+    def basis_asset(self) -> pd.DataFrame:
+        """
+        :return:
+
+                 자산총계  부채총계  자본총계    자산총계LB  부채총계LB  자본총계LB
+        2017/12      6316      3275      3041      6316억원    3275억원    3041억원
+        2018/12      7138      3519      3619      7138억원    3519억원    3619억원
+        2019/12      8919      4713      4206      8919억원    4713억원    4206억원
+        2020/12      9542      4944      4599      9542억원    4944억원    4599억원
+        2021/12     12620      7023      5597  1조 2620억원    7023억원    5597억원
+        2022/12(E)  11750      5720      6030  1조 1750억원    5720억원    6030억원
+        2023/12(E)  12570      5660      6910  1조 2570억원    5660억원    6910억원
+        """
+        return self.__load__(inner().f_code.co_name, fname='interface', table=self.basis_annual)
+
+    @property
+    def basis_profit(self) -> pd.DataFrame:
+        """
+        :return:
+
+                   매출액  영업이익  당기순이익      매출액LB  영업이익LB  당기순이익LB
+        2017/12      7015       256         963      7015억원     256억원       963억원
+        2018/12      8982       318         739      8982억원     318억원       739억원
+        2019/12     11554       555         598  1조 1554억원     555억원       598억원
+        2020/12     11722       482         443  1조 1722억원     482억원       443억원
+        2021/12     11449       613        1165  1조 1449억원     613억원      1165억원
+        2022/12(E)  12760       820         680  1조 2760억원     820억원       680억원
+        2023/12(E)  15100      1070         940  1조 5100억원    1070억원       940억원
+        """
+        return self.__load__(inner().f_code.co_name, fname='interface', table=self.basis_annual)
 
 class US(technical):
     def __init__(self, ticker:str, period:int=5, endate:str=str()):
@@ -316,18 +349,20 @@ class US(technical):
 if __name__ == "__main__":
     stock = KR(ticker='005960')
 
-    print(stock.basis_summary)
-    print(stock.basis_products)
-    print(stock.basis_annual)
-    print(stock.basis_quarter)
-    print(stock.basis_multifactor)
-    print(stock.basis_benchmark_return)
-    print(stock.basis_benchmark_multiple)
-    print(stock.basis_consensus)
-    print(stock.basis_foreign_rate)
-    print(stock.basis_short_sell)
-    print(stock.basis_short_balance)
-    print(stock.basis_expenses)
-    print(stock.basis_nps)
-    print(stock.basis_multiple_band)
-    print(stock.basis_multiple_series)
+    # print(stock.basis_summary)
+    # print(stock.basis_products)
+    # print(stock.basis_annual)
+    # print(stock.basis_quarter)
+    # print(stock.basis_multifactor)
+    # print(stock.basis_benchmark_return)
+    # print(stock.basis_benchmark_multiple)
+    # print(stock.basis_consensus)
+    # print(stock.basis_foreign_rate)
+    # print(stock.basis_short_sell)
+    # print(stock.basis_short_balance)
+    # print(stock.basis_expenses)
+    # print(stock.basis_nps)
+    # print(stock.basis_multiple_band)
+    # print(stock.basis_multiple_series)
+    print(stock.basis_asset)
+    print(stock.basis_profit)
