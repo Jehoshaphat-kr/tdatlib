@@ -1,11 +1,9 @@
 from tdatlib.viewer.stock.value.core import (
     chart
 )
-from tdatlib.viewer.tools import CD_RANGER, save
-from tdatlib.dataset import tools
+from tdatlib.viewer.tools import  save
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
-import pandas as pd
 
 
 class value(chart):
@@ -173,9 +171,57 @@ class value(chart):
         for n, trace in enumerate(self.trace_cost.values()):
             fig.add_trace(trace=trace, row = n // 2 + 1, col = n % 2 + 1)
 
+        # Debt
+        fig.add_trace(trace=self.trace_debt, row=2, col=2)
+
         fig.update_layout(dict(title=f'{self.tag}: 비용과 부채', plot_bgcolor='white'))
         for row, col in ((1, 1), (1, 2), (2, 1), (2, 2)):
-            fig.update_yaxes(title_text="비율[%]", showgrid=True, gridcolor='lightgrey', row=row, col=col)
+            fig.update_yaxes(title_text="[%]", showgrid=True, gridcolor='lightgrey', row=row, col=col)
+        for n, annotation in enumerate(fig['layout']['annotations']):
+            annotation['x'] = 0 + 0.55 * (n % 2)
+            annotation['xanchor'] = 'center'
+            annotation['xref'] = 'paper'
+        return fig
+
+    @property
+    def fig_multiple(self) -> go.Figure:
+        fig = make_subplots(
+            rows=2,
+            cols=2,
+            vertical_spacing=0.11,
+            horizontal_spacing=0.1,
+            subplot_titles=("EPS / PER(3Y)", "BPS / PBR(3Y)", "PER BAND", "PBR BAND"),
+            specs=[
+                [{"type": "xy", "secondary_y": True}, {"type": "xy", "secondary_y": True}],
+                [{"type": "xy", "secondary_y": False}, {"type": "xy", 'secondary_y': False}]
+            ]
+        )
+
+        # PER / EPS
+        for key, trace in self.trace_per.items():
+            fig.add_trace(trace=trace, row=1, col=1, secondary_y=True if key == 'PER' else False)
+
+        # PBR / BPS
+        for key, trace in self.trace_pbr.items():
+            fig.add_trace(trace=trace, row=1, col=2, secondary_y=True if key == 'PBR' else False)
+
+        # PER BAND
+        for trace in self.trace_perband.values():
+            fig.add_trace(trace=trace, row=2, col=1)
+
+        # PBR BAND
+        for trace in self.trace_pbrband.values():
+            fig.add_trace(trace=trace, row=2, col=2)
+
+        fig.update_layout(dict(
+            title=f'<b>{self.tag}</b> : PER / PBR',
+            plot_bgcolor='white',
+            legend=dict(groupclick="toggleitem")
+        ))
+        for row, col in ((1, 1), (1, 2), (2, 1), (2, 2)):
+            fig.update_yaxes(title_text="KRW[원]", showgrid=True, gridcolor='lightgrey', row=row, col=col,
+                             secondary_y=False)
+            fig.update_yaxes(title_text="배수[-]", showgrid=False, row=row, col=col, secondary_y=True)
         for n, annotation in enumerate(fig['layout']['annotations']):
             annotation['x'] = 0 + 0.55 * (n % 2)
             annotation['xanchor'] = 'center'
@@ -193,15 +239,8 @@ if __name__ == "__main__":
     data = KR(ticker='010060', period=3)
 
     viewer = value(src = data)
-
-
     save(fig=viewer.fig_overview, filename=f'{viewer.tag}-V1_제품_팩터_자산_수익', path=path)
     save(fig=viewer.fig_relative, filename=f'{viewer.tag}-V2_상대지표', path=path)
     save(fig=viewer.fig_supply, filename=f'{viewer.tag}-V3_수급', path=path)
     save(fig=viewer.fig_cost, filename=f'{viewer.tag}-V4_비용_부채', path=path)
-
-
-    # for ticker in ["011370", "104480", "048550", "130660", "052690", "045660", "091590", "344820", "014970", "063440", "069540"]:
-    #     viewer = technical(ticker=ticker, period=2)
-    #     save(fig=viewer.fig_basis, filename=f'{viewer.ticker}({viewer.name})-01_기본_차트', path=path)
-    #     save(fig=viewer.fig_bollinger_band, filename=f'{viewer.ticker}({viewer.name})-02_볼린저_밴드', path=path)
+    save(fig=viewer.fig_multiple, filename=f'{viewer.tag}-V5_투자배수', path=path)

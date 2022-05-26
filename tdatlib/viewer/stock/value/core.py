@@ -1,5 +1,4 @@
 from tdatlib.dataset.stock import KR
-from tdatlib.viewer.tools import CD_RANGER
 import plotly.graph_objects as go
 
 
@@ -327,52 +326,104 @@ class chart(object):
                     x=df.index,
                     y=df,
                     mode='lines+markers+text',
-                    text='',
+                    text=df,
+                    textposition='top center',
+                    texttemplate='%{y:.2f}%',
                     hovertemplate='%{x}<br>부채비율: %{y:.2f}%<extra></extra>'
                 )
             )
+        return self.__getattribute__('__debt')
 
+    @property
+    def trace_per(self) -> dict:
+        if not hasattr(self, '__per'):
+            form = lambda x : ': %{y:.2f}' if x == 'PER' else ': %{y:,d}원'
+            scatters = {
+                col : go.Scatter(
+                    name=col,
+                    x=self.src.basis_multiple_series.index,
+                    y=self.src.basis_multiple_series[col],
+                    visible=True,
+                    showlegend=True,
+                    legendgroup='PER',
+                    legendgrouptitle=dict(
+                        text='PER / EPS'
+                    ) if not n else None,
+                    xhoverformat='%Y/%m/%d',
+                    hovertemplate='%{x}<br>' + col + form(col) + '<extra></extra>'
+                ) for n, col in enumerate(['PER', 'EPS'])
+            }
+            self.__setattr__('__per', scatters)
+        return self.__getattribute__('__per')
 
+    @property
+    def trace_pbr(self) -> dict:
+        if not hasattr(self, '__pbr'):
+            form = lambda x: ': %{y:.2f}' if x == 'PBR' else ': %{y:,d}원'
+            scatters = {
+                col: go.Scatter(
+                    name=col,
+                    x=self.src.basis_multiple_series.index,
+                    y=self.src.basis_multiple_series[col],
+                    visible=True,
+                    showlegend=True,
+                    legendgroup='PBR',
+                    legendgrouptitle=dict(
+                        text='PBR / BPS'
+                    ) if not n else None,
+                    xhoverformat='%Y/%m/%d',
+                    hovertemplate='%{x}<br>' + col + form(col) + '<extra></extra>'
+                ) for n, col in enumerate(['PBR', 'BPS'])
+            }
+            self.__setattr__('__pbr', scatters)
+        return self.__getattribute__('__pbr')
 
-# class sketch(object):
-#     def __init__(self):
-#         self.__x_axis = dict(
-#             showticklabels=False,
-#             tickformat='%Y/%m/%d',
-#             zeroline=False,
-#             showgrid=True,
-#             gridcolor='lightgrey',
-#             autorange=True,
-#             showline=True,
-#             linewidth=1,
-#             linecolor='grey',
-#             mirror=False,
-#         )
-#         self.__y_axis = dict(
-#             showticklabels=True,
-#             zeroline=False,
-#             showgrid=True,
-#             gridcolor='lightgrey',
-#             autorange=True,
-#             showline=True,
-#             linewidth=0.5,
-#             linecolor='grey',
-#             mirror=False
-#         )
-#
-#     def x_axis(self, title:str=str(), showticklabels:bool=False, rangeselector:bool=False) -> dict:
-#         _ = self.__x_axis.copy()
-#         if title:
-#             _['title'] = title
-#         if showticklabels:
-#             _['showticklabels'] = True
-#         if rangeselector:
-#             _['rangeselector'] = CD_RANGER
-#         return _
-#
-#     def y_axis(self, title:str=str()) -> dict:
-#         _ = self.__y_axis.copy()
-#         if title:
-#             _['title'] = title
-#         return _
+    @property
+    def trace_perband(self) -> dict:
+        if not hasattr(self, '__perband'):
+            per, _ = self.src.basis_multiple_band
+            per = per.astype(float)
+            scatters = {
+                col : go.Scatter(
+                    name=col,
+                    x=per.index,
+                    y=per[col],
+                    visible=True,
+                    showlegend=True,
+                    line=dict(
+                        color='black' if col.endswith('가') else CD_COLORS[n],
+                        dash='solid' if col.endswith('가') else 'dot'
+                    ),
+                    legendgroup='PERBand',
+                    legendgrouptitle=dict(text='PER BAND') if not n else None,
+                    xhoverformat='%Y/%m/%d',
+                    hovertemplate='%{x}<br>' + col +  ': %{y:,.2f}원<extra></extra>'
+                ) for n, col in enumerate(per.columns)
+            }
+            self.__setattr__('__perband', scatters)
+        return self.__getattribute__('__perband')
 
+    @property
+    def trace_pbrband(self) -> dict:
+        if not hasattr(self, '__pbrband'):
+            _, pbr = self.src.basis_multiple_band
+            pbr = pbr.astype(float)
+            scatters = {
+                col: go.Scatter(
+                    name=col,
+                    x=pbr.index,
+                    y=pbr[col],
+                    visible=True,
+                    showlegend=True,
+                    line=dict(
+                        color='black' if col.endswith('가') else CD_COLORS[n],
+                        dash='solid' if col.endswith('가') else 'dot'
+                    ),
+                    legendgroup='PBRBand',
+                    legendgrouptitle=dict(text='PBR BAND') if not n else None,
+                    xhoverformat='%Y/%m/%d',
+                    hovertemplate='%{x}<br>' + col + ': %{y:,d}원<extra></extra>'
+                ) for n, col in enumerate(pbr.columns)
+            }
+            self.__setattr__('__pbrband', scatters)
+        return self.__getattribute__('__pbrband')
