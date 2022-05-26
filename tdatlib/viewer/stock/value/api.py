@@ -29,22 +29,22 @@ class value(chart):
         )
 
         # Products
-        fig.add_trace(trace=self.pie, row=1, col=1)
+        fig.add_trace(trace=self.trace_product, row=1, col=1)
 
         # Multi-Factor
-        for trace in self.multi_factor.values():
+        for trace in self.trace_factor.values():
             fig.add_trace(trace=trace, row=1, col=2)
 
         # Asset
-        for trace in self.asset.values():
+        for trace in self.trace_asset.values():
             fig.add_trace(trace=trace, row=2, col=1)
 
         # Profit
-        for trace in self.profit.values():
+        for trace in self.trace_profit.values():
             fig.add_trace(trace=trace, row=2, col=2)
 
         fig.update_layout(dict(
-            title=f'{self.src.label}[{self.src.ticker}] : 제품, 자산 및 실적',
+            title=f'<b>{self.tag}</b> : 제품, 자산 및 실적',
             plot_bgcolor='white',
             margin=dict(l=20, r=20),
             legend=dict(groupclick="toggleitem")
@@ -72,25 +72,28 @@ class value(chart):
         )
 
         # Relative Benchmark
-        for trace in self.relative_return.values():
+        for trace in self.trace_rr.values():
             fig.add_trace(trace=trace, row=1, col=1)
 
         # Relative PER
-        for trace in self.relative_per.values():
+        for trace in self.trace_rp.values():
             fig.add_trace(trace=trace, row=1, col=2)
 
         # Relative EV/EBITDA
-        for trace in self.relative_ebitda.values():
+        for trace in self.trace_re.values():
             fig.add_trace(trace=trace, row=2, col=1)
 
         # Relative ROE
-        for trace in self.relative_roe.values():
+        for trace in self.trace_roe.values():
             fig.add_trace(trace=trace, row=2, col=2)
 
         fig.update_layout(dict(
-            title=f'<b>{self.src.label}[{self.src.ticker}]</b> : 벤치마크 대비 지표',
+            title=f'<b>{self.tag}</b> : 벤치마크 대비 지표',
             plot_bgcolor='white',
-            legend=dict(groupclick="toggleitem")
+            legend=dict(
+                tracegroupgap=5,
+                # groupclick="toggleitem"
+            )
         ))
         fig.update_yaxes(title_text="상대 수익률[%]", gridcolor='lightgrey', row=1, col=1)
         fig.update_yaxes(title_text="PER[-]", gridcolor='lightgrey', row=1, col=2)
@@ -118,23 +121,23 @@ class value(chart):
         )
 
         # Consensus
-        for trace in self.consensus.values():
+        for trace in self.trace_consensus.values():
             fig.add_trace(trace=trace, row=1, col=1)
 
         # Foreign Rate
-        for key, trace in self.foreign.items():
+        for key, trace in self.trace_foreign.items():
             fig.add_trace(trace=trace, row=1, col=2, secondary_y=False if key.endswith('비중') else True)
 
         # Short Sell
-        for key, trace in self.short.items():
+        for key, trace in self.trace_short.items():
             fig.add_trace(trace=trace, row=2, col=1, secondary_y=True if key.endswith('종가') else False)
 
         # Short Balance
-        for key, trace in self.balance.items():
+        for key, trace in self.trace_balance.items():
             fig.add_trace(trace=trace, row=2, col=2, secondary_y=True if key.endswith('종가') else False)
 
         fig.update_layout(
-            title=f'<b>{self.src.label}[{self.src.ticker}]</b> : 수급 현황',
+            title=f'<b>{self.tag}</b> : 수급 현황',
             plot_bgcolor='white',
             legend=dict(
                 # groupclick="toggleitem",
@@ -152,13 +155,40 @@ class value(chart):
             annotation['xref'] = 'paper'
         return fig
 
+    @property
+    def fig_cost(self) -> go.Figure:
+        fig = make_subplots(
+            rows=2,
+            cols=2,
+            vertical_spacing=0.11,
+            horizontal_spacing=0.1,
+            subplot_titles=("매출 원가", "판관비", "R&D투자 비중", "부채율"),
+            specs=[
+                [{"type": "xy", "secondary_y": True}, {"type": "xy", "secondary_y": True}],
+                [{"type": "xy", "secondary_y": True}, {"type": "xy", 'secondary_y': True}]
+            ]
+        )
+
+        # General Cost
+        for n, trace in enumerate(self.trace_cost.values()):
+            fig.add_trace(trace=trace, row = n // 2 + 1, col = n % 2 + 1)
+
+        fig.update_layout(dict(title=f'{self.tag}: 비용과 부채', plot_bgcolor='white'))
+        for row, col in ((1, 1), (1, 2), (2, 1), (2, 2)):
+            fig.update_yaxes(title_text="비율[%]", showgrid=True, gridcolor='lightgrey', row=row, col=col)
+        for n, annotation in enumerate(fig['layout']['annotations']):
+            annotation['x'] = 0 + 0.55 * (n % 2)
+            annotation['xanchor'] = 'center'
+            annotation['xref'] = 'paper'
+        return fig
+
 
 
 if __name__ == "__main__":
     from tdatlib.dataset.stock import KR
 
-    path = r'\\kefico\keti\ENT\Softroom\Temp\J.H.Lee'
-    # path = str()
+    # path = r'\\kefico\keti\ENT\Softroom\Temp\J.H.Lee'
+    path = str()
 
     data = KR(ticker='010060', period=3)
 
@@ -168,6 +198,7 @@ if __name__ == "__main__":
     save(fig=viewer.fig_overview, filename=f'{viewer.tag}-V1_제품_팩터_자산_수익', path=path)
     save(fig=viewer.fig_relative, filename=f'{viewer.tag}-V2_상대지표', path=path)
     save(fig=viewer.fig_supply, filename=f'{viewer.tag}-V3_수급', path=path)
+    save(fig=viewer.fig_cost, filename=f'{viewer.tag}-V4_비용_부채', path=path)
 
 
     # for ticker in ["011370", "104480", "048550", "130660", "052690", "045660", "091590", "344820", "014970", "063440", "069540"]:

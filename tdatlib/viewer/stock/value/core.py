@@ -23,7 +23,7 @@ class chart(object):
         self.src = src
 
     @property
-    def pie(self) -> go.Pie:
+    def trace_product(self) -> go.Pie:
         if not hasattr(self, f'__pie'):
             self.__setattr__(
                 f'__pie',
@@ -42,7 +42,7 @@ class chart(object):
         return self.__getattribute__('__pie')
 
     @property
-    def multi_factor(self) -> dict:
+    def trace_factor(self) -> dict:
         if not hasattr(self, f'__multifactor'):
             scatters = {
                 col : go.Scatterpolar(
@@ -60,7 +60,7 @@ class chart(object):
         return self.__getattribute__('__multifactor')
 
     @property
-    def asset(self) -> dict:
+    def trace_asset(self) -> dict:
         if not hasattr(self, '__asset'):
             scatters = {
                 '자산' : go.Bar(
@@ -94,7 +94,7 @@ class chart(object):
         return self.__getattribute__('__asset')
 
     @property
-    def profit(self) -> dict:
+    def trace_profit(self) -> dict:
         if not hasattr(self, '__profit'):
             scatters = {
                 col : go.Bar(
@@ -118,7 +118,7 @@ class chart(object):
         return self.__getattribute__('__profit')
 
     @property
-    def relative_return(self) -> dict:
+    def trace_rr(self) -> dict:
         if not hasattr(self, '__relativereturn'):
             scatters = dict()
             for n, gap in enumerate(['3M', '1Y']):
@@ -130,7 +130,7 @@ class chart(object):
                         y=df[col].astype(float),
                         visible=True if not n else 'legendonly',
                         showlegend=True,
-                        legendgroup=f'{gap}수익률비교',
+                        legendgroup=f'{gap}',
                         legendgrouptitle=dict(text='수익률 비교') if not n else None,
                         xhoverformat='%Y/%m/%d',
                         hovertemplate='%{x}<br>' + f'{col}: ' + '%{y:.2f}%<extra></extra>'
@@ -139,7 +139,7 @@ class chart(object):
         return self.__getattribute__('__relativereturn')
 
     @property
-    def relative_per(self) -> dict:
+    def trace_rp(self) -> dict:
         if not hasattr(self, '__relativeper'):
             df = self.src.basis_benchmark_multiple.PER.astype(float)
             scatters = {
@@ -150,7 +150,6 @@ class chart(object):
                     marker=dict(color=CD_COLORS[n]),
                     visible=True,
                     showlegend=True,
-                    legendgroup='PER',
                     legendgrouptitle=dict(text='PER 비교') if not n else None,
                     texttemplate='%{y:.2f}',
                     textfont=dict(color='white'),
@@ -161,7 +160,7 @@ class chart(object):
         return self.__getattribute__('__relativeper')
 
     @property
-    def relative_ebitda(self) -> dict:
+    def trace_re(self) -> dict:
         if not hasattr(self, '__relativeebitda'):
             df = self.src.basis_benchmark_multiple['EV/EBITDA'].astype(float)
             scatters = {
@@ -172,7 +171,6 @@ class chart(object):
                     marker=dict(color=CD_COLORS[n]),
                     visible=True,
                     showlegend=True,
-                    legendgroup='EV',
                     legendgrouptitle=dict(text='EV/EBITDA 비교') if not n else None,
                     texttemplate='%{y:.2f}',
                     textfont=dict(color='white'),
@@ -183,7 +181,7 @@ class chart(object):
         return self.__getattribute__('__relativeebitda')
 
     @property
-    def relative_roe(self) -> dict:
+    def trace_roe(self) -> dict:
         if not hasattr(self, '__relativeroe'):
             df = self.src.basis_benchmark_multiple.ROE.astype(float)
             scatters = {
@@ -194,7 +192,6 @@ class chart(object):
                     marker=dict(color=CD_COLORS[n]),
                     visible=True,
                     showlegend=True,
-                    legendgroup='ROE',
                     legendgrouptitle=dict(text='ROE 비교') if not n else None,
                     texttemplate='%{y:.2f}',
                     textfont=dict(color='white'),
@@ -205,7 +202,7 @@ class chart(object):
         return self.__getattribute__('__relativeroe')
 
     @property
-    def consensus(self) -> dict:
+    def trace_consensus(self) -> dict:
         if not hasattr(self, '__consensus'):
             scatters = {
                 col : go.Scatter(
@@ -213,6 +210,10 @@ class chart(object):
                     x=self.src.basis_consensus.index,
                     y=self.src.basis_consensus[col],
                     mode='lines',
+                    line=dict(
+                        color='royalblue' if col.endswith('종가') else 'green',
+                        dash='dot' if col.endswith('종가') else 'solid'
+                    ),
                     visible=True,
                     showlegend=True,
                     legendgrouptitle=dict(text='컨센서스') if col == '목표주가' else None,
@@ -224,7 +225,7 @@ class chart(object):
         return self.__getattribute__('__consensus')
 
     @property
-    def foreign(self) -> dict:
+    def trace_foreign(self) -> dict:
         if not hasattr(self, '__foreign'):
             form = lambda x : ': %{y:,d}원' if x == '종가' else ': %{y:.2f}%'
             df = self.src.basis_foreign_rate[self.src.basis_foreign_rate != '']
@@ -233,6 +234,10 @@ class chart(object):
                     name=f'{gap.replace("M", "개월").replace("Y", "년")}: {label}',
                     x=df[gap][label].dropna().index,
                     y=df[gap][label].dropna(),
+                    line=dict(
+                        color='royalblue' if label.endswith('종가') else 'brown',
+                        dash='dot' if label.endswith('종가') else 'solid'
+                    ),
                     visible=True if gap == '1Y' else 'legendonly',
                     showlegend=True,
                     legendgroup=gap,
@@ -245,7 +250,7 @@ class chart(object):
         return self.__getattribute__('__foreign')
 
     @property
-    def short(self) -> dict:
+    def trace_short(self) -> dict:
         if not hasattr(self, '__short'):
             form = lambda x: ': %{y:,d}원' if x.endswith('종가') else ': %{y:.2f}%'
             scatters = {
@@ -255,7 +260,7 @@ class chart(object):
                     y=self.src.basis_short_sell[col],
                     mode='lines',
                     line=dict(
-                        color='black' if col.endswith('종가') else 'royalblue',
+                        color='royalblue' if col.endswith('종가') else 'red',
                         dash='dot' if col.endswith('종가') else 'solid'
                     ),
                     visible=True,
@@ -269,7 +274,7 @@ class chart(object):
         return self.__getattribute__('__short')
 
     @property
-    def balance(self) -> dict:
+    def trace_balance(self) -> dict:
         if not hasattr(self, '__balance'):
             form = lambda x: ': %{y:,d}원' if x.endswith('종가') else ': %{y:.2f}%'
             scatters = {
@@ -278,6 +283,10 @@ class chart(object):
                     x=self.src.basis_short_balance.index,
                     y=self.src.basis_short_balance[col],
                     mode='lines',
+                    line=dict(
+                        color='royalblue' if col.endswith('종가') else '#e377c2',
+                        dash='dot' if col.endswith('종가') else 'solid'
+                    ),
                     visible=True,
                     showlegend=True,
                     legendgrouptitle=dict(text='대차잔고 비중') if not n else None,
@@ -287,6 +296,42 @@ class chart(object):
             }
             self.__setattr__('__balance', scatters)
         return self.__getattribute__('__balance')
+
+    @property
+    def trace_cost(self) -> dict:
+        if not hasattr(self, '__cost'):
+            df = self.src.basis_expenses.copy()
+            scatters = {
+                col : go.Scatter(
+                    name=col,
+                    x=df[col].dropna().index,
+                    y=df[col].dropna(),
+                    mode='lines+markers+text',
+                    text=df[col].dropna(),
+                    textposition='top center',
+                    texttemplate='%{y:.2f}%',
+                    hovertemplate='%{x}<br>' + col + ': %{y:.2f}%<extra></extra>'
+                ) for n, col in enumerate(['매출원가율', '판관비율', 'R&D투자비중'])
+            }
+            self.__setattr__('__cost', scatters)
+        return self.__getattribute__('__cost')
+
+    @property
+    def trace_debt(self) -> go.Scatter:
+        if not hasattr(self, '__debt'):
+            df = self.src.basis_annual['부채비율'].dropna()
+            self.__setattr__(
+                '__debt',
+                go.Scatter(
+                    name='부채비율',
+                    x=df.index,
+                    y=df,
+                    mode='lines+markers+text',
+                    text='',
+                    hovertemplate='%{x}<br>부채비율: %{y:.2f}%<extra></extra>'
+                )
+            )
+
 
 
 # class sketch(object):
