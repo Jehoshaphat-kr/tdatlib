@@ -117,7 +117,133 @@ class chart(object):
             self.__setattr__('__profit', scatters)
         return self.__getattribute__('__profit')
 
+    @property
+    def relative_return(self) -> dict:
+        if not hasattr(self, '__relativereturn'):
+            scatters = dict()
+            for n, gap in enumerate(['3M', '1Y']):
+                df = self.src.basis_benchmark_return[gap].dropna()
+                for m, col in enumerate(df.columns):
+                    scatters[f'{gap}_{col}'] = go.Scatter(
+                        name=f'{gap} {col}',
+                        x=df.index,
+                        y=df[col].astype(float),
+                        visible=True if not n else 'legendonly',
+                        showlegend=True,
+                        legendgroup=f'{gap}수익률비교',
+                        legendgrouptitle=dict(text='수익률 비교') if not n else None,
+                        xhoverformat='%Y/%m/%d',
+                        hovertemplate='%{x}<br>' + f'{col}: ' + '%{y:.2f}%<extra></extra>'
+                    )
+            self.__setattr__('__relativereturn', scatters)
+        return self.__getattribute__('__relativereturn')
 
+    @property
+    def relative_per(self) -> dict:
+        if not hasattr(self, '__relativeper'):
+            df = self.src.basis_benchmark_multiple.PER.astype(float)
+            scatters = {
+                col : go.Bar(
+                    name=col,
+                    x=df[col].index,
+                    y=df[col],
+                    marker=dict(color=CD_COLORS[n]),
+                    visible=True,
+                    showlegend=True,
+                    legendgroup='PER',
+                    legendgrouptitle=dict(text='PER 비교') if not n else None,
+                    texttemplate='%{y:.2f}',
+                    textfont=dict(color='white'),
+                    hovertemplate='%{x}<br>' + col + ': %{y:.2f}<extra></extra>'
+                ) for n, col in enumerate(df.columns)
+            }
+            self.__setattr__('__relativeper', scatters)
+        return self.__getattribute__('__relativeper')
+
+    @property
+    def relative_ebitda(self) -> dict:
+        if not hasattr(self, '__relativeebitda'):
+            df = self.src.basis_benchmark_multiple['EV/EBITDA'].astype(float)
+            scatters = {
+                col : go.Bar(
+                    name=col,
+                    x=df[col].index,
+                    y=df[col],
+                    marker=dict(color=CD_COLORS[n]),
+                    visible=True,
+                    showlegend=True,
+                    legendgroup='EV',
+                    legendgrouptitle=dict(text='EV/EBITDA 비교') if not n else None,
+                    texttemplate='%{y:.2f}',
+                    textfont=dict(color='white'),
+                    hovertemplate='%{x}<br>' + col + ': %{y:.2f}<extra></extra>'
+                ) for n, col in enumerate(df.columns)
+            }
+            self.__setattr__('__relativeebitda', scatters)
+        return self.__getattribute__('__relativeebitda')
+
+    @property
+    def relative_roe(self) -> dict:
+        if not hasattr(self, '__relativeroe'):
+            df = self.src.basis_benchmark_multiple.ROE.astype(float)
+            scatters = {
+                col: go.Bar(
+                    name=col,
+                    x=df[col].index,
+                    y=df[col],
+                    marker=dict(color=CD_COLORS[n]),
+                    visible=True,
+                    showlegend=True,
+                    legendgroup='ROE',
+                    legendgrouptitle=dict(text='ROE 비교') if not n else None,
+                    texttemplate='%{y:.2f}',
+                    textfont=dict(color='white'),
+                    hovertemplate='%{x}<br>' + col + ': %{y:.2f}%<extra></extra>'
+                ) for n, col in enumerate(df.columns)
+            }
+            self.__setattr__('__relativeroe', scatters)
+        return self.__getattribute__('__relativeroe')
+
+    @property
+    def consensus(self) -> dict:
+        if not hasattr(self, '__consensus'):
+            scatters = {
+                col : go.Scatter(
+                    name=col,
+                    x=self.src.basis_consensus.index,
+                    y=self.src.basis_consensus[col],
+                    mode='lines',
+                    visible=True,
+                    showlegend=True,
+                    # legendgroup='Consensus',
+                    legendgrouptitle=dict(text='컨센서스') if not n else None,
+                    xhoverformat='%Y/%m/%d',
+                    hovertemplate='%{x}<br>' + col + '%{y:,}원<extra></extra>'
+                ) for n, col in enumerate(self.src.basis_consensus.columns) if not col == '투자의견'
+            }
+            self.__setattr__('__consensus', scatters)
+        return self.__getattribute__('__consensus')
+
+    @property
+    def foreign(self) -> dict:
+        if not hasattr(self, '__foreign'):
+            form = lambda x : ': %{y:,d}원' if x == '종가' else ': %{y:.2f}%'
+            df = self.src.basis_foreign_rate[self.src.basis_foreign_rate != '']
+            scatters = {
+                f'{gap}_{label}' : go.Scatter(
+                    name=f'{gap.replace("M", "개월").replace("Y", "년")}: {label}',
+                    x=df[gap][label].dropna().index,
+                    y=df[gap][label].dropna(),
+                    visible=True if gap == '1Y' else 'legendonly',
+                    showlegend=True,
+                    legendgroup=gap,
+                    legendgrouptitle=dict(text='외인비중') if not n else None,
+                    xhoverformat='%Y/%m/%d',
+                    hovertemplate='%{x}<br>' + label + form(label) + '<extra></extra>'
+                ) for n, (gap, label) in enumerate(df.columns)
+            }
+            self.__setattr__('__foreign', scatters)
+        return self.__getattribute__('__foreign')
 
 
 # class sketch(object):
