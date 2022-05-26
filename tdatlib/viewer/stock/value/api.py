@@ -125,6 +125,14 @@ class value(chart):
         for key, trace in self.foreign.items():
             fig.add_trace(trace=trace, row=1, col=2, secondary_y=False if key.endswith('비중') else True)
 
+        # Short Sell
+        for key, trace in self.short.items():
+            fig.add_trace(trace=trace, row=2, col=1, secondary_y=True if key.endswith('종가') else False)
+
+        # Short Balance
+        for key, trace in self.balance.items():
+            fig.add_trace(trace=trace, row=2, col=2, secondary_y=True if key.endswith('종가') else False)
+
         fig.update_layout(
             title=f'<b>{self.src.label}[{self.src.ticker}]</b> : 수급 현황',
             plot_bgcolor='white',
@@ -149,19 +157,17 @@ class value(chart):
 if __name__ == "__main__":
     from tdatlib.dataset.stock import KR
 
-    # path = r'\\kefico\keti\ENT\Softroom\Temp\J.H.Lee'
-    path = str()
+    path = r'\\kefico\keti\ENT\Softroom\Temp\J.H.Lee'
+    # path = str()
 
-    data = KR(ticker='185750', period=3)
+    data = KR(ticker='010060', period=3)
 
     viewer = value(src = data)
 
 
-    # save(fig=viewer.fig_overview, filename=f'{viewer.tag}-V1_제품_팩터_자산_수익', path=path)
-    # save(fig=viewer.fig_relative, filename=f'{viewer.tag}-V2_상대지표', path=path)
+    save(fig=viewer.fig_overview, filename=f'{viewer.tag}-V1_제품_팩터_자산_수익', path=path)
+    save(fig=viewer.fig_relative, filename=f'{viewer.tag}-V2_상대지표', path=path)
     save(fig=viewer.fig_supply, filename=f'{viewer.tag}-V3_수급', path=path)
-    # save(fig=viewer.fig_macd, filename=f'{viewer.ticker}({viewer.name})-03_MACD', path=path)
-    # save(fig=viewer.fig_rsi, filename=f'{viewer.ticker}({viewer.name})-04_RSI', path=path)
 
 
     # for ticker in ["011370", "104480", "048550", "130660", "052690", "045660", "091590", "344820", "014970", "063440", "069540"]:

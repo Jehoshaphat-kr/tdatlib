@@ -215,8 +215,7 @@ class chart(object):
                     mode='lines',
                     visible=True,
                     showlegend=True,
-                    # legendgroup='Consensus',
-                    legendgrouptitle=dict(text='컨센서스') if not n else None,
+                    legendgrouptitle=dict(text='컨센서스') if col == '목표주가' else None,
                     xhoverformat='%Y/%m/%d',
                     hovertemplate='%{x}<br>' + col + '%{y:,}원<extra></extra>'
                 ) for n, col in enumerate(self.src.basis_consensus.columns) if not col == '투자의견'
@@ -244,6 +243,50 @@ class chart(object):
             }
             self.__setattr__('__foreign', scatters)
         return self.__getattribute__('__foreign')
+
+    @property
+    def short(self) -> dict:
+        if not hasattr(self, '__short'):
+            form = lambda x: ': %{y:,d}원' if x.endswith('종가') else ': %{y:.2f}%'
+            scatters = {
+                col : go.Scatter(
+                    name=f'공매도: {col.replace("공매도", "")}',
+                    x=self.src.basis_short_sell.index,
+                    y=self.src.basis_short_sell[col],
+                    mode='lines',
+                    line=dict(
+                        color='black' if col.endswith('종가') else 'royalblue',
+                        dash='dot' if col.endswith('종가') else 'solid'
+                    ),
+                    visible=True,
+                    showlegend=True,
+                    legendgrouptitle=dict(text='차입공매도 비중') if not n else None,
+                    xhoverformat='%Y/%m/%d',
+                    hovertemplate='%{x}<br>' + col + form(col) + '<extra></extra>'
+                ) for n, col in enumerate(self.src.basis_short_sell)
+            }
+            self.__setattr__('__short', scatters)
+        return self.__getattribute__('__short')
+
+    @property
+    def balance(self) -> dict:
+        if not hasattr(self, '__balance'):
+            form = lambda x: ': %{y:,d}원' if x.endswith('종가') else ': %{y:.2f}%'
+            scatters = {
+                col: go.Scatter(
+                    name=f'대차잔고: {col.replace("대차잔고", "")}',
+                    x=self.src.basis_short_balance.index,
+                    y=self.src.basis_short_balance[col],
+                    mode='lines',
+                    visible=True,
+                    showlegend=True,
+                    legendgrouptitle=dict(text='대차잔고 비중') if not n else None,
+                    xhoverformat='%Y/%m/%d',
+                    hovertemplate='%{x}<br>' + col + form(col) + '<extra></extra>'
+                ) for n, col in enumerate(self.src.basis_short_balance)
+            }
+            self.__setattr__('__balance', scatters)
+        return self.__getattribute__('__balance')
 
 
 # class sketch(object):
