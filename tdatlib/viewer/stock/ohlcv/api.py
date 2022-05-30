@@ -2,16 +2,31 @@ from tdatlib.viewer.stock.ohlcv.core import (
     sketch,
     chart
 )
-from tdatlib.viewer.tools import CD_RANGER, save
-from tdatlib.dataset import tools
+from tdatlib.viewer.tools import save
 from plotly.subplots import make_subplots
+from tqdm import tqdm
 import plotly.graph_objects as go
-import pandas as pd
 
 
 class ohlcv(chart):
 
     _skh = sketch()
+
+    def saveall(self, path:str=str()):
+        proc = tqdm(
+            (self.fig_basis, 'Basic'),
+            (self.fig_bollinger_band, 'Bollinger Band'),
+            (self.fig_macd, 'MACD'),
+            (self.fig_rsi, 'RSI'),
+            (self.fig_mfi, 'MFI'),
+            (self.fig_cci, 'CCI'),
+            (self.fig_vortex, 'Vortex'),
+            (self.fig_trix, 'Trix')
+        )
+        for n, (fig, name) in enumerate(proc):
+            proc.set_description(desc=f'{self.tag}: {name}')
+            save(fig=fig, filename=f'{self.tag}-T{str(n).zfill(2)}_{name}', path=path)
+        return
 
     @property
     def tag(self) -> str:
@@ -330,6 +345,96 @@ class ohlcv(chart):
         )
         return fig
 
+    @property
+    def fig_vortex(self) -> go.Figure:
+        fig = make_subplots(
+            rows=3,
+            cols=1,
+            row_width=[0.3, 0.2, 0.5],
+            shared_xaxes=True,
+            vertical_spacing=0.02
+        )
+
+        # Candle Stick
+        fig.add_trace(self.candle, row=1, col=1)
+
+        # Price
+        for trace in self.price.values():
+            fig.add_trace(trace, row=1, col=1)
+
+        # MA
+        for ch in self.ma.values():
+            fig.add_trace(ch, row=1, col=1)
+
+        # Volume
+        fig.add_trace(self.volume, row=2, col=1)
+
+        # Vortex
+        fig.add_trace(self.vortex, row=3, col=1)
+        fig.add_hline(y=0, line_width=0.5, line_color='black', line_dash='dot', row=3, col=1)
+
+        fig.update_layout(
+            title=f'{self.tag} Vortex',
+            plot_bgcolor='white',
+            legend=dict(
+                groupclick="toggleitem",
+                tracegroupgap=5
+            ),
+            xaxis=self._skh.x_axis(rangeselector=True),
+            yaxis=self._skh.y_axis(title=self.src.currency),
+            xaxis2=self._skh.x_axis(),
+            yaxis2=self._skh.y_axis(title='거래량'),
+            xaxis3=self._skh.x_axis(title='날짜', showticklabels=True),
+            yaxis3=self._skh.y_axis(title='Vortex'),
+            xaxis_rangeslider=dict(visible=False)
+        )
+        return fig
+
+    @property
+    def fig_trix(self) -> go.Figure:
+        fig = make_subplots(
+            rows=3,
+            cols=1,
+            row_width=[0.3, 0.2, 0.5],
+            shared_xaxes=True,
+            vertical_spacing=0.02
+        )
+
+        # Candle Stick
+        fig.add_trace(self.candle, row=1, col=1)
+
+        # Price
+        for trace in self.price.values():
+            fig.add_trace(trace, row=1, col=1)
+
+        # MA
+        for ch in self.ma.values():
+            fig.add_trace(ch, row=1, col=1)
+
+        # Volume
+        fig.add_trace(self.volume, row=2, col=1)
+
+        # Trix
+        fig.add_trace(self.trix, row=3, col=1)
+        # fig.add_hline(y=0, line_width=0.5, line_color='black', line_dash='dot', row=3, col=1)
+
+        fig.update_layout(
+            title=f'{self.tag} Trix',
+            plot_bgcolor='white',
+            legend=dict(
+                groupclick="toggleitem",
+                tracegroupgap=5
+            ),
+            xaxis=self._skh.x_axis(rangeselector=True),
+            yaxis=self._skh.y_axis(title=self.src.currency),
+            xaxis2=self._skh.x_axis(),
+            yaxis2=self._skh.y_axis(title='거래량'),
+            xaxis3=self._skh.x_axis(title='날짜', showticklabels=True),
+            yaxis3=self._skh.y_axis(title='Trix'),
+            xaxis_rangeslider=dict(visible=False)
+        )
+        return fig
+
 
 if __name__ == "__main__":
     from tdatlib.dataset.stock.ohlcv import technical
@@ -343,12 +448,14 @@ if __name__ == "__main__":
     viewer = ohlcv(src = data)
     # viewer.fig_basis.show()
 
-    # save(fig=viewer.fig_basis, filename=f'{viewer.tag}-01_기본_차트', path=path)
-    # save(fig=viewer.fig_bollinger_band, filename=f'{viewer.tag}-02_볼린저_밴드', path=path)
-    # save(fig=viewer.fig_macd, filename=f'{viewer.tag}-03_MACD', path=path)
-    # save(fig=viewer.fig_rsi, filename=f'{viewer.tag}-04_RSI', path=path)
-    # save(fig=viewer.fig_mfi, filename=f'{viewer.tag}-05_MFI', path=path)
+    save(fig=viewer.fig_basis, filename=f'{viewer.tag}-01_Basic', path=path)
+    save(fig=viewer.fig_bollinger_band, filename=f'{viewer.tag}-02_Bollinger', path=path)
+    save(fig=viewer.fig_macd, filename=f'{viewer.tag}-03_MACD', path=path)
+    save(fig=viewer.fig_rsi, filename=f'{viewer.tag}-04_RSI', path=path)
+    save(fig=viewer.fig_mfi, filename=f'{viewer.tag}-05_MFI', path=path)
     save(fig=viewer.fig_cci, filename=f'{viewer.tag}-06_CCI', path=path)
+    save(fig=viewer.fig_vortex, filename=f'{viewer.tag}-07_VORTEX', path=path)
+    save(fig=viewer.fig_trix, filename=f'{viewer.tag}-08_TRIX', path=path)
 
 
     # for ticker in ["011370", "104480", "048550", "130660", "052690", "045660", "091590", "344820", "014970", "063440", "069540"]:

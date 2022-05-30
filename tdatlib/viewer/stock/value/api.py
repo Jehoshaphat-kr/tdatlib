@@ -3,10 +3,24 @@ from tdatlib.viewer.stock.value.core import (
 )
 from tdatlib.viewer.tools import  save
 from plotly.subplots import make_subplots
+from tqdm import tqdm
 import plotly.graph_objects as go
 
 
 class value(chart):
+
+    def saveall(self, path:str=str()):
+        proc = tqdm(
+            (self.fig_overview, '개요'),
+            (self.fig_supply, '수급'),
+            (self.fig_multiple, '투자배수'),
+            (self.fig_relative, '상대지표'),
+            (self.fig_cost, '주요비용')
+        )
+        for n, (fig, name) in proc:
+            proc.set_description(desc=f'{self.tag}: {name}')
+            save(fig=fig, filename=f'{self.tag}-F{str(n).zfill(2)}_{name}', path=path)
+        return
 
     @property
     def tag(self) -> str:

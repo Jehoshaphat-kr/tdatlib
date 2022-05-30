@@ -51,31 +51,3 @@ def save(fig: go.Figure, filename: str, path: str = str()):
         os.makedirs(path)
     of.plot(fig, filename=f'{path}/{filename}.html', auto_open=False)
     return
-
-
-def dform(span) -> list:
-    """
-    :param span : [list or np.array or pd.Series; iterable] date
-    :return     : YY/MM/DD
-    """
-    return [f'{d.year}/{d.month}/{d.day}' for d in span]
-
-
-def set_x(title:str, label:bool=True) -> dict:
-    """
-    :param title : x축 이름
-    :param label : label 표출 여부
-    """
-    return dict(
-        title=title, showgrid=True, gridcolor='lightgrey', showticklabels=label, zeroline=False, autorange=True,
-        showline=True, linewidth=1, linecolor='grey', mirror=False
-    )
-
-def set_y(title:str) -> dict:
-    """
-    :param title: y축 이름
-    """
-    return dict(
-        title=title, showgrid=True, gridcolor='lightgrey', showticklabels=True, zeroline=False, autorange=True,
-        showline=True, linewidth=0.5, linecolor='grey', mirror=False
-    )

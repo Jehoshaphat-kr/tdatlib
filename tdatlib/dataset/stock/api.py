@@ -20,6 +20,7 @@ from tdatlib.dataset.stock.fnguide import (
 )
 from inspect import currentframe as inner
 import pandas as pd
+import os
 
 
 class KR(technical):
@@ -340,6 +341,31 @@ class KR(technical):
         """
         return self.__load__(inner().f_code.co_name, fname='interface', table=self.basis_annual)
 
+    @property
+    def relatives(self) -> (list, list):
+        root = os.path.join(os.path.dirname(os.path.dirname(__file__)), '_archive')
+        icm = pd.read_csv(os.path.join(root, f'common/icm.csv'), encoding='utf-8', index_col='종목코드')
+        icm.index = icm.index.astype(str).str.zfill(6)
+
+        wics = pd.read_csv(os.path.join(root, f'category/wics.csv'), encoding='utf-8', index_col='종목코드')
+        wics.index = wics.index.astype(str).str.zfill(6)
+
+        same_sector = wics[wics['섹터'] == wics.loc[self.ticker, '섹터']][['종목명', '섹터']].join(icm['시가총액'], how='left')
+        sames = same_sector.index.tolist()
+
+        n_curr = sames.index(self.ticker)
+        benchmark = same_sector.iloc[[0, 1, 2, 3, 4] if n_curr < 5 else [0, 1, 2, 3] + [n_curr]].index
+
+        if n_curr < 4:
+            similar_idx = [0, 1, 2, 3, 4]
+        elif n_curr == len(sames) - 1:
+            similar_idx = [0, 1, len(sames) - 3, len(sames) - 2, len(sames) - 1]
+        else:
+            similar_idx = [0, 1, n_curr - 1, n_curr, n_curr + 1]
+        similar = same_sector.iloc[similar_idx].index
+        return benchmark.tolist(), similar.tolist()
+
+
 class US(technical):
     def __init__(self, ticker:str, period:int=5, endate:str=str()):
         super().__init__(ticker=ticker, period=period, endate=endate)
@@ -366,3 +392,4 @@ if __name__ == "__main__":
     # print(stock.basis_multiple_series)
     print(stock.basis_asset)
     print(stock.basis_profit)
+    print(stock.relatives)
