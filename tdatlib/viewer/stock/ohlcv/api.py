@@ -12,15 +12,10 @@ import pandas as pd
 class ohlcv(chart):
 
     _skh = sketch()
-    # def __init__(self, ticker:str, name:str=str(), period:int=5, endate:str=str()):
-    #     self.ticker = ticker
-    #
-    #     self._src = src(ticker=ticker, period=period, endate=endate)
-    #     self._cht = chart(obj=self._src)
-    #     if name:
-    #         self._src.label = name
-    #     self.name = self._src.label
-    #     return
+
+    @property
+    def tag(self) -> str:
+        return f'{self.src.label}' if self.src.currency == 'USD' else f'{self.src.label}({self.src.ticker})'
 
     @property
     def fig_basis(self) -> go.Figure:
@@ -61,7 +56,7 @@ class ohlcv(chart):
         fig.add_trace(self.volume, row=2, col=1)
 
         fig.update_layout(
-            title=f'{self.src.label}({self.src.ticker}) 기본 차트',
+            title=f'{self.tag} 기본 차트',
             plot_bgcolor='white',
             legend=dict(
                 # groupclick="toggleitem",
@@ -120,7 +115,7 @@ class ohlcv(chart):
         fig.add_trace(self.bb_breakout, row=1, col=1)
 
         fig.update_layout(
-            title=f'{self.src.label}({self.src.ticker}) Bollinger Band',
+            title=f'{self.tag} Bollinger Band',
             plot_bgcolor='white',
             # legend=dict(groupclick="toggleitem"),
             legend=dict(tracegroupgap=5),
@@ -169,7 +164,7 @@ class ohlcv(chart):
         fig.add_hline(y=0, row=3, col=1, line_width=0.5, line_dash="dot", line_color="black")
 
         fig.update_layout(
-            title=f'{self.src.label}({self.src.ticker}) MACD',
+            title=f'{self.tag} MACD',
             plot_bgcolor='white',
             legend=dict(
                 groupclick="toggleitem",
@@ -221,7 +216,7 @@ class ohlcv(chart):
         fig.add_hrect(y0=0, y1=20, line_width=0, fillcolor='green', opacity=0.2, row=4, col=1)
 
         fig.update_layout(
-            title=f'{self.src.label}({self.src.ticker}) RSI',
+            title=f'{self.tag} RSI',
             plot_bgcolor='white',
             legend=dict(
                 groupclick="toggleitem",
@@ -239,6 +234,102 @@ class ohlcv(chart):
         )
         return fig
 
+    @property
+    def fig_mfi(self) -> go.Figure:
+        fig = make_subplots(
+            rows=3,
+            cols=1,
+            row_width=[0.3, 0.2, 0.5],
+            shared_xaxes=True,
+            vertical_spacing=0.02
+        )
+
+        # Candle Stick
+        fig.add_trace(self.candle, row=1, col=1)
+
+        # Price
+        for trace in self.price.values():
+            fig.add_trace(trace, row=1, col=1)
+
+        # MA
+        for ch in self.ma.values():
+            fig.add_trace(ch, row=1, col=1)
+
+        # Volume
+        fig.add_trace(self.volume, row=2, col=1)
+
+        # MFI
+        fig.add_trace(self.mfi, row=3, col=1)
+        fig.add_hrect(y0=80, y1=100, line_width=0, fillcolor='red', opacity=0.2, row=3, col=1)
+        fig.add_hline(y=90, line_width=0.5, line_dash="dash", line_color="black", row=3, col=1)
+        fig.add_hrect(y0=0, y1=20, line_width=0, fillcolor='lightgreen', opacity=0.4, row=3, col=1)
+        fig.add_hline(y=10, line_width=0.5, line_dash="dash", line_color="black", row=3, col=1)
+
+        fig.update_layout(
+            title=f'{self.tag} MFI',
+            plot_bgcolor='white',
+            legend=dict(
+                groupclick="toggleitem",
+                tracegroupgap=5
+            ),
+            xaxis=self._skh.x_axis(rangeselector=True),
+            yaxis=self._skh.y_axis(title=self.src.currency),
+            xaxis2=self._skh.x_axis(),
+            yaxis2=self._skh.y_axis(title='거래량'),
+            xaxis3=self._skh.x_axis(title='날짜', showticklabels=True),
+            yaxis3=self._skh.y_axis(title='MFI'),
+            xaxis_rangeslider=dict(visible=False)
+        )
+        return fig
+
+    @property
+    def fig_cci(self) -> go.Figure:
+        fig = make_subplots(
+            rows=3,
+            cols=1,
+            row_width=[0.3, 0.2, 0.5],
+            shared_xaxes=True,
+            vertical_spacing=0.02
+        )
+
+        # Candle Stick
+        fig.add_trace(self.candle, row=1, col=1)
+
+        # Price
+        for trace in self.price.values():
+            fig.add_trace(trace, row=1, col=1)
+
+        # MA
+        for ch in self.ma.values():
+            fig.add_trace(ch, row=1, col=1)
+
+        # Volume
+        fig.add_trace(self.volume, row=2, col=1)
+
+        # CCI
+        fig.add_trace(self.cci, row=3, col=1)
+        fig.add_hrect(y0=200, y1=400, line_width=0, fillcolor='red', opacity=0.2, row=3, col=1)
+        fig.add_hrect(y0=100, y1=200, line_width=0, fillcolor='brown', opacity=0.2, row=3, col=1)
+        fig.add_hrect(y0=-200, y1=-100, line_width=0, fillcolor='lightgreen', opacity=0.4, row=3, col=1)
+        fig.add_hrect(y0=-400, y1=-200, line_width=0, fillcolor='green', opacity=0.2, row=3, col=1)
+
+        fig.update_layout(
+            title=f'{self.tag} CCI',
+            plot_bgcolor='white',
+            legend=dict(
+                groupclick="toggleitem",
+                tracegroupgap=5
+            ),
+            xaxis=self._skh.x_axis(rangeselector=True),
+            yaxis=self._skh.y_axis(title=self.src.currency),
+            xaxis2=self._skh.x_axis(),
+            yaxis2=self._skh.y_axis(title='거래량'),
+            xaxis3=self._skh.x_axis(title='날짜', showticklabels=True),
+            yaxis3=self._skh.y_axis(title='CCI'),
+            xaxis_rangeslider=dict(visible=False)
+        )
+        return fig
+
 
 if __name__ == "__main__":
     from tdatlib.dataset.stock.ohlcv import technical
@@ -250,15 +341,17 @@ if __name__ == "__main__":
     data = technical(ticker='TSLA', period=3)
 
     viewer = ohlcv(src = data)
-    viewer.fig_basis.show()
+    # viewer.fig_basis.show()
 
-    # save(fig=viewer.fig_basis, filename=f'{viewer.ticker}({viewer.name})-01_기본_차트', path=path)
-    # save(fig=viewer.fig_bollinger_band, filename=f'{viewer.ticker}({viewer.name})-02_볼린저_밴드', path=path)
-    # save(fig=viewer.fig_macd, filename=f'{viewer.ticker}({viewer.name})-03_MACD', path=path)
-    # save(fig=viewer.fig_rsi, filename=f'{viewer.ticker}({viewer.name})-04_RSI', path=path)
+    # save(fig=viewer.fig_basis, filename=f'{viewer.tag}-01_기본_차트', path=path)
+    # save(fig=viewer.fig_bollinger_band, filename=f'{viewer.tag}-02_볼린저_밴드', path=path)
+    # save(fig=viewer.fig_macd, filename=f'{viewer.tag}-03_MACD', path=path)
+    # save(fig=viewer.fig_rsi, filename=f'{viewer.tag}-04_RSI', path=path)
+    # save(fig=viewer.fig_mfi, filename=f'{viewer.tag}-05_MFI', path=path)
+    save(fig=viewer.fig_cci, filename=f'{viewer.tag}-06_CCI', path=path)
 
 
     # for ticker in ["011370", "104480", "048550", "130660", "052690", "045660", "091590", "344820", "014970", "063440", "069540"]:
     #     viewer = technical(ticker=ticker, period=2)
-    #     save(fig=viewer.fig_basis, filename=f'{viewer.ticker}({viewer.name})-01_기본_차트', path=path)
-    #     save(fig=viewer.fig_bollinger_band, filename=f'{viewer.ticker}({viewer.name})-02_볼린저_밴드', path=path)
+    #     save(fig=viewer.fig_basis, filename=f'{viewer.tag}-01_기본_차트', path=path)
+    #     save(fig=viewer.fig_bollinger_band, filename=f'{viewer.tag}-02_볼린저_밴드', path=path)

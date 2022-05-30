@@ -1,10 +1,11 @@
 from tdatlib.viewer.tools import CD_RANGER
+from tdatlib.dataset.stock.ohlcv import technical
 import plotly.graph_objects as go
 
 
 class chart(object):
 
-    def __init__(self, src):
+    def __init__(self, src:technical):
         self.src = src
 
     @property
@@ -437,7 +438,81 @@ class chart(object):
             )
         return self.__getattribute__('__stoch_rsi_sig')
 
+    @property
+    def mfi(self) -> go.Scatter:
+        if not hasattr(self, '__mfi'):
+            self.__setattr__(
+                '__mfi',
+                go.Scatter(
+                    name='MFI',
+                    x=self.src.ohlcv_ta.volume_mfi.index,
+                    y=self.src.ohlcv_ta.volume_mfi,
+                    visible=True,
+                    showlegend=True,
+                    legendgrouptitle=dict(text='MFI'),
+                    xhoverformat='%Y/%m/%d',
+                    yhoverformat='.2f',
+                    hovertemplate='%{x}<br>MFI: %{y}<extra></extra>'
+                )
+            )
+        return self.__getattribute__('__mfi')
 
+    @property
+    def cci(self) -> go.Scatter:
+        if not hasattr(self, '__cci'):
+            self.__setattr__(
+                '__cci',
+                go.Scatter(
+                    name='CCI',
+                    x=self.src.ohlcv_ta.trend_cci.index,
+                    y=self.src.ohlcv_ta.trend_cci,
+                    visible=True,
+                    showlegend=True,
+                    legendgrouptitle=dict(text='CCI'),
+                    xhoverformat='%Y/%m/%d',
+                    yhoverformat='.2f',
+                    hovertemplate='%{x}<br>CCI: %{y}<extra></extra>'
+                )
+            )
+        return self.__getattribute__('__cci')
+
+    @property
+    def vortex(self) -> go.Scatter:
+        if not hasattr(self, '__vortex'):
+            self.__setattr__(
+                '__vortex',
+                go.Scatter(
+                    name='Vortex',
+                    x=self.src.ohlcv_ta.trend_vortex_ind_diff.index,
+                    y=self.src.ohlcv_ta.trend_vortex_ind_diff,
+                    visible=True,
+                    showlegend=True,
+                    legendgrouptitle=dict(text='Vortex'),
+                    xhoverformat='%Y/%m/%d',
+                    yhoverformat='.2f',
+                    hovertemplate='%{x}<br>Vortex: %{y}<extra></extra>'
+                )
+            )
+        return self.__getattribute__('__vortex')
+
+    @property
+    def trix(self) -> go.Scatter:
+        if not hasattr(self, '__trix'):
+            self.__setattr__(
+                '__trix',
+                go.Scatter(
+                    name='Trix',
+                    x=self.src.ohlcv_ta.trend_trix.index,
+                    y=self.src.ohlcv_ta.trend_trix,
+                    visible=True,
+                    showlegend=True,
+                    legendgrouptitle=dict(text='Trix'),
+                    xhoverformat='%Y/%m/%d',
+                    yhoverformat='.2f',
+                    hovertemplate='%{x}<br>Trix: %{y}<extra></extra>'
+                )
+            )
+        return self.__getattribute__('__trix')
 
 
 
