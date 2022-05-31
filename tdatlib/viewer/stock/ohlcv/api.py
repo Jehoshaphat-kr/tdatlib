@@ -1,8 +1,5 @@
-from tdatlib.viewer.stock.ohlcv.core import (
-    sketch,
-    chart
-)
-from tdatlib.viewer.tools import save
+from tdatlib.viewer.stock.ohlcv.core import chart
+from tdatlib.viewer.tools import save, sketch
 from plotly.subplots import make_subplots
 from tqdm import tqdm
 import plotly.graph_objects as go
@@ -13,7 +10,7 @@ class ohlcv(chart):
     _skh = sketch()
 
     def saveall(self, path:str=str()):
-        proc = tqdm(
+        proc = tqdm([
             (self.fig_basis, 'Basic'),
             (self.fig_bollinger_band, 'Bollinger Band'),
             (self.fig_macd, 'MACD'),
@@ -22,10 +19,10 @@ class ohlcv(chart):
             (self.fig_cci, 'CCI'),
             (self.fig_vortex, 'Vortex'),
             (self.fig_trix, 'Trix')
-        )
+        ])
         for n, (fig, name) in enumerate(proc):
             proc.set_description(desc=f'{self.tag}: {name}')
-            save(fig=fig, filename=f'{self.tag}-T{str(n).zfill(2)}_{name}', path=path)
+            save(fig=fig, filename=f'{self.tag}-T{str(n + 1).zfill(2)}_{name}', path=path)
         return
 
     @property
@@ -443,22 +440,17 @@ if __name__ == "__main__":
     path = str()
 
     # data = technical(ticker='185750', period=3)
-    data = technical(ticker='TSLA', period=3)
+    # data = technical(ticker='TSLA', period=3)
+    data = technical(ticker='253450', period=3)
 
     viewer = ohlcv(src = data)
-    # viewer.fig_basis.show()
 
-    save(fig=viewer.fig_basis, filename=f'{viewer.tag}-01_Basic', path=path)
-    save(fig=viewer.fig_bollinger_band, filename=f'{viewer.tag}-02_Bollinger', path=path)
-    save(fig=viewer.fig_macd, filename=f'{viewer.tag}-03_MACD', path=path)
-    save(fig=viewer.fig_rsi, filename=f'{viewer.tag}-04_RSI', path=path)
-    save(fig=viewer.fig_mfi, filename=f'{viewer.tag}-05_MFI', path=path)
-    save(fig=viewer.fig_cci, filename=f'{viewer.tag}-06_CCI', path=path)
-    save(fig=viewer.fig_vortex, filename=f'{viewer.tag}-07_VORTEX', path=path)
-    save(fig=viewer.fig_trix, filename=f'{viewer.tag}-08_TRIX', path=path)
-
-
-    # for ticker in ["011370", "104480", "048550", "130660", "052690", "045660", "091590", "344820", "014970", "063440", "069540"]:
-    #     viewer = technical(ticker=ticker, period=2)
-    #     save(fig=viewer.fig_basis, filename=f'{viewer.tag}-01_기본_차트', path=path)
-    #     save(fig=viewer.fig_bollinger_band, filename=f'{viewer.tag}-02_볼린저_밴드', path=path)
+    viewer.saveall()
+    # save(fig=viewer.fig_basis, filename=f'{viewer.tag}-01_Basic', path=path)
+    # save(fig=viewer.fig_bollinger_band, filename=f'{viewer.tag}-02_Bollinger', path=path)
+    # save(fig=viewer.fig_macd, filename=f'{viewer.tag}-03_MACD', path=path)
+    # save(fig=viewer.fig_rsi, filename=f'{viewer.tag}-04_RSI', path=path)
+    # save(fig=viewer.fig_mfi, filename=f'{viewer.tag}-05_MFI', path=path)
+    # save(fig=viewer.fig_cci, filename=f'{viewer.tag}-06_CCI', path=path)
+    # save(fig=viewer.fig_vortex, filename=f'{viewer.tag}-07_VORTEX', path=path)
+    # save(fig=viewer.fig_trix, filename=f'{viewer.tag}-08_TRIX', path=path)

@@ -1,4 +1,3 @@
-from tdatlib.viewer.tools import CD_RANGER
 from tdatlib.dataset.stock.ohlcv import technical
 import plotly.graph_objects as go
 
@@ -517,48 +516,4 @@ class chart(object):
                 )
             )
         return self.__getattribute__('__trix')
-
-
-
-class sketch(object):
-    def __init__(self):
-        self.__x_axis = dict(
-            showticklabels=False,
-            tickformat='%Y/%m/%d',
-            zeroline=False,
-            showgrid=True,
-            gridcolor='lightgrey',
-            autorange=True,
-            showline=True,
-            linewidth=1,
-            linecolor='grey',
-            mirror=False,
-        )
-        self.__y_axis = dict(
-            showticklabels=True,
-            zeroline=False,
-            showgrid=True,
-            gridcolor='lightgrey',
-            autorange=True,
-            showline=True,
-            linewidth=0.5,
-            linecolor='grey',
-            mirror=False
-        )
-
-    def x_axis(self, title:str=str(), showticklabels:bool=False, rangeselector:bool=False) -> dict:
-        _ = self.__x_axis.copy()
-        if title:
-            _['title'] = title
-        if showticklabels:
-            _['showticklabels'] = True
-        if rangeselector:
-            _['rangeselector'] = CD_RANGER
-        return _
-
-    def y_axis(self, title:str=str()) -> dict:
-        _ = self.__y_axis.copy()
-        if title:
-            _['title'] = title
-        return _
 

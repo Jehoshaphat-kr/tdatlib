@@ -51,3 +51,50 @@ def save(fig: go.Figure, filename: str, path: str = str()):
         os.makedirs(path)
     of.plot(fig, filename=f'{path}/{filename}.html', auto_open=False)
     return
+
+
+class sketch(object):
+    def __init__(self):
+        self.__x_axis = dict(
+            showticklabels=False,
+            tickformat='%Y/%m/%d',
+            zeroline=False,
+            showgrid=True,
+            gridcolor='lightgrey',
+            autorange=True,
+            showline=True,
+            linewidth=1,
+            linecolor='grey',
+            mirror=False,
+        )
+        self.__y_axis = dict(
+            showticklabels=True,
+            zeroline=False,
+            showgrid=True,
+            gridcolor='lightgrey',
+            autorange=True,
+            showline=True,
+            linewidth=0.5,
+            linecolor='grey',
+            mirror=False
+        )
+
+    def x_axis(self, title:str=str(), showticklabels:bool=False, rangeselector:bool=False, **kwargs) -> dict:
+        _ = self.__x_axis.copy()
+        if title:
+            _['title'] = title
+        if showticklabels:
+            _['showticklabels'] = True
+        if rangeselector:
+            _['rangeselector'] = CD_RANGER
+        if kwargs:
+            _.update(kwargs)
+        return _
+
+    def y_axis(self, title:str=str(), **kwargs) -> dict:
+        _ = self.__y_axis.copy()
+        if title:
+            _['title'] = title
+        if kwargs:
+            _.update(kwargs)
+        return _

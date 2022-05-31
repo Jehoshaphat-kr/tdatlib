@@ -1,7 +1,5 @@
-from tdatlib.viewer.stock.value.core import (
-    chart
-)
-from tdatlib.viewer.tools import  save
+from tdatlib.viewer.stock.value.core import chart
+from tdatlib.viewer.tools import save
 from plotly.subplots import make_subplots
 from tqdm import tqdm
 import plotly.graph_objects as go
@@ -10,21 +8,21 @@ import plotly.graph_objects as go
 class value(chart):
 
     def saveall(self, path:str=str()):
-        proc = tqdm(
+        proc = tqdm([
             (self.fig_overview, '개요'),
             (self.fig_supply, '수급'),
             (self.fig_multiple, '투자배수'),
             (self.fig_relative, '상대지표'),
             (self.fig_cost, '주요비용')
-        )
-        for n, (fig, name) in proc:
+        ])
+        for n, (fig, name) in enumerate(proc):
             proc.set_description(desc=f'{self.tag}: {name}')
-            save(fig=fig, filename=f'{self.tag}-F{str(n).zfill(2)}_{name}', path=path)
+            save(fig=fig, filename=f'{self.tag}-F{str(n + 1).zfill(2)}_{name}', path=path)
         return
 
     @property
     def tag(self) -> str:
-        return f'{self.src.ticker}({self.src.label})'
+        return f'{self.src.label}({self.src.ticker})'
 
     @property
     def fig_overview(self) -> go.Figure:
@@ -105,7 +103,8 @@ class value(chart):
             legend=dict(
                 tracegroupgap=5,
                 # groupclick="toggleitem"
-            )
+            ),
+            xaxis=dict(tickformat='%Y/%m/%d'),
         ))
         fig.update_yaxes(title_text="상대 수익률[%]", gridcolor='lightgrey', row=1, col=1)
         fig.update_yaxes(title_text="PER[-]", gridcolor='lightgrey', row=1, col=2)
@@ -154,8 +153,9 @@ class value(chart):
             legend=dict(
                 # groupclick="toggleitem",
                 tracegroupgap=5
-            )
+            ),
         )
+        fig.update_xaxes(tickformat='%Y/%m/%d')
         fig.update_yaxes(title_text="주가[원]", showgrid=True, gridcolor='lightgrey', row=1, col=1)
         for row, col in ((1, 2), (2, 1), (2, 2)):
             fig.update_yaxes(title_text="주가[원]", showgrid=True, gridcolor='lightgrey', row=row, col=col,
@@ -230,7 +230,9 @@ class value(chart):
         fig.update_layout(dict(
             title=f'<b>{self.tag}</b> : PER / PBR',
             plot_bgcolor='white',
-            legend=dict(groupclick="toggleitem")
+            legend=dict(groupclick="toggleitem"),
+            xaxis=dict(tickformat='%Y/%m/%d'),
+            xaxis2=dict(tickformat='%Y/%m/%d')
         ))
         for row, col in ((1, 1), (1, 2), (2, 1), (2, 2)):
             fig.update_yaxes(title_text="KRW[원]", showgrid=True, gridcolor='lightgrey', row=row, col=col,
@@ -250,11 +252,13 @@ if __name__ == "__main__":
     # path = r'\\kefico\keti\ENT\Softroom\Temp\J.H.Lee'
     path = str()
 
-    data = KR(ticker='010060', period=3)
+    data = KR(ticker='253450', period=3)
 
     viewer = value(src = data)
-    save(fig=viewer.fig_overview, filename=f'{viewer.tag}-V1_제품_팩터_자산_수익', path=path)
-    save(fig=viewer.fig_relative, filename=f'{viewer.tag}-V2_상대지표', path=path)
-    save(fig=viewer.fig_supply, filename=f'{viewer.tag}-V3_수급', path=path)
-    save(fig=viewer.fig_cost, filename=f'{viewer.tag}-V4_비용_부채', path=path)
-    save(fig=viewer.fig_multiple, filename=f'{viewer.tag}-V5_투자배수', path=path)
+
+    viewer.saveall()
+    # save(fig=viewer.fig_overview, filename=f'{viewer.tag}-V1_제품_팩터_자산_수익', path=path)
+    # save(fig=viewer.fig_relative, filename=f'{viewer.tag}-V2_상대지표', path=path)
+    # save(fig=viewer.fig_supply, filename=f'{viewer.tag}-V3_수급', path=path)
+    # save(fig=viewer.fig_cost, filename=f'{viewer.tag}-V4_비용_부채', path=path)
+    # save(fig=viewer.fig_multiple, filename=f'{viewer.tag}-V5_투자배수', path=path)

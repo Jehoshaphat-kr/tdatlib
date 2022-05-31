@@ -1,23 +1,22 @@
-from tdatlib.interface.compare import interface_compare
-from tdatlib.viewer.tools import CD_COLORS, CD_X_RANGER, save, dform
+from tdatlib.dataset.stock import compare
+from tdatlib.viewer.tools import CD_COLORS, sketch, save
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
-import numpy as np
 
 
-class view_compare(interface_compare):
+class view_compare(compare):
+    _skh = sketch()
 
-    def __init__(self, tickers:list or np.array, period:int):
-        super().__init__(tickers=tickers, period=period)
-        self.name_suffix = f"-{'_'.join(self.names)}"
-        return
+    @property
+    def name_suffix(self) -> str:
+        return f"-{'_'.join(self.names)}"
 
     @property
     def fig_returns(self) -> go.Figure:
         fig = go.Figure()
 
         gaps = ['3M', '6M', '1Y', '2Y', '3Y', '5Y']
-        data, price = self.rel_yield.copy(), self.price.copy()
+        data, price = self.rel_yield.copy(), self.rel_price.copy()
         for c, col in enumerate(gaps):
             for n, name in enumerate(self.names):
                 d = data[(col, name)].dropna()
@@ -54,26 +53,21 @@ class view_compare(interface_compare):
             sliders=sliders,
             hovermode="x",
             hoverlabel = dict(font=dict(color='white')),
-            xaxis=dict(
-                title='날짜',
-                showgrid=True,
-                gridcolor='lightgrey',
-                autorange=True,
-                tickformat='%Y/%m/%d',
+            xaxis=self._skh.x_axis(
+                title='날짜', showticklabels=True,
                 showspikes=True,
                 spikecolor="black",
                 spikesnap="cursor",
                 spikemode="across",
-                spikethickness=0.5
+                spikethickness=0.5,
+                showline=False
             ),
-            yaxis=dict(
+            yaxis=self._skh.y_axis(
                 title='수익률[%]',
-                showgrid=True,
-                gridcolor='lightgrey',
-                autorange=True,
                 zeroline=True,
                 zerolinecolor='grey',
-                zerolinewidth=1
+                zerolinewidth=1,
+                # showline=False
             )
         )
         return fig
@@ -83,7 +77,7 @@ class view_compare(interface_compare):
         fig = go.Figure()
 
         gaps = ['3M', '6M', '1Y', '2Y', '3Y', '5Y']
-        data, price = self.rel_drawdown.copy(), self.price.copy()
+        data, price = self.rel_drawdown.copy(), self.rel_price.copy()
         for c, col in enumerate(gaps):
             for n, name in enumerate(self.names):
                 d = data[(col, name)].dropna()
@@ -120,26 +114,21 @@ class view_compare(interface_compare):
             sliders=sliders,
             hovermode="x",
             hoverlabel=dict(font=dict(color='white')),
-            xaxis=dict(
-                title='날짜',
-                showgrid=True,
-                gridcolor='lightgrey',
-                autorange=True,
-                tickformat='%Y/%m/%d',
+            xaxis=self._skh.x_axis(
+                title='날짜', showticklabels=True,
                 showspikes=True,
                 spikecolor="black",
                 spikesnap="cursor",
                 spikemode="across",
-                spikethickness=0.5
+                spikethickness=0.5,
+                showline=False
             ),
-            yaxis=dict(
+            yaxis=self._skh.y_axis(
                 title='낙폭[%]',
-                showgrid=True,
-                gridcolor='lightgrey',
-                autorange=True,
                 zeroline=True,
                 zerolinecolor='grey',
-                zerolinewidth=1
+                zerolinewidth=1,
+                # showline=False
             )
         )
         return fig
@@ -200,43 +189,26 @@ class view_compare(interface_compare):
             legend=dict(groupclick="toggleitem"),
             hovermode="x",
             hoverlabel=dict(font=dict(color='white')),
-            xaxis=dict(
-                showgrid=True,
-                gridcolor='lightgrey',
-                autorange=True,
-                showticklabels=True,
-                tickformat='%Y/%m/%d',
+            xaxis=self._skh.x_axis(
+                title='', showticklabels=True, rangeselector=True,
                 showspikes=True,
                 spikecolor="black",
                 spikesnap="cursor",
                 spikemode="across",
                 spikethickness=0.5,
-                rangeselector=CD_X_RANGER
+                showline=False
             ),
-            xaxis2=dict(
-                title='날짜',
-                showgrid=True,
-                gridcolor='lightgrey',
-                autorange=True,
-                tickformat='%Y/%m/%d',
+            xaxis2=self._skh.x_axis(
+                title='날짜', showticklabels=True, rangeselector=False,
                 showspikes=True,
                 spikecolor="black",
                 spikesnap="cursor",
                 spikemode="across",
-                spikethickness=0.5
+                spikethickness=0.5,
+                showline=False
             ),
-            yaxis=dict(
-                title='RSI[%]',
-                showgrid=True,
-                gridcolor='lightgrey',
-                autorange=True
-            ),
-            yaxis2=dict(
-                title='Stochastic-RSI[%]',
-                showgrid=True,
-                gridcolor='lightgrey',
-                autorange=True
-            )
+            yaxis=self._skh.y_axis(title='RSI[%]'),
+            yaxis2=self._skh.y_axis(title='Stochastic-RSI[%]')
         )
         return fig
 
@@ -534,13 +506,16 @@ if __name__ == "__main__":
     t_tickers = ['105560', '055550', '316140', '024110']
 
     t_compare = view_compare(tickers=t_tickers, period=5)
+    t_compare.fig_returns.show()
+    t_compare.fig_drawdown.show()
+    t_compare.fig_rsi.show()
 
-    save(t_compare.fig_returns, filename='00_수익률 비교')
-    save(t_compare.fig_drawdown, filename='01_낙폭 비교')
-    save(t_compare.fig_rsi, filename='02_RSI 비교')
-    save(t_compare.fig_cci_roc, filename='03_CCI_ROC')
-    save(t_compare.fig_mfi_bb, filename='04_MFI_B-Sig')
-    save(t_compare.fig_sharpe_ratio, filename='05_샤프비율 비교')
-    save(t_compare.fig_profit, filename='06_수익성 비교')
-    save(t_compare.fig_growth, filename='07_성장성 비교')
-    save(t_compare.fig_multiple, filename='08_투자배수 비교')
+    # save(t_compare.fig_returns, filename='00_수익률 비교')
+    # save(t_compare.fig_drawdown, filename='01_낙폭 비교')
+    # save(t_compare.fig_rsi, filename='02_RSI 비교')
+    # save(t_compare.fig_cci_roc, filename='03_CCI_ROC')
+    # save(t_compare.fig_mfi_bb, filename='04_MFI_B-Sig')
+    # save(t_compare.fig_sharpe_ratio, filename='05_샤프비율 비교')
+    # save(t_compare.fig_profit, filename='06_수익성 비교')
+    # save(t_compare.fig_growth, filename='07_성장성 비교')
+    # save(t_compare.fig_multiple, filename='08_투자배수 비교')
