@@ -30,9 +30,10 @@ CD_RANGER = dict(
 
 
 
-def save(fig: go.Figure, filename: str, path: str = str()):
+def save(fig: go.Figure, asset: str, filename: str, path: str = str()):
     """
     :param fig      : 차트
+    :param asset    : 종목명
     :param filename : 파일명
     :param path     : 파일 경로
     """

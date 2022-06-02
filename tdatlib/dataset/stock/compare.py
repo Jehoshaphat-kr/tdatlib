@@ -1,4 +1,4 @@
-# from tdatlib.dataset.market.kr import KR as _market
+from tdatlib.dataset import market
 from tdatlib.dataset.stock import KR as stock
 import pandas as pd
 import numpy as np
@@ -11,7 +11,8 @@ class compare(object):
         for ticker in tickers:
             setattr(self, f'__{ticker}', stock(ticker=ticker, period=period, endate=endate))
         self.names = [self.__getattribute__(f'__{ticker}').label for ticker in self.tickers]
-        self._market = _market()
+        # self._market = _market()
+        self._market = market.KR()
         return
 
     @property

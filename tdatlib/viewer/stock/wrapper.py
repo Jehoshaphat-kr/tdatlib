@@ -4,6 +4,7 @@ from tdatlib.dataset.stock import (
 )
 from tdatlib.viewer.stock.ohlcv import ohlcv
 from tdatlib.viewer.stock.value import value
+from tdatlib.viewer.stock.compare import view_compare
 
 
 class KR(object):
@@ -11,6 +12,7 @@ class KR(object):
         _src = _kr(ticker=ticker, period=period, endate=endate)
         self.technical = ohlcv(src=_src)
         self.fundamental = value(src=_src)
+        self.relatives = view_compare(tickers=self.fundamental.src.relatives[1], period=period)
         return
 
     def saveall(self, path:str=str()):
