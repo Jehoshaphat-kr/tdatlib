@@ -1,4 +1,4 @@
-from tdatlib.dataset.market import KR as market
+# from tdatlib.dataset.market.kr import KR as _market
 from tdatlib.dataset.stock import KR as stock
 import pandas as pd
 import numpy as np
@@ -11,7 +11,7 @@ class compare(object):
         for ticker in tickers:
             setattr(self, f'__{ticker}', stock(ticker=ticker, period=period, endate=endate))
         self.names = [self.__getattribute__(f'__{ticker}').label for ticker in self.tickers]
-        self.market = market()
+        self._market = _market()
         return
 
     @property
@@ -47,7 +47,7 @@ class compare(object):
         058470    리노공업  2001-12-18  175500    2670463224000  ...  7.93  3648.0  0.85  1500.0
         """
         if not hasattr(self, '__icm'):
-            icm = self.market.icm
+            icm = self._market.icm
             self.__setattr__('__icm', icm[icm.index.isin(self.tickers)].copy())
         return self.__getattribute__('__icm')
 
@@ -309,9 +309,9 @@ class compare(object):
             for i in data.index[:-2]:
                 _data = data.loc[i].to_dict()
                 objs[i] = pd.DataFrame(data=_data, index=[name])
-                if i.startswith(str(int(self.market.trading_date[:4]) - 1)):
+                if i.startswith(str(int(self._market.trading_date[:4]) - 1)):
                     _data['PEG'] = round(icm.loc[ticker, 'PER'] / _data['EPS증가율'], 2)
-                    objs[f'{self.market.trading_date[:4]}/현재'] = pd.DataFrame(data=_data, index=[name])
+                    objs[f'{self._market.trading_date[:4]}/현재'] = pd.DataFrame(data=_data, index=[name])
             growth = pd.concat(objs=[growth, pd.concat(objs=objs, axis=1)], axis=0)
         return growth
 
