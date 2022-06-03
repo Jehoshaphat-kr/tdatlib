@@ -18,6 +18,7 @@ class KR(object):
     def saveall(self, path:str=str()):
         self.technical.saveall(path=path)
         self.fundamental.saveall(path=path)
+        self.relatives.saveall(tag=self.technical.tag, path=path)
         return
 
 

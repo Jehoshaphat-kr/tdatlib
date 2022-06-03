@@ -17,7 +17,7 @@ class value(chart):
         ])
         for n, (fig, name) in enumerate(proc):
             proc.set_description(desc=f'{self.tag}: {name}')
-            save(fig=fig, filename=f'{self.tag}-F{str(n + 1).zfill(2)}_{name}', path=path)
+            save(fig=fig, tag=self.tag, filename=f'F{str(n + 1).zfill(2)}_{name}', path=path)
         return
 
     @property

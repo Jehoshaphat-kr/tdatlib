@@ -1,15 +1,33 @@
 from tdatlib.dataset.stock import compare
 from tdatlib.viewer.tools import CD_COLORS, sketch, save
 from plotly.subplots import make_subplots
+from tqdm import tqdm
 import plotly.graph_objects as go
 
 
 class view_compare(compare):
     _skh = sketch()
 
+    def saveall(self, tag:str, path:str=str()):
+        proc = tqdm([
+            (self.fig_returns, '수익률'),
+            (self.fig_drawdown, '낙폭'),
+            (self.fig_rsi, 'RSI'),
+            (self.fig_cci_roc, 'CCI&ROC'),
+            (self.fig_mfi_bb, 'MFI&Bollinger'),
+            (self.fig_sharpe_ratio, '샤프비율'),
+            (self.fig_profit, '수익성'),
+            (self.fig_growth, '성장성'),
+            (self.fig_multiple, '투자배수'),
+        ])
+        for n, (fig, name) in enumerate(proc):
+            proc.set_description(desc=f'{tag}: {name} 비교')
+            save(fig=fig, tag=tag, filename=f'R{str(n + 1).zfill(2)}_{name}{self.name_suffix}', path=path)
+        return
+
     @property
     def name_suffix(self) -> str:
-        return f"-{'_'.join(self.names)}"
+        return f"_{','.join(self.names)}"
 
     @property
     def fig_returns(self) -> go.Figure:

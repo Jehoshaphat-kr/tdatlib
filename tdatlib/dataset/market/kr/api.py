@@ -38,6 +38,7 @@ class KR(object):
         _now = datetime.now(timezone('Asia/Seoul'))
         _lat = get_nearest_business_day_in_a_week(date=_now.strftime("%Y%m%d"))
         self.trading_date = td if td else _lat
+        self.is_test_mode = True if td else False
 
         self.__is_market_on = 859 < int(_now.strftime("%H%M")) < 1531 and _now.strftime("%Y%m%d") == self.trading_date
         self.__write_ok     = _lat == self.trading_date

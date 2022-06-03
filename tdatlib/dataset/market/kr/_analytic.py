@@ -1,5 +1,5 @@
-from tdatlib.dataset.market.kr.api import KR as mk
-from tdatlib.dataset.stock import KR as stock
+from tdatlib.dataset.market.kr.api import KR as _market
+from tdatlib.viewer.stock import KR as _stock
 from scipy import stats
 import pandas as pd
 import numpy as np
@@ -50,23 +50,39 @@ CD_COLORS = [
 ]
 
 
-class gather(object):
+class analytic(object):
 
-    def __init__(self, parent:mk, date:str=str()):
-        self.par = parent
-        self.date = date
-        target = self.par.icm[self.par.icm.시가총액 >= 100000000000].copy()
-        self.__target = target.index.tolist()
+    def __init__(self, market:_market):
+        self.market = market
+        self.__caplim = 100000000000
+        return
+
+    @property
+    def caplim(self) -> int:
+        return self.__caplim
+
+    @caplim.setter
+    def caplim(self, lim:int):
+        self.__caplim = lim
         return
 
     @property
     def target(self) -> list or np.array or pd.Series:
-        return self.__target
+        if not hasattr(self, '__target'):
+            self.__setattr__('__target', self.market.icm[self.market.icm.시가총액 >= self.caplim].index)
+        return self.__getattribute__('__target')
 
     @target.setter
-    def target(self, target:list or np.array or pd.Series):
-        self.__target = target
+    def target(self, list_or_kind:list or np.array or pd.Series or str):
+        if isinstance(list_or_kind, str):
+            self.__setattr__('__target', self.market.get_deposit(label=list_or_kind))
+            return
+        self.__setattr__('__target', list_or_kind)
         return
+
+    def _collect(self):
+        for ticker in self.target:
+            set
 
     def __iscoll__(self):
         if not hasattr(self, 'is_coll'):
@@ -81,38 +97,6 @@ class gather(object):
                 self.__setattr__(f'A{ticker}', view_stock(ticker=ticker, endate=self.date, period=5))
         return
 
-    def set_target(self, category_or_tickers:str or list):
-        for attr in ['__baseline']:
-            if hasattr(self, attr):
-                self.__delattr__(attr)
-
-        if isinstance(category_or_tickers, list):
-            self.__setattr__('__target', category_or_tickers)
-            return
-
-        if isinstance(category_or_tickers, str):
-            if category_or_tickers.lower() == 'kospi':
-                self.__setattr__('__target', self.kospi)
-            elif category_or_tickers.lower() == 'kosdaq':
-                self.__setattr__('__target', self.kosdaq)
-            elif category_or_tickers.lower() == 'kospi200':
-                self.__setattr__('__target', self.kospi200)
-            elif category_or_tickers.lower() == 'kosdaq150':
-                self.__setattr__('__target', self.kosdaq150)
-            elif category_or_tickers.lower() == 'midcap':
-                self.__setattr__('__target', self.kospi_midcap + self.kosdaq_midcap)
-            elif category_or_tickers.lower() == 'all':
-                self.__setattr__('__target', self.kospi + self.kosdaq)
-            return
-
-        raise KeyError(f'Parameter category = {category_or_tickers} is not the right target')
-
-    def reset_target(self):
-        self.__setattr__('__target', self.kospi200 + self.kosdaq150)
-        if hasattr(self, '__baseline'):
-            self.__delattr__('__baseline')
-        return
-
     def get_axis_data(self, col:str, axis:str) -> pd.DataFrame:
         data = self.baseline[['종목명', '섹터', '섹터색상', col]].copy()
         data[f'{axis}norm'] = stats.norm.pdf(data[col], data[col].mean(), data[col].std())
@@ -122,12 +106,6 @@ class gather(object):
         self.__iscoll__()
         self.__setattr__('__baseline', pd.concat(objs=[self.baseline, func(obj=self, target=self.target)], axis=1))
         return
-
-    @property
-    def target(self) -> list:
-        if not hasattr(self, '__target'):
-            self.reset_target()
-        return self.__getattribute__('__target')
 
     @property
     def baseline(self) -> pd.DataFrame:
@@ -142,16 +120,3 @@ class gather(object):
             df['섹터색상'] = df.섹터.apply(lambda x:colors[x])
             self.__setattr__('__baseline', df)
         return self.__getattribute__('__baseline')
-
-
-if __name__ == "__main__":
-    t_tickers = ['005930', '000660', '000990', '058470', '005290', '357780']
-
-    tester = interface_market()
-
-    # tester.set_target(category_or_tickers=t_tickers)
-    print(tester.baseline)
-    # print(tester.get_axis_data(col='R1Y', axis='x'))
-
-    # tester.append(func=new_attrib)
-    # print(tester.baseline)

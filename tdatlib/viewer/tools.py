@@ -30,14 +30,17 @@ CD_RANGER = dict(
 
 
 
-def save(fig: go.Figure, asset: str, filename: str, path: str = str()):
+def save(fig: go.Figure, tag: str, filename: str, path: str = str()):
     """
     :param fig      : 차트
-    :param asset    : 종목명
+    :param tag      : 종목명
     :param filename : 파일명
     :param path     : 파일 경로
     """
     if path:
+        path = f'{path}/{tag}'
+        if not os.path.isdir(path):
+            os.makedirs(path)
         of.plot(fig, filename=f'{path}/{filename}.html', auto_open=False)
         return
 
@@ -47,7 +50,7 @@ def save(fig: go.Figure, asset: str, filename: str, path: str = str()):
     except:
         desktop = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop')
 
-    path = f'{desktop}/tdat/{datetime.now().strftime("%Y-%m-%d")}'
+    path = f'{desktop}/tdat/{datetime.now().strftime("%Y-%m-%d")}/{tag}'
     if not os.path.isdir(path):
         os.makedirs(path)
     of.plot(fig, filename=f'{path}/{filename}.html', auto_open=False)
