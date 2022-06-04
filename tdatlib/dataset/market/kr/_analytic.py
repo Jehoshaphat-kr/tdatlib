@@ -1,6 +1,7 @@
 from tdatlib.dataset.market.kr.api import KR as _market
 from tdatlib.viewer.stock import KR as _stock
 from scipy import stats
+from tqdm import tqdm
 import pandas as pd
 import numpy as np
 
@@ -80,43 +81,48 @@ class analytic(object):
         self.__setattr__('__target', list_or_kind)
         return
 
-    def _collect(self):
-        for ticker in self.target:
-            set
-
-    def __iscoll__(self):
-        if not hasattr(self, 'is_coll'):
-            for ticker in self.target:
-                self.__setattr__(f'A{ticker}', stock(ticker=ticker, endate=self.date, period=5))
-            self.__setattr__('is_coll', True)
-        return
-
-    def __reset__(self):
-        for ticker in self.target:
-            if not hasattr(self, f'A{ticker}'):
-                self.__setattr__(f'A{ticker}', view_stock(ticker=ticker, endate=self.date, period=5))
-        return
-
-    def get_axis_data(self, col:str, axis:str) -> pd.DataFrame:
-        data = self.baseline[['종목명', '섹터', '섹터색상', col]].copy()
-        data[f'{axis}norm'] = stats.norm.pdf(data[col], data[col].mean(), data[col].std())
-        return data
-
-    def append(self, func) -> None:
-        self.__iscoll__()
-        self.__setattr__('__baseline', pd.concat(objs=[self.baseline, func(obj=self, target=self.target)], axis=1))
-        return
-
     @property
     def baseline(self) -> pd.DataFrame:
         if not hasattr(self, '__baseline'):
-            self.__iscoll__()
-            wics = self.wics[self.wics.index.isin(self.target)][['종목명', '섹터']].copy()
-            icm  = self.icm.drop(columns=['종목명', '거래대금', '상장주식수', 'BPS', 'DPS'])
-            perf = self.performance(tickers=self.target)
-            df = wics.join(icm, how='left').join(perf, how='left')
-            df['시가총액'] = round(np.log(df.시가총액), 2)
-            colors = dict(zip(df.섹터.drop_duplicates().tolist(), CD_COLORS))
-            df['섹터색상'] = df.섹터.apply(lambda x:colors[x])
-            self.__setattr__('__baseline', df)
+            _wics = self.market.wics[self.market.wics.index.isin(self.target)].copy()
+            _icm  =self.market.icm[self.market.icm.index.isin(self.target)].copy()
+            _baseline = pd.concat(
+                objs=[_wics, _icm.drop(columns=['종목명', '거래대금', '상장주식수', 'BPS', 'DPS'])],
+                axis=1
+            )
+            self.__setattr__('__baseline', _baseline)
         return self.__getattribute__('__baseline')
+
+    @property
+    def frame(self) -> pd.DataFrame:
+        if hasattr(self, '__frame'):
+            return self.__getattribute__('__frame')
+        return self.baseline
+
+    def init(self, period:int=5, endate:str=str()):
+        _return = self.market.get_returns(tickers=self.target) if not endate else list()
+
+        proc = tqdm(self.target)
+        for ticker in proc:
+            proc.set_description(desc=f'Initialize {ticker}...')
+            df = _stock(ticker=ticker, period=period, endate=endate)
+            if endate:
+                _return.append(df.technical.src.ohlcv_returns)
+            self.__setattr__(f'__A{ticker}', df)
+
+        if endate:
+            _return = pd.concat(objs=_return, axis=0)
+        self.__setattr__('__frame', pd.concat(objs=[self.baseline, _return], axis=1))
+        return
+
+    def axis(self, columns:list, key:str) -> pd.dataFrame:
+        data = self.baseline[['종목명', '섹터'] + columns].copy()
+        data[f'{key}_norm'] = stats.norm.pdf(data[key], data[key].mean(), data[key].std())
+        return data
+
+    def append(self, df:pd.Series or pd.DataFrame) -> None:
+        self.__setattr__('__frame', pd.concat(
+            objs=[self.frame, df],
+            axis=1
+        ))
+        return
