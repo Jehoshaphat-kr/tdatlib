@@ -373,7 +373,7 @@ class US(technical):
 
 
 if __name__ == "__main__":
-    stock = KR(ticker='005960')
+    stock = KR(ticker='186230')
 
     # print(stock.basis_summary)
     # print(stock.basis_products)
@@ -383,13 +383,13 @@ if __name__ == "__main__":
     # print(stock.basis_benchmark_return)
     # print(stock.basis_benchmark_multiple)
     # print(stock.basis_consensus)
-    # print(stock.basis_foreign_rate)
+    print(stock.basis_foreign_rate)
     # print(stock.basis_short_sell)
     # print(stock.basis_short_balance)
     # print(stock.basis_expenses)
     # print(stock.basis_nps)
     # print(stock.basis_multiple_band)
     # print(stock.basis_multiple_series)
-    print(stock.basis_asset)
-    print(stock.basis_profit)
-    print(stock.relatives)
+    # print(stock.basis_asset)
+    # print(stock.basis_profit)
+    # print(stock.relatives)

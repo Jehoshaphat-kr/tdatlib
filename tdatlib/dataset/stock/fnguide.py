@@ -119,6 +119,7 @@ def fetch_foreign_rate(ticker:str) -> pd.DataFrame:
             'TRD_DT': '날짜', 'J_PRC': '종가', 'FRG_RT': '외국인보유비중'
         }).set_index(keys='날짜')
         frame.index = pd.to_datetime(frame.index)
+        frame = frame.replace('', '0.0')
         frame['종가'] = frame['종가'].astype(int)
         frame['외국인보유비중'] = frame['외국인보유비중'].astype(float)
         objs[dt] = frame
