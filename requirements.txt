@@ -1,6 +1,6 @@
 numpy
 pandas
-pykrx==1.0.32
+pykrx
 lxml
 jsmin
 plotly

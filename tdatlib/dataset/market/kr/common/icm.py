@@ -12,11 +12,11 @@ DIR_ICM = f'{ROOT}/_archive/common/icm.csv'
 
 
 def __fetchMarketCap(trading_date:str) -> pd.DataFrame:
-    return get_market_cap_by_ticker(date=trading_date, market="ALL", prev=True)
+    return get_market_cap_by_ticker(date=trading_date, market="ALL", alternative=True)
 
 
 def __fetchMultiples(trading_date:str) -> pd.DataFrame:
-    return get_market_fundamental(date=trading_date, market="ALL", prev=True)
+    return get_market_fundamental(date=trading_date, market="ALL", alternative=True)
 
 
 def __fetchIPO(trading_date:str) -> pd.DataFrame:

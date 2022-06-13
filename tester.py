@@ -1,9 +1,15 @@
 from tdatlib.dataset import market
 from tdatlib.viewer import stock
 
-DEBUG_MARKET = False
-DEBUG_STOCK  = False
-DEBUG_GROUP  = True
+DEBUG_MARKET  = False
+DEBUG_TREEMAP = True
+DEBUG_STOCK   = False
+DEBUG_GROUP   = False
+
+if DEBUG_TREEMAP:
+    krx = market.KR()
+    treemap = krx.treemap(category='WICS', sub_category='1028')
+    print(treemap)
 
 if DEBUG_MARKET:
     krx = market.KR()

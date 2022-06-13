@@ -146,12 +146,26 @@ class treemap(object):
             neg_val, pos_val = neg[t].sort_values(ascending=True).tolist(), pos[t].sort_values(ascending=True).tolist()
             neg_bin = 3 if len(neg_val) < 3 else [neg_val[int((len(neg_val) - 1) * _ / 3)] for _ in range(0, 4)]
             pos_bin = 3 if len(pos_val) < 3 else [pos_val[int((len(pos_val) - 1) * _ / 3)] for _ in range(0, 4)]
-            n_color = pd.cut(neg[t], bins=neg_bin, labels=scale[:3], right=True)
-            n_color.fillna(scale[0], inplace=True)
-            p_color = pd.cut(pos[t], bins=pos_bin, labels=scale[4:], right=True)
-            p_color.fillna(scale[4], inplace=True)
+
+            objs = list()
+            if neg.empty:
+                pass
+            else:
+                n_color = pd.cut(neg[t], bins=neg_bin, labels=scale[:3], right=True)
+                n_color.fillna(scale[0], inplace=True)
+                objs.append(n_color)
+
             u_color = pd.Series(dtype=str) if neu.empty else pd.Series(data=[scale[3]] * len(neu), index=neu.index)
-            colors = pd.concat([n_color, u_color, p_color], axis=0)
+            objs.append(u_color)
+
+            if pos.empty:
+                pass
+            else:
+                p_color = pd.cut(pos[t], bins=pos_bin, labels=scale[4:], right=True)
+                p_color.fillna(scale[4], inplace=True)
+                objs.append(p_color)
+
+            colors = pd.concat(objs=objs, axis=0)
             colors.name = f'C{t}'
             colored = colored.join(colors.astype(str), how='left')
             colored.fillna(scale[3], inplace=True)

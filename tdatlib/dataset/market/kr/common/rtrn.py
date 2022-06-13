@@ -34,7 +34,7 @@ def __fetch_stock_returns(tds:dict) -> pd.DataFrame:
     }, axis=1)
     even = shares[shares.prev == shares.curr].index.tolist()
 
-    objs = {f'TD{k}': get_market_ohlcv_by_ticker(date=date, market='ALL', prev=False)['종가']
+    objs = {f'TD{k}': get_market_ohlcv_by_ticker(date=date, market='ALL', alternative=False)['종가']
             for k, date, in tqdm(tds.items(), desc='기간별 수익률 계산(주식)')}
     p_s = pd.concat(objs=objs, axis=1)
     rtrn = pd.concat(objs={f'R{k}': round(100 * (p_s.TD0D / p_s[f'TD{k}'] - 1), 2) for k in tds.keys()}, axis=1)
