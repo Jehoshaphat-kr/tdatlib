@@ -3,44 +3,48 @@ from datetime import datetime, timedelta
 import pandas as pd
 
 
-US기준금리 = 'EFFR'
-US10년물금리 = 'T10YFF'
-US5년기대인플레 = 'T5YIFR'
-US소비자물가지수 = 'CPIAUCSL'
-US10년평형인플레 = 'T10YIE'
-TODAY = datetime.now().date()
+def fetch(symbols:str or list, period:int = 10):
+    today = datetime.now().date()
+    start = today - timedelta(period * 365)
+    end = today
+    return fred(symbols=symbols, start=start, end=end)
 
-
-basis = US10년물금리
-
-period = 10
-raw = fred(
-    symbols=basis,
-    start=TODAY - timedelta(period * 365),
-    end=TODAY
-)
-# raw = raw.astype(float)
 
 if __name__ == "__main__":
-    from tdatlib.tdef import *
+    from tdatlib.tdef import labels
     from tdatlib.dataset import stock
     from plotly.subplots import make_subplots
     import plotly.graph_objects as go
     import plotly.offline as of
     import os
 
-    compare = KB금융
+    save_filename = '환율'
+    basis = labels.KR수출량
+    compare = labels.KRX은행
+    period = 10
 
-    _stock = stock.KR(ticker=compare, period=10)
+    _basis = fetch(symbols=basis, period=period)
+
+    _stock = stock.KR(ticker=compare, period=period)
     price = _stock.ohlcv
 
-    data = pd.concat(objs=[raw, price], axis=1)
+    data = pd.concat(
+        objs=[
+            _basis,
+            price
+        ],
+        axis=1
+    )
+    corr = data[[basis, '종가']].corr()
+    r_sq = corr.iloc[0, 1] ** 2
+    print(corr)
+    print(r_sq)
 
     fig = make_subplots(specs=[[{"secondary_y": True}]])
 
     fig.add_trace(
         go.Candlestick(
-            name=compare,
+            name=_stock.label,
             x=_stock.ohlcv.index,
             open=_stock.ohlcv.시가,
             high=_stock.ohlcv.고가,
@@ -58,8 +62,8 @@ if __name__ == "__main__":
 
     fig.add_trace(
         go.Scatter(
-            x=raw.index,
-            y=raw[basis],
+            x=_basis.index,
+            y=_basis[basis],
             name=basis,
             mode='lines',
             visible=True,
@@ -74,7 +78,8 @@ if __name__ == "__main__":
         plot_bgcolor='white',
         xaxis_rangeslider=dict(visible=False),
         xaxis=dict(
-            showticklabels=False,
+            title='날짜',
+            showticklabels=True,
             tickformat='%Y/%m/%d',
             zeroline=False,
             showgrid=True,
@@ -107,6 +112,6 @@ if __name__ == "__main__":
     path = f'{desktop}/tdat/{datetime.now().strftime("%Y-%m-%d")}/MACRO'
     if not os.path.isdir(path):
         os.makedirs(path)
-    of.plot(fig, filename=f'{path}/TEST.html', auto_open=False)
+    of.plot(fig, filename=f'{path}/{save_filename}.html', auto_open=False)
 
 
