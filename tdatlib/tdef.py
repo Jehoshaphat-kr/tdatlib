@@ -9,15 +9,13 @@ class labels(object):
     우리금융지주 = '316140'
     상상인 = '038540'
 
-    @property
-    def banks(self) -> list:
-        return [
-            self.KB금융,
-            self.하나금융지주,
-            self.DGB금융지주,
-            self.신한지주,
-            self.기업은행,
-            self.BNK금융지주,
-            self.우리금융지주,
-            self.상상인
-        ]
+    은행주 = [
+        KB금융,
+        하나금융지주,
+        DGB금융지주,
+        신한지주,
+        기업은행,
+        BNK금융지주,
+        우리금융지주,
+        상상인
+    ]
