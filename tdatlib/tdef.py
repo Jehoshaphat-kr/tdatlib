@@ -33,3 +33,6 @@ class labels(object):
     US5년기대인플레  = 'T5YIFR'
     US소비자물가지수 = 'CPIAUCSL'
     US10년평형인플레 = 'T10YIE'
+    BRENT유가        = 'DCOILBRENTEU'
+    WTI유가          = 'DCOILWTICO'
+    CRUDE유가변동성  = 'OVXCLS'
