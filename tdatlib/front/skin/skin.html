@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>[##_page_title_##]</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="./images/bootstrap.min.css" rel="stylesheet">
+  <link href="./images/bootstrap-icons.css" rel="stylesheet">
+  <link href="./images/aos.css" rel="stylesheet">
+  <link href="./images/remixicon.css" rel="stylesheet">
+  <link href="./images/swiper-bundle.min.css" rel="stylesheet">
+  <link href="./images/glightbox.min.css" rel="stylesheet">
+
+  <!-- Template Main CSS File -->
+  <link href="./style.css" rel="stylesheet">
+</head>
+
+<body>
+  <s_t3>
+
+  <!-- ======= Header ======= -->
+  <header id="header" class="header fixed-top">
+    <div class="container-fluid container-xl d-flex align-items-center justify-content-between">
+
+      <a href="index.html" class="logo d-flex align-items-center">
+        <img src="./images/logo.png" alt="">
+        <span>Snow Ball.com</span>
+      </a>
+
+      <nav id="navbar" class="navbar">
+        <ul>
+          <li><a class="nav-link scrollto active" href="#">홈</a></li>
+          <!-- <li><a href="blog.html">일반 메뉴</a></li> -->
+          <li class="dropdown"><a href="#"><span>시장 보기</span> <i class="bi bi-chevron-down"></i></a>
+            <ul>
+              <li><a href="#">시장 지도</a></li>
+              <li><a href="#">버블 지도</a></li>
+              <li><a href="#">산업/업종 등락률</a></li>
+            </ul>
+          </li>
+          <li class="dropdown"><a href="#"><span>기술 분석</span> <i class="bi bi-chevron-down"></i></a>
+            <ul>
+              <li class="dropdown"><a href="#"><span>투자 지표</span> <i class="bi bi-chevron-right"></i></a>
+                <ul>
+                  <li><a href="#">지지선과 저항선</a></li>
+                  <li><a href="#">볼린저밴드</a></li>
+                  <li><a href="#">MACD</a></li>
+                  <li><a href="#">RSI</a></li>
+                  <li><a href="#">ROC</a></li>
+                </ul>
+              </li>
+              <li><a href="#">백 테스트</a></li>
+              <li><a href="#">실전 투자</a></li>
+            </ul>
+          </li>
+          <li class="dropdown"><a href="#"><span>기본 분석</span> <i class="bi bi-chevron-down"></i></a>
+            <ul>
+              <li><a href="#">기업 조사</a></li>
+              <li><a href="#">실전 투자</a></li>
+            </ul>
+          </li>
+          <li><a href="#">개발 노트</a></li>
+          <!-- <li><a class="getstarted scrollto" href="#">후원하기</a></li> -->
+        </ul>
+        <i class="bi bi-list mobile-nav-toggle"></i>
+      </nav>
+      <!-- .navbar -->
+
+    </div>
+  </header>
+  <!-- End Header -->
+
+  <main id="main">
+    <s_cover_group>
+    <p>&nbsp;&nbsp;&nbsp;</p>
+
+    <!-- ======= Dashboard Section ======= -->
+    <section id="counts" class="counts">
+      <div class="container" data-aos="fade-up">
+        <header class="section-header">
+          <h2>Dash Board</h2>
+        </header>
+
+        <div class="row gy-4">
+          <div class="col-lg-3 col-md-6">
+            <div class="count-box">
+              <i class="bi bi-collection"></i>
+              <div>
+                <!-- <span data-purecounter-start="0" data-purecounter-end="17" data-purecounter-duration="1" class="purecounter"></span> -->
+                <span>17</span>
+                <p>투자 진행 종목</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6">
+            <div class="count-box">
+              <i class="bi bi-file-arrow-up" style="color: #ee6c20;"></i>
+              <div>
+                <span data-purecounter-start="0" data-purecounter-end="12" data-purecounter-duration="1" class="purecounter"></span>
+                <p>상승 종목</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6">
+            <div class="count-box">
+              <i class="bi bi-file-arrow-down" style="color: #15be56;"></i>
+              <div>
+                <span data-purecounter-start="0" data-purecounter-end="5" data-purecounter-duration="1" class="purecounter"></span>
+                <p>하락 종목</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6">
+            <div class="count-box">
+              <i class="bi bi-percent" style="color: #bb0852;"></i>
+              <div>
+                <span>-15.4%</span>
+                <!-- <span data-purecounter-start="0" data-purecounter-end="-15.4" data-purecounter-duration="0.1" class="purecounter"></span> -->
+                <p>수익률</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+    <!-- End Counts Section -->
+
+
+
+    <!-- ======= Services Section ======= -->
+    <section id="services" class="services">
+
+      <div class="container" data-aos="fade-up">
+
+        <header class="section-header">
+          <h2>Services</h2>
+          <!-- <p>투자에 도움이 될 서비스를 제공합니다.</p> -->
+        </header>
+
+        <div class="row gy-4">
+
+          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+            <div class="service-box blue">
+              <i class="ri-road-map-line icon"></i>
+              <h3>시장 지도 Maps</h3>
+              <p>경제적 자유를 찾아떠나는 여행길,<br>지도는 필수겠죠?</p>
+              <a href="#" class="read-more"><span>Read More</span> <i class="bi bi-arrow-right"></i></a>
+            </div>
+          </div>
+
+          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+            <div class="service-box orange">
+              <i class="ri-bubble-chart-line icon"></i>
+              <h3>버블 차트 Bubbles</h3>
+              <p>힘들게 찾던 정보와 비교 작업을 <br>편리하게 도와드리겠습니다.</p>
+              <a href="#" class="read-more"><span>Read More</span> <i class="bi bi-arrow-right"></i></a>
+            </div>
+          </div>
+
+          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="400">
+            <div class="service-box green">
+              <!-- <i class="ri-discuss-line icon"></i> -->
+              <h3>광고</h3>
+              <p>광고 위치 #1</p>
+              <!-- <a href="#" class="read-more"><span>Read More</span> <i class="bi bi-arrow-right"></i></a> -->
+            </div>
+          </div>
+
+          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="500">
+            <div class="service-box red">
+              <i class="ri-bar-chart-box-line icon"></i>
+              <h3>산업 차트 Sectors</h3>
+              <p>산업 분류별 정보들을 <br>한 눈에 확인 할 수 있습니다.</p>
+              <a href="#" class="read-more"><span>Read More</span> <i class="bi bi-arrow-right"></i></a>
+            </div>
+          </div>
+
+          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="600">
+            <div class="service-box purple">
+              <i class="ri-find-replace-line icon"></i>
+              <h3>기업 분석 Analysis</h3>
+              <p>유망한 기업을 찾고 <br>꼼꼼하게 공부해서 핵심만 짚었습니다.</p>
+              <a href="#" class="read-more"><span>Read More</span> <i class="bi bi-arrow-right"></i></a>
+            </div>
+          </div>
+
+          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="700">
+            <div class="service-box pink">
+              <i class="ri-chat-history-line icon"></i>
+              <h3>투자 역사 History</h3>
+              <p>과거는 미래를 비추는 거울이라고 하죠.<br>리스크 관리 관점의 투자 역사를 탐구합니다.</p>
+              <a href="#" class="read-more"><span>Read More</span> <i class="bi bi-arrow-right"></i></a>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+    <!-- End Services Section -->
+
+    <!-- ======= Recent Blog Posts Section ======= -->
+    <s_cover_rep>
+    <s_cover name="recent">
+    <section id="recent-blog-posts" class="recent-blog-posts">
+
+      <div class="container" data-aos="fade-up">
+
+        <header class="section-header">
+          <h2>Recent Post</h2>
+        </header>
+
+        <div class="row">
+          <s_cover_item>
+          <div class="col-lg-4">
+            <div class="post-box">
+              <s_cover_item_thumbnail>
+              <div class="post-img"><img src="[##_cover_item_thumbnail_##]" class="img-fluid" alt=""></div>
+              </s_cover_item_thumbnail>
+
+              <s_cover_item_article_info>
+              <span class="post-date">[##_cover_item_simple_date_##]</span>
+              <h3 class="post-title">[##_cover_item_title_##]</h3>
+              </s_cover_item_article_info>
+              <a href="[##_cover_item_url_##]" class="readmore stretched-link mt-auto"><span>더 보기</span><i class="bi bi-arrow-right"></i></a>
+
+            </div>
+          </div>
+          </s_cover_item>
+        </div>
+
+      </div>
+
+    </section><!-- End Recent Blog Posts Section -->
+    </s_cover>
+    </s_cover_rep>
+
+    <!-- ======= Popular Blog Posts Section ======= -->
+    <s_cover_rep>
+    <s_cover name="recommended">
+    <section id="recent-blog-posts" class="recent-blog-posts">
+
+      <div class="container" data-aos="fade-up">
+
+        <header class="section-header">
+          <h2>Recommended Post</h2>
+        </header>
+
+        <div class="row">
+          <s_cover_item>
+          <div class="col-lg-4">
+            <div class="post-box">
+              <s_cover_item_thumbnail>
+              <div class="post-img"><img src="[##_cover_item_thumbnail_##]" class="img-fluid" alt=""></div>
+              </s_cover_item_thumbnail>
+
+              <s_cover_item_article_info>
+              <span class="post-date">[##_cover_item_simple_date_##]</span>
+              <h3 class="post-title">[##_cover_item_title_##]</h3>
+              </s_cover_item_article_info>
+              <a href="[##_cover_item_url_##]" class="readmore stretched-link mt-auto"><span>더 보기</span><i class="bi bi-arrow-right"></i></a>
+
+            </div>
+          </div>
+          </s_cover_item>
+        </div>
+
+      </div>
+
+    </section>
+    </s_cover>
+    </s_cover_rep>
+    <!-- End Popular Blog Posts Section -->
+
+    <!-- ======= F.A.Q Section ======= -->
+    <section id="faq" class="faq">
+
+      <div class="container" data-aos="fade-up">
+
+        <header class="section-header">
+          <h2>F.A.Q</h2>
+        </header>
+
+        <div class="row">
+          <div class="col-lg-6">
+            <div class="accordion accordion-flush" id="faqlist1">
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-content-1">
+                    어떤 투자 방법을 선호하나요?
+                  </button>
+                </h2>
+                <div id="faq-content-1" class="accordion-collapse collapse" data-bs-parent="#faqlist1">
+                  <div class="accordion-body">
+                    투자에는 왕도가 없다고 생각합니다.
+                    시행 착오를 거듭한 끝에 발견한 저만의 투자 방법은 시장 추종 투자와 회전율이 비교적 빠른 투자를 병행하는 것입니다.
+                    자산의 60%를 시장 지수 추종 투자(ETF)로 하고 20%는 중단기 스윙(Swing) 투자를 합니다.
+                  </div>
+                </div>
+              </div>
+
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-content-2">
+                    가장 존경하는 투자자는 누군가요?
+                  </button>
+                </h2>
+                <div id="faq-content-2" class="accordion-collapse collapse" data-bs-parent="#faqlist1">
+                  <div class="accordion-body">
+                    Dolor sit amet consectetur adipiscing elit pellentesque habitant morbi. Id interdum velit laoreet id donec ultrices. Fringilla phasellus faucibus scelerisque eleifend donec pretium. Est pellentesque elit ullamcorper dignissim. Mauris ultrices eros in cursus turpis massa tincidunt dui.
+                  </div>
+                </div>
+              </div>
+
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-content-3">
+                    지금 이 종목 사면 되나요?
+                  </button>
+                </h2>
+                <div id="faq-content-3" class="accordion-collapse collapse" data-bs-parent="#faqlist1">
+                  <div class="accordion-body">
+                    Eleifend mi in nulla posuere sollicitudin aliquam ultrices sagittis orci. Faucibus pulvinar elementum integer enim. Sem nulla pharetra diam sit amet nisl suscipit. Rutrum tellus pellentesque eu tincidunt. Lectus urna duis convallis convallis tellus. Urna molestie at elementum eu facilisis sed odio morbi quis
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="accordion accordion-flush" id="faqlist2">
+
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2-content-1">
+                    어떻게 종목 선정을 하나요?
+                  </button>
+                </h2>
+                <div id="faq2-content-1" class="accordion-collapse collapse" data-bs-parent="#faqlist2">
+                  <div class="accordion-body">
+                    Dolor sit amet consectetur adipiscing elit pellentesque habitant morbi. Id interdum velit laoreet id donec ultrices. Fringilla phasellus faucibus scelerisque eleifend donec pretium. Est pellentesque elit ullamcorper dignissim. Mauris ultrices eros in cursus turpis massa tincidunt dui.
+                  </div>
+                </div>
+              </div>
+
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2-content-2">
+                    가장 존경하는 투자자는 누군가요?
+                  </button>
+                </h2>
+                <div id="faq2-content-2" class="accordion-collapse collapse" data-bs-parent="#faqlist2">
+                  <div class="accordion-body">
+                    Molestie a iaculis at erat pellentesque adipiscing commodo. Dignissim suspendisse in est ante in. Nunc vel risus commodo viverra maecenas accumsan. Sit amet nisl suscipit adipiscing bibendum est. Purus gravida quis blandit turpis cursus in
+                  </div>
+                </div>
+              </div>
+
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2-content-3">
+                    언제 매도해야 하나요?
+                  </button>
+                </h2>
+                <div id="faq2-content-3" class="accordion-collapse collapse" data-bs-parent="#faqlist2">
+                  <div class="accordion-body">
+                    Laoreet sit amet cursus sit amet dictum sit amet justo. Mauris vitae ultricies leo integer malesuada nunc vel. Tincidunt eget nullam non nisi est sit amet. Turpis nunc eget lorem dolor sed. Ut venenatis tellus in metus vulputate eu scelerisque. Pellentesque diam volutpat commodo sed egestas egestas fringilla phasellus faucibus. Nibh tellus molestie nunc non blandit massa enim nec.
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+    <!-- End F.A.Q Section -->
+
+    <!-- ======= Counts Section ======= -->
+    <section id="counts" class="counts">
+      <div class="container" data-aos="fade-up">
+
+        <header class="section-header">
+          <h2>Blog Statistics</h2>
+        </header>
+
+        <div class="row gy-4">
+
+          <div class="col-lg-3 col-md-6">
+            <div class="count-box">
+              <i class="bi bi-people"></i>
+              <div>
+                <span data-purecounter-start="0" data-purecounter-end="[##_count_total_##]" data-purecounter-duration="1" class="purecounter"></span>
+                <p>전체 방문자</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-3 col-md-6">
+            <div class="count-box">
+              <i class="bi bi-person-check" style="color: #ee6c20;"></i>
+              <div>
+                <span data-purecounter-start="0" data-purecounter-end="[##_count_today_##]" data-purecounter-duration="1" class="purecounter"></span>
+                <p>어제</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-3 col-md-6">
+            <div class="count-box">
+              <i class="bi bi-person-plus" style="color: #15be56;"></i>
+              <div>
+                <span data-purecounter-start="0" data-purecounter-end="[##_count_yesterday_##]" data-purecounter-duration="1" class="purecounter"></span>
+                <p>오늘</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-3 col-md-6">
+            <div class="count-box">
+              <i class="bi bi-journal-text" style="color: #bb0852;"></i>
+              <div>
+                <span data-purecounter-start="0" data-purecounter-end="50" data-purecounter-duration="1" class="purecounter"></span>
+                <p>포스팅 수</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+    <!-- End Counts Section -->
+    </s_cover_group>
+
+    <s_list>
+    <!-- ======= Breadcrumbs ======= -->
+    <section class="breadcrumbs">
+      <div class="container">
+
+        <ol>
+          <li><a href="index.html">홈</a></li>
+          <li>카테고리</li>
+        </ol>
+        <h2>[##_list_conform_##]</h2>
+
+      </div>
+    </section><!-- End Breadcrumbs -->
+
+    <!-- ======= Blog Section ======= -->
+    <section id="blog" class="blog">
+      <div class="container" data-aos="fade-up">
+
+        <div class="row">
+
+          <div class="col-lg-8 entries">
+            <s_list_rep>
+            <article class="entry">
+
+              <div class="entry-img">
+                <s_list_rep_thumbnail>
+                <img src="[##_list_rep_thumbnail_##]" alt="[##_list_rep_title_##]" class="img-fluid">
+                </s_list_rep_thumbnail>
+              </div>
+
+              <h2 class="entry-title">
+                <a href="[##_list_rep_link_##]">[##_list_rep_title_##]</a>
+              </h2>
+
+              <div class="entry-meta">
+                <ul>
+                  <li class="d-flex align-items-center"><i class="bi bi-person"></i> <a href="blog-single.html">내일모레</a></li>
+                  <li class="d-flex align-items-center"><i class="bi bi-clock"></i> <a href="blog-single.html"><time datetime="2020-01-01">[##_list_rep_regdate_##]</time></a></li>
+                  <li class="d-flex align-items-center"><i class="bi bi-chat-dots"></i> <a href="blog-single.html">12 Comments</a></li>
+                </ul>
+              </div>
+
+              <div class="entry-content">
+                <p>[##_list_rep_summary_##]</p>
+                <div class="read-more">
+                  <a href="[##_list_rep_link_##]">더 보기</a>
+                </div>
+              </div>
+
+            </article><!-- End blog entry -->
+            </s_list_rep>
+
+            <div class="blog-pagination">
+              <ul class="justify-content-center">
+                <li><a href="#">1</a></li>
+                <li class="active"><a href="#">2</a></li>
+                <li><a href="#">3</a></li>
+              </ul>
+            </div>
+
+          </div><!-- End blog entries list -->
+
+          <div class="col-lg-4">
+
+            <div class="sidebar">
+
+              <h3 class="sidebar-title">Search</h3>
+              <div class="sidebar-item search-form">
+                <form action="">
+                  <input type="text">
+                  <button type="submit"><i class="bi bi-search"></i></button>
+                </form>
+              </div><!-- End sidebar search formn-->
+
+              <h3 class="sidebar-title">Categories</h3>
+              <div class="sidebar-item categories">
+                <ul>
+                  <li><a href="#">General <span>(25)</span></a></li>
+                  <li><a href="#">Lifestyle <span>(12)</span></a></li>
+                  <li><a href="#">Travel <span>(5)</span></a></li>
+                  <li><a href="#">Design <span>(22)</span></a></li>
+                  <li><a href="#">Creative <span>(8)</span></a></li>
+                  <li><a href="#">Educaion <span>(14)</span></a></li>
+                </ul>
+              </div><!-- End sidebar categories-->
+
+              <h3 class="sidebar-title">Recent Posts</h3>
+              <div class="sidebar-item recent-posts">
+                <div class="post-item clearfix">
+                  <img src="assets/img/blog/blog-recent-1.jpg" alt="">
+                  <h4><a href="blog-single.html">Nihil blanditiis at in nihil autem</a></h4>
+                  <time datetime="2020-01-01">Jan 1, 2020</time>
+                </div>
+
+                <div class="post-item clearfix">
+                  <img src="assets/img/blog/blog-recent-2.jpg" alt="">
+                  <h4><a href="blog-single.html">Quidem autem et impedit</a></h4>
+                  <time datetime="2020-01-01">Jan 1, 2020</time>
+                </div>
+
+                <div class="post-item clearfix">
+                  <img src="assets/img/blog/blog-recent-3.jpg" alt="">
+                  <h4><a href="blog-single.html">Id quia et et ut maxime similique occaecati ut</a></h4>
+                  <time datetime="2020-01-01">Jan 1, 2020</time>
+                </div>
+
+                <div class="post-item clearfix">
+                  <img src="assets/img/blog/blog-recent-4.jpg" alt="">
+                  <h4><a href="blog-single.html">Laborum corporis quo dara net para</a></h4>
+                  <time datetime="2020-01-01">Jan 1, 2020</time>
+                </div>
+
+                <div class="post-item clearfix">
+                  <img src="assets/img/blog/blog-recent-5.jpg" alt="">
+                  <h4><a href="blog-single.html">Et dolores corrupti quae illo quod dolor</a></h4>
+                  <time datetime="2020-01-01">Jan 1, 2020</time>
+                </div>
+
+              </div><!-- End sidebar recent posts-->
+
+              <h3 class="sidebar-title">Tags</h3>
+              <div class="sidebar-item tags">
+                <ul>
+                  <li><a href="#">App</a></li>
+                  <li><a href="#">IT</a></li>
+                  <li><a href="#">Business</a></li>
+                  <li><a href="#">Mac</a></li>
+                  <li><a href="#">Design</a></li>
+                  <li><a href="#">Office</a></li>
+                  <li><a href="#">Creative</a></li>
+                  <li><a href="#">Studio</a></li>
+                  <li><a href="#">Smart</a></li>
+                  <li><a href="#">Tips</a></li>
+                  <li><a href="#">Marketing</a></li>
+                </ul>
+              </div><!-- End sidebar tags-->
+
+            </div><!-- End sidebar -->
+
+          </div><!-- End blog sidebar -->
+
+        </div>
+
+      </div>
+    </section><!-- End Blog Section -->
+    </s_list>
+
+    <s_article_rep>
+      <s_permalink_article_rep>
+
+        <!-- ======= Breadcrumbs ======= -->
+        <section class="breadcrumbs">
+          <div class="container">
+
+            <ol>
+              <li><a href="[##_article_rep_category_link_##]">[##_article_rep_category_##]</a></li>
+            </ol>
+            <h2>[##_article_rep_title_##]</h2>
+
+          </div>
+        </section>
+        <!-- End Breadcrumbs -->
+
+        <!-- ======= Blog Single Section ======= -->
+        <section id="blog" class="blog">
+          <div class="container" data-aos="fade-up">
+
+            <div class="row">
+
+              <div class="col-lg-8 entries">
+
+                <article class="entry entry-single">
+                  <s_article_rep_thumbnail>
+                  <div class="entry-img">
+                    <img class="img-fluid" src="[##_article_rep_thumbnail_url_##]" alt="[##_article_rep_title_##]">
+                  </div>
+                  </s_article_rep_thumbnail>
+
+                  <div class="entry-meta">
+                    <ul>
+                      <li class="d-flex align-items-center"><i class="bi bi-person"></i><a href="#">내일모레</a></li>
+                      <li class="d-flex align-items-center"><i class="bi bi-clock"></i><a href="#"><time datetime="2020-01-01">[##_article_rep_simple_date_##]</time></a></li>
+                      <li class="d-flex align-items-center"><i class="bi bi-chat-dots"></i><a href="#"><s_rp_count>[##_article_rep_rp_cnt_##]</s_rp_count></a></li>
+                    </ul>
+                  </div>
+
+                  <div class="entry-content">
+                    [##_article_rep_desc_##]
+                  </div>
+
+                  <div class="entry-footer">
+                    <s_tag_label>
+                      <!-- article-tag -->
+                      <i class="bi bi-tags"></i>
+                      <ul class="tags">[##_tag_label_rep_##]</ul>
+
+                      <!-- End area_tag -->
+                    </s_tag_label>
+                  </div>
+
+                </article><!-- End blog entry -->
+
+                <div class="blog-author d-flex align-items-center">
+                  <img src="./images/author.jpg" class="rounded-circle float-left" alt="">
+                  <div>
+                    <h4>내일모레</h4>
+                    <div class="social-links">
+                      <a href="https://twitters.com/#"><i class="bi bi-twitter"></i></a>
+                      <a href="https://facebook.com/#"><i class="bi bi-facebook"></i></a>
+                      <a href="https://instagram.com/#"><i class="biu bi-instagram"></i></a>
+                    </div>
+                    <p>
+                      블로그 운영자. 자동차 업계 6년차 연구개발직. 미혼. ESTJ. 본인이 주식하려고 종목 고르면 떨어지는데 남의 종목 골라주면 오르는. 그래서 주식 공부해서 남주기로 마음 먹은.
+                    </p>
+                  </div>
+                </div><!-- End blog author bio -->
+
+                <div class="blog-comments">
+
+                  <h4 class="comments-count">8 Comments</h4>
+
+                  <div id="comment-1" class="comment">
+                    <div class="d-flex">
+                      <div class="comment-img"><img src="assets/img/blog/comments-1.jpg" alt=""></div>
+                      <div>
+                        <h5><a href="">Georgia Reader</a> <a href="#" class="reply"><i class="bi bi-reply-fill"></i> Reply</a></h5>
+                        <time datetime="2020-01-01">01 Jan, 2020</time>
+                        <p>
+                          Et rerum totam nisi. Molestiae vel quam dolorum vel voluptatem et et. Est ad aut sapiente quis molestiae est qui cum soluta.
+                          Vero aut rerum vel. Rerum quos laboriosam placeat ex qui. Sint qui facilis et.
+                        </p>
+                      </div>
+                    </div>
+                  </div><!-- End comment #1 -->
+
+                  <div id="comment-2" class="comment">
+                    <div class="d-flex">
+                      <div class="comment-img"><img src="assets/img/blog/comments-2.jpg" alt=""></div>
+                      <div>
+                        <h5><a href="">Aron Alvarado</a> <a href="#" class="reply"><i class="bi bi-reply-fill"></i> Reply</a></h5>
+                        <time datetime="2020-01-01">01 Jan, 2020</time>
+                        <p>
+                          Ipsam tempora sequi voluptatem quis sapiente non. Autem itaque eveniet saepe. Officiis illo ut beatae.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div id="comment-reply-1" class="comment comment-reply">
+                      <div class="d-flex">
+                        <div class="comment-img"><img src="assets/img/blog/comments-3.jpg" alt=""></div>
+                        <div>
+                          <h5><a href="">Lynda Small</a> <a href="#" class="reply"><i class="bi bi-reply-fill"></i> Reply</a></h5>
+                          <time datetime="2020-01-01">01 Jan, 2020</time>
+                          <p>
+                            Enim ipsa eum fugiat fuga repellat. Commodi quo quo dicta. Est ullam aspernatur ut vitae quia mollitia id non. Qui ad quas nostrum rerum sed necessitatibus aut est. Eum officiis sed repellat maxime vero nisi natus. Amet nesciunt nesciunt qui illum omnis est et dolor recusandae.
+
+                            Recusandae sit ad aut impedit et. Ipsa labore dolor impedit et natus in porro aut. Magnam qui cum. Illo similique occaecati nihil modi eligendi. Pariatur distinctio labore omnis incidunt et illum. Expedita et dignissimos distinctio laborum minima fugiat.
+
+                            Libero corporis qui. Nam illo odio beatae enim ducimus. Harum reiciendis error dolorum non autem quisquam vero rerum neque.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div id="comment-reply-2" class="comment comment-reply">
+                        <div class="d-flex">
+                          <div class="comment-img"><img src="assets/img/blog/comments-4.jpg" alt=""></div>
+                          <div>
+                            <h5><a href="">Sianna Ramsay</a> <a href="#" class="reply"><i class="bi bi-reply-fill"></i> Reply</a></h5>
+                            <time datetime="2020-01-01">01 Jan, 2020</time>
+                            <p>
+                              Et dignissimos impedit nulla et quo distinctio ex nemo. Omnis quia dolores cupiditate et. Ut unde qui eligendi sapiente omnis ullam. Placeat porro est commodi est officiis voluptas repellat quisquam possimus. Perferendis id consectetur necessitatibus.
+                            </p>
+                          </div>
+                        </div>
+
+                      </div><!-- End comment reply #2-->
+
+                    </div><!-- End comment reply #1-->
+
+                  </div><!-- End comment #2-->
+
+                  <div id="comment-3" class="comment">
+                    <div class="d-flex">
+                      <div class="comment-img"><img src="assets/img/blog/comments-5.jpg" alt=""></div>
+                      <div>
+                        <h5><a href="">Nolan Davidson</a> <a href="#" class="reply"><i class="bi bi-reply-fill"></i> Reply</a></h5>
+                        <time datetime="2020-01-01">01 Jan, 2020</time>
+                        <p>
+                          Distinctio nesciunt rerum reprehenderit sed. Iste omnis eius repellendus quia nihil ut accusantium tempore. Nesciunt expedita id dolor exercitationem aspernatur aut quam ut. Voluptatem est accusamus iste at.
+                          Non aut et et esse qui sit modi neque. Exercitationem et eos aspernatur. Ea est consequuntur officia beatae ea aut eos soluta. Non qui dolorum voluptatibus et optio veniam. Quam officia sit nostrum dolorem.
+                        </p>
+                      </div>
+                    </div>
+
+                  </div><!-- End comment #3 -->
+
+                  <div id="comment-4" class="comment">
+                    <div class="d-flex">
+                      <div class="comment-img"><img src="assets/img/blog/comments-6.jpg" alt=""></div>
+                      <div>
+                        <h5><a href="">Kay Duggan</a> <a href="#" class="reply"><i class="bi bi-reply-fill"></i> Reply</a></h5>
+                        <time datetime="2020-01-01">01 Jan, 2020</time>
+                        <p>
+                          Dolorem atque aut. Omnis doloremque blanditiis quia eum porro quis ut velit tempore. Cumque sed quia ut maxime. Est ad aut cum. Ut exercitationem non in fugiat.
+                        </p>
+                      </div>
+                    </div>
+
+                  </div><!-- End comment #4 -->
+
+                  <div class="reply-form">
+                    <h4>Leave a Reply</h4>
+                    <p>Your email address will not be published. Required fields are marked * </p>
+                    <form action="">
+                      <div class="row">
+                        <div class="col-md-6 form-group">
+                          <input name="name" type="text" class="form-control" placeholder="Your Name*">
+                        </div>
+                        <div class="col-md-6 form-group">
+                          <input name="email" type="text" class="form-control" placeholder="Your Email*">
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col form-group">
+                          <input name="website" type="text" class="form-control" placeholder="Your Website">
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col form-group">
+                          <textarea name="comment" class="form-control" placeholder="Your Comment*"></textarea>
+                        </div>
+                      </div>
+                      <button type="submit" class="btn btn-primary">Post Comment</button>
+
+                    </form>
+
+                  </div>
+
+                </div><!-- End blog comments -->
+
+              </div><!-- End blog entries list -->
+
+              <div class="col-lg-4">
+
+                <div class="sidebar">
+
+                  <h3 class="sidebar-title">Search</h3>
+                  <div class="sidebar-item search-form">
+                    <form action="">
+                      <input type="text">
+                      <button type="submit"><i class="bi bi-search"></i></button>
+                    </form>
+                  </div><!-- End sidebar search formn-->
+
+                  <h3 class="sidebar-title">Categories</h3>
+                  <div class="sidebar-item categories">
+                    <ul>
+                      <li><a href="#">General <span>(25)</span></a></li>
+                      <li><a href="#">Lifestyle <span>(12)</span></a></li>
+                      <li><a href="#">Travel <span>(5)</span></a></li>
+                      <li><a href="#">Design <span>(22)</span></a></li>
+                      <li><a href="#">Creative <span>(8)</span></a></li>
+                      <li><a href="#">Educaion <span>(14)</span></a></li>
+                    </ul>
+                  </div><!-- End sidebar categories-->
+
+                  <h3 class="sidebar-title">Recent Posts</h3>
+                  <div class="sidebar-item recent-posts">
+                    <div class="post-item clearfix">
+                      <img src="assets/img/blog/blog-recent-1.jpg" alt="">
+                      <h4><a href="blog-single.html">Nihil blanditiis at in nihil autem</a></h4>
+                      <time datetime="2020-01-01">Jan 1, 2020</time>
+                    </div>
+
+                    <div class="post-item clearfix">
+                      <img src="assets/img/blog/blog-recent-2.jpg" alt="">
+                      <h4><a href="blog-single.html">Quidem autem et impedit</a></h4>
+                      <time datetime="2020-01-01">Jan 1, 2020</time>
+                    </div>
+
+                    <div class="post-item clearfix">
+                      <img src="assets/img/blog/blog-recent-3.jpg" alt="">
+                      <h4><a href="blog-single.html">Id quia et et ut maxime similique occaecati ut</a></h4>
+                      <time datetime="2020-01-01">Jan 1, 2020</time>
+                    </div>
+
+                    <div class="post-item clearfix">
+                      <img src="assets/img/blog/blog-recent-4.jpg" alt="">
+                      <h4><a href="blog-single.html">Laborum corporis quo dara net para</a></h4>
+                      <time datetime="2020-01-01">Jan 1, 2020</time>
+                    </div>
+
+                    <div class="post-item clearfix">
+                      <img src="assets/img/blog/blog-recent-5.jpg" alt="">
+                      <h4><a href="blog-single.html">Et dolores corrupti quae illo quod dolor</a></h4>
+                      <time datetime="2020-01-01">Jan 1, 2020</time>
+                    </div>
+
+                  </div><!-- End sidebar recent posts-->
+
+                  <h3 class="sidebar-title">Tags</h3>
+                  <div class="sidebar-item tags">
+                    <ul>
+                      <li><a href="#">App</a></li>
+                      <li><a href="#">IT</a></li>
+                      <li><a href="#">Business</a></li>
+                      <li><a href="#">Mac</a></li>
+                      <li><a href="#">Design</a></li>
+                      <li><a href="#">Office</a></li>
+                      <li><a href="#">Creative</a></li>
+                      <li><a href="#">Studio</a></li>
+                      <li><a href="#">Smart</a></li>
+                      <li><a href="#">Tips</a></li>
+                      <li><a href="#">Marketing</a></li>
+                    </ul>
+                  </div><!-- End sidebar tags-->
+
+                </div><!-- End sidebar -->
+
+              </div><!-- End blog sidebar -->
+            </div>
+          </div>
+        </section>
+      </s_permalink_article_rep>
+    </s_article_rep>
+
+
+
+  </main><!-- End #main -->
+
+  <!-- ======= Footer ======= -->
+  <footer id="footer" class="footer">
+
+    <div class="footer-top">
+      <div class="container">
+        <div class="row gy-4">
+          <div class="col-lg-5 col-md-12 footer-info">
+            <a href="index.html" class="logo d-flex align-items-center">
+              <img src="./images/logo.png" alt="">
+              <span>Snow Ball.com</span>
+            </a>
+            <p>티스토리(Tistory) 플랫폼에 기반한 <b>개인 블로그</b>이며 본 사이트에서 취득한 어떤 정보도 법적인 효력을 갖지 못합니다. 모든 투자의 책임은 투자자 본인에게 있습니다.
+            참고한 정보의 출처는 신뢰할 만하나, 열람 시점이나 제공처의 사정 따라 정보의 정확성이 달라질 수 있습니다.</p>
+            <div class="social-links mt-3">
+              <a href="#" class="twitter"><i class="bi bi-twitter"></i></a>
+              <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
+              <a href="#" class="instagram"><i class="bi bi-instagram bx bxl-instagram"></i></a>
+              <a href="#" class="linkedin"><i class="bi bi-linkedin bx bxl-linkedin"></i></a>
+            </div>
+          </div>
+
+          <div class="col-lg-2 col-6 footer-links">
+            <h4>주요 정보 출처</h4>
+            <ul>
+              <li><i class="bi bi-chevron-right"></i> <a href="http://data.krx.co.kr/contents/MDC/MAIN/main/index.cmd">한국거래소</a></li>
+              <li><i class="bi bi-chevron-right"></i> <a href="https://dart.fss.or.kr/">전자공시시스템</a></li>
+              <li><i class="bi bi-chevron-right"></i> <a href="https://finance.naver.com/">네이버증권</a></li>
+              <li><i class="bi bi-chevron-right"></i> <a href="https://comp.fnguide.com/SVO2/ASP/SVD_main.asp?pGB=1&gicode=A005930&cID=&MenuYn=Y&ReportGB=&NewMenuID=11&stkGb=&strResearchYN=">에프앤가이드</a></li>
+              <li><i class="bi bi-chevron-right"></i> <a href="https://news.einfomax.co.kr/">연합인포맥스</a></li>
+            </ul>
+          </div>
+
+          <div class="col-lg-2 col-6 footer-links">
+            <h4>주요 서비스</h4>
+            <ul>
+              <li><i class="bi bi-chevron-right"></i> <a href="#">시장 지도</a></li>
+              <li><i class="bi bi-chevron-right"></i> <a href="#">버블 지도</a></li>
+              <li><i class="bi bi-chevron-right"></i> <a href="#">산업 차트</a></li>
+              <li><i class="bi bi-chevron-right"></i> <a href="#">기업 분석</a></li>
+              <li><i class="bi bi-chevron-right"></i> <a href="#">투자 역사</a></li>
+            </ul>
+          </div>
+
+          <div class="col-lg-3 col-md-12 footer-contact text-center text-md-start">
+            <h4>Contact</h4>
+            <p>
+              <strong>Email:</strong> info@example.com<br>
+              <strong>Open Kakao:</strong> 준비 중 <br>
+            </p>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="copyright">
+        &copy; Copyright <strong><span>TDAT내일모레</span></strong>. All Rights Reserved
+      </div>
+      <div class="credits">
+        Designed by TDAT내일모레
+      </div>
+    </div>
+  </footer><!-- End Footer -->
+
+  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Vendor JS Files -->
+  <script src="./images/bootstrap.bundle.js"></script>
+  <script src="./images/aos.js"></script>
+  <!-- <script src="assets/vendor/php-email-form/validate.js"></script> -->
+  <script src="./images/swiper-bundle.min.js"></script>
+  <script src="./images/purecounter.js"></script>
+  <script src="./images/isotope.pkgd.min.js"></script>
+  <script src="./images/glightbox.min.js"></script>
+
+  <!-- Template Main JS File -->
+  <script src="./images/main.js"></script>
+  </s_t3>
+</body>
+
+</html>
