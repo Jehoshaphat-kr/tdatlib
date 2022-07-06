@@ -38,36 +38,37 @@
           <li><a class="nav-link scrollto active" href="#">홈</a></li>
           <!-- <li><a href="blog.html">일반 메뉴</a></li> -->
           <li class="dropdown"><a href="#"><span>시장 보기</span> <i class="bi bi-chevron-down"></i></a>
-            <ul>
-              <li><a href="#">시장 지도</a></li>
-              <li><a href="#">버블 지도</a></li>
-              <li><a href="#">산업/업종 등락률</a></li>
-            </ul>
+          <ul>
+            <li><a href="/category/시장 지도">시장 지도</a></li>
+            <li><a href="#">버블 지도</a></li>
+            <li><a href="#">산업/업종 등락률</a></li>
+          </ul>
           </li>
           <li class="dropdown"><a href="#"><span>기술 분석</span> <i class="bi bi-chevron-down"></i></a>
+          <ul>
+            <li class="dropdown"><a href="#"><span>투자 지표</span> <i class="bi bi-chevron-right"></i></a>
             <ul>
-              <li class="dropdown"><a href="#"><span>투자 지표</span> <i class="bi bi-chevron-right"></i></a>
-                <ul>
-                  <li><a href="#">지지선과 저항선</a></li>
-                  <li><a href="#">볼린저밴드</a></li>
-                  <li><a href="#">MACD</a></li>
-                  <li><a href="#">RSI</a></li>
-                  <li><a href="#">ROC</a></li>
-                </ul>
-              </li>
-              <li><a href="#">백 테스트</a></li>
-              <li><a href="#">실전 투자</a></li>
+              <li><a href="#">지지선과 저항선</a></li>
+              <li><a href="#">볼린저밴드</a></li>
+              <li><a href="#">MACD</a></li>
+              <li><a href="#">RSI</a></li>
+              <li><a href="#">ROC</a></li>
             </ul>
+            </li>
+            <li><a href="#">백 테스트</a></li>
+            <li><a href="#">실전 투자</a></li>
+          </ul>
           </li>
           <li class="dropdown"><a href="#"><span>기본 분석</span> <i class="bi bi-chevron-down"></i></a>
-            <ul>
-              <li><a href="#">기업 조사</a></li>
-              <li><a href="#">실전 투자</a></li>
-            </ul>
+          <ul>
+            <li><a href="#">기업 조사</a></li>
+            <li><a href="#">실전 투자</a></li>
+          </ul>
           </li>
-          <li><a href="#">개발 노트</a></li>
+          <li><a href="/category/투자 노트">투자 노트</a></li>
           <!-- <li><a class="getstarted scrollto" href="#">후원하기</a></li> -->
         </ul>
+
         <i class="bi bi-list mobile-nav-toggle"></i>
       </nav>
       <!-- .navbar -->
@@ -242,10 +243,10 @@
 
     </section><!-- End Recent Blog Posts Section -->
     </s_cover>
-    </s_cover_rep>
 
-    <!-- ======= Popular Blog Posts Section ======= -->
-    <s_cover_rep>
+
+    <!-- ======= Recent Blog Posts Section ======= -->
+
     <s_cover name="recommended">
     <section id="recent-blog-posts" class="recent-blog-posts">
 
@@ -276,10 +277,10 @@
 
       </div>
 
-    </section>
+    </section><!-- End Recent Blog Posts Section -->
     </s_cover>
     </s_cover_rep>
-    <!-- End Popular Blog Posts Section -->
+
 
     <!-- ======= F.A.Q Section ======= -->
     <section id="faq" class="faq">
@@ -511,7 +512,6 @@
           <div class="col-lg-4">
 
             <div class="sidebar">
-
               <h3 class="sidebar-title">Search</h3>
               <div class="sidebar-item search-form">
                 <form action="">
@@ -522,14 +522,7 @@
 
               <h3 class="sidebar-title">Categories</h3>
               <div class="sidebar-item categories">
-                <ul>
-                  <li><a href="#">General <span>(25)</span></a></li>
-                  <li><a href="#">Lifestyle <span>(12)</span></a></li>
-                  <li><a href="#">Travel <span>(5)</span></a></li>
-                  <li><a href="#">Design <span>(22)</span></a></li>
-                  <li><a href="#">Creative <span>(8)</span></a></li>
-                  <li><a href="#">Educaion <span>(14)</span></a></li>
-                </ul>
+                [##_category_list_##]
               </div><!-- End sidebar categories-->
 
               <h3 class="sidebar-title">Recent Posts</h3>
@@ -586,12 +579,22 @@
             </div><!-- End sidebar -->
 
           </div><!-- End blog sidebar -->
-
         </div>
 
       </div>
     </section><!-- End Blog Section -->
     </s_list>
+
+    <s_tag>
+      <h3 class="sidebar-title">Tags</h3>
+      <div class="sidebar-item tags">
+        <ul>
+          <s_tag_rep>
+          <li><a href="[##_tag_link_##]" class="[##_tag_class_##]"> [##_tag_name_##]</a></li>
+          </s_tag_rep>
+        </ul>
+      </div><!-- End sidebar tags-->
+    </s_tag>
 
     <s_article_rep>
       <s_permalink_article_rep>
