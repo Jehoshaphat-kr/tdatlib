@@ -1,0 +1,655 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">	
+<meta name="viewport" content="user-scalable=no,width=device-width,initial-scale=1.0">	
+<meta name="author" content="[##_blogger_##]">
+<meta name="description" content="[##_desc_##]">
+<meta name="generator" content="M1react">	
+
+<link rel="alternate" type="application/rss+xml" title="[##_title_##]" href="[##_blog_link_##]rss" />
+<link rel="stylesheet" media="screen" type="text/css" href="./style.css" />
+<link rel="shortcut icon" href="[##_blog_link_##]favicon.ico" />
+<script type="text/javascript" src="./images/m1react.js"></script>
+<title>[##_title_##] :: [##_page_title_##]</title>
+</head>
+
+<body>
+
+<s_t3>
+<!-- 랩 s -->
+<div id="wrap">
+
+<!-- 컨테이너 s -->
+<div id="container">
+		
+<!-- 헤더 s -->
+<div id="header">
+	<div class="top_title"><a href="[##_blog_link_##]">[##_title_##]</a></div>
+	<div class="pages">
+		<div class="pages1"><a href="[##_blog_link_##]notice">공지사항</a></div>
+		<div class="pages2"><a href="[##_blog_link_##]guestbook">방명록</a></div>
+		<div class="pages3"><a href="[##_blog_link_##]media">미디어로그</a></div>
+		<div class="pages4"><a href="[##_blog_link_##]location">위치로그</a></div>
+	</div>
+	<div class="search">
+		<s_search><div class="search1"><input type=text id="s" name="[##_search_name_##]" value="[##_search_text_##]" onkeypress="if (event.keyCode == 13) { [##_search_onclick_submit_##] }" class="search-textfield"></div>
+		<div class="search2"><input id="searchsubmit" type=image value="" class="search-button" onclick="[##_search_onclick_submit_##]"></div></s_search>
+	</div>
+<div class="fixed"></div>
+</div>
+<!-- 헤더 e-->	
+	
+<!-- 네비게이션 (카테고리1) s -->	
+<div id="navigation">
+ <div id="category_top">
+	<div id="lmenu">	
+	<div class="home"><a href="[##_blog_link_##]">홈</a></div>
+	<div class="category1">[##_category_list_##]</div>	
+	</div>	
+	<div id="rmenu">
+	<div class="rmenu1"><a href="[##_blog_link_##]rss" target="_blank">RSS</a></div> 
+<div class="rmenu2"><a href="[##_taglog_link_##]">태그</a></div> 
+<div class="rmenu3"><a href="[##_blog_link_##]admin/">관리</a></div> 
+<div class="rmenu4"><a href="[##_blog_link_##]admin/entry/post/">쓰기</a></div> 
+	</div>
+</div>
+</div>
+<!-- 네비게이션 (카테고리1) e -->
+
+<!-- 네비게이션 (카테고리1) (모바일) s -->
+<div id="navigation_m">
+<div id="mobile1"><a href="javascript:ViewLayer1();"><img src="./images/r_category.png"></a></div>
+<!-- s -->	
+<div id="divpop1">
+<div class="close_m1"><a href="javascript:close_Layer1();"><img src="./images/close_m.gif"></a></div>	
+<div id="mobile_top">		
+<div id="sidebar_plus_m">	
+<div class="title">카테고리</div>	
+<div class="widget">
+	<div id="category_side_m">
+	<div class="category2">[##_category_list_##]</div>
+	</div>	
+</div>
+</div>	
+</div>
+<!--<div class="close_m2"><a href="javascript:close_Layer1();"><img src="./images/close_m.gif"></a></div>-->
+</div>
+<!-- e -->	
+<div id="mobile2"><div class="top_title"><a href="[##_blog_link_##]">[##_title_##]</a></div></div>
+<div id="mobile3"><a href="javascript:ViewLayer2();"><img src="./images/r_search.png"></a></div>
+	
+<!-- s -->	
+<div id="divpop2">
+
+<div id="mobile_search">	
+<div class="close_m"><a href="javascript:close_Layer2();"><img src="./images/close_m2.gif"></a></div>		
+<div class="search">
+		<s_search><div class="search1"><input type=text id="s" name="search2" value="[##_search_text_##]" onkeypress="if (event.keyCode == 13) { try{window.location.href='/search2/'+looseURIEncode(document.getElementsByName('search2')[0].value);document.getElementsByName('search2')[0].value='';return false;}catch(e){} }" class="search-textfield"></div>
+		<div class="search2"><input id="searchsubmit" type=image value="" class="search-button" onkeypress="if (event.keyCode == 13) { try{window.location.href='/search2/'+looseURIEncode(document.getElementsByName('search2')[0].value);document.getElementsByName('search2')[0].value='';return false;}catch(e){} }"></div></s_search>
+	
+</div>
+			
+</div>
+
+</div>
+<!-- e -->		
+	
+</div>	
+<!-- 네비게이션 (카테고리1) (모바일) e -->	
+	
+	
+<div id="content">
+<!-- 메인 s -->
+<div id="main">
+					
+<!-- 검색결과, 카테고리 클릭시 나오는 페이지 설정 s -->
+<s_list>
+<div id="searchlog">
+<h2 class="title"><span class="sl_font">[##_list_conform_##]</span>에 해당하는 글 <span class="sl_font">[##_list_count_##]</span>건</h2>
+<div style="margin:5px 0 0 0;border-bottom:1px solid #e1e1e1"></div>			
+<div class="box">
+<ol>
+<s_list_rep>
+<li class="hover">
+<a href="[##_list_rep_link_##]">[##_list_rep_title_##]</a><span class="cnt3">[##_list_rep_rp_cnt_##]</span><span class="date3">[##_list_rep_regdate_##]</span>
+</li>
+</s_list_rep>
+</ol>
+</div>
+</div>
+</s_list>
+<!-- 검색결과, 카테고리 클릭시 나오는 페이지 설정 e -->
+
+<!-- 기본 메뉴 - 공지사항 페이지 s -->							
+<s_notice_rep>
+<div class="post">
+<h2><a href="[##_notice_rep_link_##]">[##_notice_rep_title_##]</a></h2>
+<div class="info">
+<span class="categories">공지사항</span><span class=cate-quick-div-footer>|</span><span class="date">[##_notice_rep_date_##]</span>
+<div class="fixed"></div>
+</div>
+<div class="article">[##_notice_rep_desc_##]</div>
+</div><!-- entry -->
+<div style="margin:15px 0 0 0;border-bottom:1px solid #e1e1e1"></div>
+</s_notice_rep>
+<!-- 기본 메뉴 - 공지사항 페이지 e -->
+
+<!-- 기본 메뉴 - 방명록 페이지 s -->							
+<s_guest>
+<div id="guest">
+<div class="guest_title">방명록</div>
+<div id="respond">
+<s_guest_input_form>
+<s_guest_member>
+<s_guest_form>
+<div class="textarea_s">
+<input type="text" id="[##_guest_input_name_##]" name="[##_guest_input_name_##]" class="textfield" value="[##_guest_name_##]" maxlength="20" placeholder="이름"/>
+<label for="[##_guest_input_name_##]"></label>
+</div>
+<div class="textarea_s">
+<input type="password" id="[##_guest_input_password_##]" class="textfield" name="[##_guest_input_password_##]" value="[##_guest_password_##]" placeholder="비밀번호"/>
+<label for="[##_guest_input_password_##]"></label>
+</div>
+<div class="textarea_s">
+<input type="text" id="[##_guest_input_homepage_##]" class="textfield" name="[##_guest_input_homepage_##]" value="[##_guest_homepage_##]" />
+<label for="[##_guest_input_homepage_##]"></label>
+</div>
+</s_guest_form>
+<div class="row">
+<input type="checkbox" id="[##_guest_input_is_secret_##]" name="[##_guest_input_is_secret_##]" class="checkbox" value="1" />
+	<label for="[##_guest_input_is_secret_##]"><span class="secret">비밀글</span></label>
+</div>
+</s_guest_member>
+<div class="textarea_i"><textarea name="[##_guest_textarea_body_##]" id="comment" rows="6" class="textarea_c"></textarea></div>
+<div id="submitbox"><input type="submit" class="submitbox" id="submit_cmt" value="댓글 등록" onclick="[##_guest_onclick_submit_##]" /></div>
+</s_guest_input_form>	
+<div class="fixed"></div>    
+</div>
+<div class="comment">
+<div class="guest_list">						
+<s_guest_container>
+<ol>
+<s_guest_rep>
+<li id="[##_guest_rep_id_##]" class="hover">
+<div class="[##_guest_rep_class_##]">
+<div class="comment_in">
+<span class="name">[##_guest_rep_name_##]</span>
+<span class="date"> [##_guest_rep_date_##]</span>
+<span class="control">
+<a href="#" onclick="[##_guest_rep_onclick_delete_##]" class="modify">&nbsp;<span>수정/삭제</span></a><a href="#" onclick="[##_guest_rep_onclick_reply_##]" class="write">&nbsp;<span>댓글쓰기</span></a></span>
+<p class="guest_rep_desc">[##_guest_rep_desc_##]</p>
+</div>
+</div>	
+<s_guest_reply_container>
+<ul>
+<s_guest_reply_rep>
+<li id="[##_guest_rep_id_##]">	
+<div class="[##_guest_rep_class_##]">
+<div class="comment_in">	
+<span class="name">[##_guest_rep_name_##]</span>
+<span class="date"> [##_guest_rep_date_##]</span>
+<span class="control">
+<a href="#" onclick="[##_guest_rep_onclick_delete_##]" class="modify">&nbsp;<span>수정/삭제</span></a>
+</span>
+<p class="guest_rep_desc">[##_guest_rep_desc_##]</p>
+</div>
+</div>	
+</li>
+</s_guest_reply_rep>
+</ul>
+</s_guest_reply_container>
+</li>
+</s_guest_rep>
+</ol>
+</s_guest_container>								
+<div class="fixed"></div>
+</div>
+</div>
+</div>
+</s_guest>
+<!-- 기본 메뉴 - 방명록 페이지 e -->
+
+<!-- 기본 메뉴 - 위치로그 페이지 s -->
+<s_local>
+<div id="localog" class="nonEntry">
+<div class="localog_title">위치로그</div>
+<s_local_spot_rep>
+<div class="spot" style="margin-left: [##_local_spot_depth_##]px">[##_local_spot_##]</div>
+</s_local_spot_rep>
+<s_local_info_rep>
+<div class="info" style="margin-left: [##_local_info_depth_##]px"><a href="[##_local_info_link_##]">[##_local_info_title_##]</a></div>
+</s_local_info_rep>
+</div>
+</s_local>
+<!-- 기본 메뉴 - 위치로그 페이지 e -->
+
+<!-- 기본 메뉴 - 태그 페이지 s -->
+<s_tag>
+<div id="taglog">
+<div class="taglog_title">태그</div>
+<ul>
+<s_tag_rep>
+<li>
+<a href="[##_tag_link_##]" class="[##_tag_class_##]" >[##_tag_name_##]</a>
+</li>
+</s_tag_rep>
+</ul>
+</div>
+</s_tag>
+<!-- 기본 메뉴 - 태그 페이지 e -->
+
+<!-- 보호글 - 제목,내용 부분 s -->
+<s_article_protected>
+<div class="post">
+<h2><a href="[##_article_rep_link_##]">[##_article_rep_title_##]</a></h2>
+<div class="info">
+<span class="categories"><a href="[##_article_rep_category_link_##]">[##_article_rep_category_##]</a></span><span class=cate-quick-div-footer>|</span><span class="date">[##_article_rep_date_##]</span><s_ad_div><span class=cate-quick-div-footer>|</span><span class="posted"><a href="[##_s_ad_m_link_##]">수정</a></span></s_ad_div>
+<div class="fixed"></div>
+</div>
+<div class="article">보호되어 있는 글입니다.<br />내용을 보시려면 비밀번호를 입력하세요.<br /><br />
+<label for="[##_article_password_##]">비밀번호 ::</label>
+<input id="[##_article_password_##]" name="[##_article_password_##]" type="password" maxlength="16" onkeydown="if (event.keyCode == 13) [##_article_dissolve_##]" />
+<input type="button" class="submit2" value="확인" onclick="[##_article_dissolve_##]" />
+</div>
+</div>
+</s_article_protected>
+<!-- 보호글 - 제목,내용 부분 e -->
+
+<!-- 글 s -->
+<s_article_rep>
+<div class="post">
+<h2><a href="[##_article_rep_link_##]">[##_article_rep_title_##]</a></h2>
+<div class="info">
+<div class="info_left">	
+<span class="categories"><a href="[##_article_rep_category_link_##]">[##_article_rep_category_##]</a></span><span class=cate-quick-div-footer>|</span><span class="date">[##_article_rep_date_##]</span><s_ad_div><span class=cate-quick-div-footer>|</span><span class="posted"><a href="[##_s_ad_m_link_##]">수정</a></span><span class="date"> [[##_s_ad_s1_label_##]]</span></s_ad_div></div>
+	<div class="info_right">
+		<div class="info_r_1"><a href="mailto:메일주소" target="_blank" title="메일주소"><img src="./images/infom1.gif"></a></div>
+		<div class="info_r_2"><a href="https://www.youtube.com/유튜브주소" target="_blank" title="유튜브"><img src="./images/infom2.gif"></a></div>
+		<div class="info_r_3"><a href="https://www.instagram.com/인스타그램주소" target="_blank" title="인스타그램"><img src="./images/infom3.gif"></a></div>
+		<div class="info_r_4"><a href="http://m1story.tistory.com" target="_blank" title="스킨 다운로드"><img src="./images/infom4.gif"></a></div>		
+	</div>	
+<div class="fixed"></div>  
+</div>	
+  							
+<div class="article">
+
+[##_article_rep_desc_##]
+	
+<!-- 글밑 태그 부분 s -->
+<p class="under">
+<s_tag_label><div class="tagTrail"><span class="tags">태그 : [##_tag_label_rep_##]</span></div></s_tag_label>
+</p>
+<div class="fixed"></div>
+</div>
+<!-- 글밑 태그 부분 e -->
+
+<!-- 엮인 글 댓글 선택 부분 s -->
+<div id="cmtswitcher">
+<span class="addcomment">
+<a href="#rp" onclick="[##_article_rep_rp_link_##]">댓글</a><span class="cnt">([##_article_rep_rp_cnt_##])</span>
+</span>
+<div class="fixed"></div>
+</div>
+<!-- 엮인 글 댓글 선택 부분 e -->
+
+								
+<!-- 코멘트 s --><s_rp>
+<div class="comment">
+
+<!-- 코멘트 입력 부분 s -->	
+<div id="respond">
+<s_rp_input_form>
+<s_rp_member>
+<!-- 게스트 글쓰기 부분 s -->
+<s_rp_guest>
+<div class="textarea_s">
+<input type="text" id="[##_rp_input_name_##]_[##_article_rep_id_##]" class="textfield" name="[##_rp_input_name_##]" value="[##_guest_name_##]" maxlength="20" placeholder="이름"/>
+<label for="[##_rp_input_name_##]_[##_article_rep_id_##]"></label>
+</div>
+<div class="textarea_s">
+<input type="password" id="[##_rp_input_password_##]_[##_article_rep_id_##]" class="textfield" name="[##_rp_input_password_##]" value="[##_rp_admin_check_##]" placeholder="비밀번호"/>
+<label for="[##_rp_input_password_##]_[##_article_rep_id_##]"></label>
+</div>
+<div class="textarea_s">
+<input type="text" id="[##_rp_input_homepage_##]_[##_article_rep_id_##]" class="textfield" name="[##_rp_input_homepage_##]" value="[##_guest_homepage_##]" />
+<label for="[##_rp_input_homepage_##]_[##_article_rep_id_##]"></label>
+</div>
+</s_rp_guest>
+<!-- 게스트 글쓰기 부분 e -->
+<div class="row">
+<input type="checkbox" class="checkbox" id="[##_rp_input_is_secret_##]_[##_article_rep_id_##]" name="[##_rp_input_is_secret_##]" value="1" />
+<label for="[##_rp_input_is_secret_##]_[##_article_rep_id_##]">비밀 답글</label>
+</div>
+</s_rp_member>
+<div class="textarea_i"><textarea name="[##_rp_input_comment_##]" id="comment" rows="6" class="textarea_c"></textarea></div>
+<div id="submitbox"><input type="submit" class="submitbox" id="submit_cmt" value="댓글 등록" onclick="[##_rp_onclick_submit_##]" /></div>
+</s_rp_input_form> 
+</div>
+<!-- 코멘트 입력 부분 e -->	
+	
+<!-- 코멘트 리스트 s -->
+<div class="comment_list">
+<s_rp_container>
+<ol>
+<s_rp_rep>
+<li id="[##_rp_rep_id_##]" class="hover">
+<div class="[##_rp_rep_class_##]">
+<div class="comment_in">
+<span class="name">[##_rp_rep_name_##]</span>
+<span class="date2">[##_rp_rep_date_##]</span>
+<span class="control">
+<a href="[##_rp_rep_link_##]" class="address"><span>댓글주소</span></a>
+<a href="#" onclick="[##_rp_rep_onclick_delete_##]" class="modify">&nbsp;<span>수정/삭제</span></a>
+<a href="#" onclick="[##_rp_rep_onclick_reply_##]" class="write">&nbsp;<span>댓글쓰기</span></a>
+</span>
+<p class="rep_desc">[##_rp_rep_desc_##]</p>
+</div>
+</div>                          
+<s_rp2_container>
+<ul>
+<s_rp2_rep>
+<li id="[##_rp_rep_id_##]">
+<div class="[##_rp_rep_class_##]">
+<div class="comment_in">	
+<span class="name">[##_rp_rep_name_##]</span>
+<span class="date2"> [##_rp_rep_date_##]</span>
+<span class="control">
+<a href="[##_rp_rep_link_##]" class="address"><span>댓글주소</span></a>
+<a href="#" onclick="[##_rp_rep_onclick_delete_##]" class="modify">&nbsp;<span>수정/삭제</span></a>
+</span>
+<p class="rep_desc">[##_rp_rep_desc_##]</p>
+</div>
+</div>	
+</li>
+</s_rp2_rep>
+</ul>
+</s_rp2_container>
+</li>									
+</s_rp_rep>
+</ol>
+</s_rp_container>
+</div>	
+<!-- 코멘트 리스트 e -->
+										
+<div class="fixed"></div>
+</div>
+</s_rp><!-- 코멘트 e -->
+</div>
+</s_article_rep>
+<!-- 글 e -->
+
+<!-- 페이지 네비 s -->						
+<s_paging>
+<div class="paging">
+<a [##_prev_page_##] class="[##_no_more_prev_##]" id="prevPage">이전</a>
+<s_paging_rep>
+<a [##_paging_rep_link_##]> [##_paging_rep_link_num_##]</a>
+</s_paging_rep>
+<a [##_next_page_##] class="[##_no_more_next_##]" id="nextPage">다음</a>
+</div>
+</s_paging>
+<!-- 페이지 네비 e -->
+							
+</div><!-- 메인 e-->
+
+<!-- 사이드바 s -->
+
+<div id="sidebar">
+	
+<s_sidebar>
+
+<!-- 블로그 소개 위젯 s --><s_sidebar_element>
+<!-- 블로그 소개 -->
+<div id="sidebar_plus_bloginfo">	
+<div class="title">블로그 소개</div>
+<div class="widget"><div id="bloginfo"><img src="[##_image_##]" alt="블로그 이미지" /><br><b>[##_blogger_##]</b><br/>[##_desc_##]</div>
+</div>
+</div>	
+</s_sidebar_element>
+<!-- 블로그 소개 e -->	
+	
+<!-- 공지사항 위젯 s --><s_sidebar_element>
+<s_rct_notice>
+<!-- 공지사항 -->
+<div id="sidebar_plus_notice">	
+<div class="title">공지사항</div>
+<div class="widget">
+<ul>
+<s_rct_notice_rep>
+<li><a href="[##_notice_rep_link_##]">[##_notice_rep_title_##]</a> </li>
+</s_rct_notice_rep>
+</ul>
+</div>
+</div>
+</s_rct_notice>
+</s_sidebar_element>
+<!-- 공지사항 위젯 e -->
+
+<!-- 카테고리 위젯 s --><s_sidebar_element>
+<!-- 카테고리 -->
+<div id="sidebar_plus_category">		
+<div class="title">카테고리</div>
+<div class="widget">
+	<div id="category_side">
+	<div class="category2">[##_category_list_##]</div>
+	</div>	
+</div>
+</div>	
+</s_sidebar_element>
+<!-- 카테고리 위젯 e -->
+
+<!-- 최근 등록 현황 위젯 s --><s_sidebar_element>
+<!-- 최근 등록 현황 -->
+<script language>
+function viewContents(i)
+ {
+     document.getElementById('contents1').style.display = "none";
+     document.getElementById('contents2').style.display = "none";
+     document.getElementById('contents3').style.display = "none";
+    document.getElementById('contents'+i).style.display = "";
+ }
+</script>
+<div id="sidebar_plus_tab"> 
+<div class="title">최근 등록 현황</div>
+	
+<div id="contents1">
+
+<div class="widget">
+	
+<div class="side_tab1">
+	<div class="inner1"><a href="#" onmouseover="viewContents(1)"><span><h5>최근 글</h5></span></a></div>
+	<div class="inner2"><a href="#" onmouseover="viewContents(2)"><span><h5>최근 월별 글</h5></span></a></div>
+	<div class="inner3"><a href="#" onmouseover="viewContents(3)"><span><h5>최근 댓글</h5></span></a></div>
+</div>	
+	
+	
+<ul>
+<s_rctps_rep>
+<li><a href="[##_rctps_rep_link_##]">[##_rctps_rep_title_##]</a></li>
+</s_rctps_rep>
+</ul>
+</div>
+ 
+</div>
+
+<div id="contents2" style="display:none">
+
+<div class="widget">
+	
+<div class="side_tab2">
+	<div class="inner1"><a href="#" onmouseover="viewContents(1)"><span><h5>최근 글</h5></span></a></div>
+	<div class="inner2"><a href="#" onmouseover="viewContents(2)"><span><h5>최근 월별 글</h5></span></a></div>
+	<div class="inner3"><a href="#" onmouseover="viewContents(3)"><span><h5>최근 댓글</h5></span></a></div>
+</div>	
+	
+<ul id="recentComments">
+<s_archive_rep>
+<li><a href="[##_archive_rep_link_##]">[##_archive_rep_date_##] ([##_archive_rep_count_##])</a></li>
+</s_archive_rep>
+</ul>
+</div>
+ 
+</div>	
+	
+<div id="contents3" style="display:none">
+
+<div class="widget">
+	
+<div class="side_tab3">
+	<div class="inner1"><a href="#" onmouseover="viewContents(1)"><span><h5>최근 글</h5></span></a></div>
+	<div class="inner2"><a href="#" onmouseover="viewContents(2)"><span><h5>최근 월별 글</h5></span></a></div>
+	<div class="inner3"><a href="#" onmouseover="viewContents(3)"><span><h5>최근 댓글</h5></span></a></div>
+</div>	
+	
+<ul id="recentComments">
+<s_rctrp_rep>
+<li><a href="[##_rctrp_rep_link_##]">[##_rctrp_rep_desc_##]</a></li>
+</s_rctrp_rep>
+</ul>
+</div>
+ 
+</div>
+ 
+</div>	
+</s_sidebar_element>
+<!-- 최근 등록 현황 위젯 e -->
+	
+<!-- 달력 위젯 s --><s_sidebar_element>
+<!-- 달력 -->
+<div id="sidebar_plus_calendar">	
+<div class="title">달력</div>
+<div class="widget">
+<s_custom_calendar>
+	
+<div class="side_tab_calendar">
+<div class="inner1"><a href="[##_prev_month_##]" title="지난달"><span><h5>지난달</h5></span></a></div>
+<div class="inner2"><a href="[##_this_month_##]" title="이번달"><span><h5>[##_year_##].[##_month_##]</h5></span></a></div>
+<div class="inner3"><a href="[##_next_month_##]" title="다음달"><span><h5>다음달</h5></span></a></div>	
+</div>
+	
+<table class="tt-calendar" cellpadding="0" cellspacing="0" style="width: 100%; margin:0 0 0 0; padding:10px 0 0 0; background-color:#fafbfc; table-layout: fixed">
+							
+<s_calendar_header>
+<thead><tr><s_calendar_header_item><th class="[##_class_##]">[##_title_##]</th></s_calendar_header_item></tr></thead>
+</s_calendar_header>
+<s_calendar_days>
+<tbody>
+<s_calendar_week>
+<tr class="[##_class_##]">
+<s_calendar_days_item><td class="[##_class_##]">[##_day_##]</td></s_calendar_days_item></tr>
+</s_calendar_week>
+</tbody>
+</s_calendar_days>
+</table>
+</s_custom_calendar>
+</div>
+</div>
+</s_sidebar_element>
+<!-- 달력 위젯 e -->
+
+<!-- 태그 구름 위젯 s --><s_sidebar_element>
+<!-- 태그 구름 -->
+<div id="sidebar_plus_tag">	
+<div class="title">태그 구름</div>
+<div id="tagcloud" class="widget">
+<ul>
+<s_random_tags>
+<li><a href="[##_tag_link_##]" class="[##_tag_class_##]"> [##_tag_name_##]</a></li>
+</s_random_tags>
+</ul>
+</div>
+</div>	
+</s_sidebar_element>
+<!-- 태그 구름 위젯 e -->		
+
+<!-- 링크 위젯 s --><s_sidebar_element>
+<!-- 링크 -->
+<div id="sidebar_plus_link">	
+<div class="title">링크</div>
+<div class="widget">
+<select class="link_site" onchange="window.open(this.value);">
+<option value="" select="">링크 목록을 불러옵니다</option>
+<s_link_rep><option value="[##_link_url_##]">[##_link_site_##]</option></s_link_rep></select>
+</div>
+</div>	
+</s_sidebar_element>
+<!-- 링크 위젯 e -->
+
+<!-- 카운터 위젯 s --><s_sidebar_element>
+<!-- 카운터 -->
+<div id="sidebar_plus_counter">	
+<div class="title">카운터</div>
+<div class="widget">
+<div id="counter">	
+<div id="counter1">
+	<div class="inner1"><span>전체 방문자</span></div>
+	<div class="innerm"></div>
+	<div class="inner2"><span>[##_count_total_##]</span></div>
+</div>		
+
+<div id="counter2">
+	<div class="inner1"><span>오늘</span></div>
+	<div class="innerm"></div>
+	<div class="inner2"><span>[##_count_today_##]</span></div>
+</div>	
+
+<div id="counter3">
+	<div class="inner1"><span>어제</span></div>
+	<div class="innerm"></div>
+	<div class="inner2"><span>[##_count_yesterday_##]</span></div>
+</div>
+</div>
+	
+</div>
+</div>
+</s_sidebar_element>
+<!-- 카운터 위젯 e -->
+
+</s_sidebar>
+</div><!-- 사이드바 e -->
+
+<div class="fixed"></div>
+</div><!-- 메인 e -->
+	
+<!-- 푸터 s -->
+<div id="footer">
+
+<!-- 카피라이터 부분입니다. 절대 수정하시면 안됩니다 ^^ s -->
+<div id="footer_copy">Skin by <a href="http://m1story.tistory.com" target=_blank>M1REACT</a>. Designed by <a href="http://m1story.tistory.com" target=_blank>M1STORY.TISTORY.COM</a>. Valid <a href="http://validator.w3.org/" target=_blank>XHTML 1.0</a> and <a href="http://jigsaw.w3.org/css-validator/" target=_blank>CSS 3</a>. Copyright ⓒ <a href="[##_blog_link_##]">[##_title_##]</a>. All rights reserved.</div>
+<!-- 카피라이터 부분입니다. 절대 수정하시면 안됩니다 ^^ e -->
+
+</div><!-- 푸터 e -->
+			
+</div><!-- 컨테이너 e -->
+		
+</div><!-- 랩 e -->
+
+<script>
+var cate=document.getElementById("category_side");
+var x=cate.getElementsByTagName("span");
+for (i=0;i<x.length;i++)
+{
+var pattern = /[()]/gi;
+var str=x[i].innerHTML;
+var n=str.replace(pattern,"");
+x[i].innerHTML= n;
+}
+</script>
+<script>
+var cate=document.getElementById("category_side_m");
+var x=cate.getElementsByTagName("span");
+for (i=0;i<x.length;i++)
+{
+var pattern = /[()]/gi;
+var str=x[i].innerHTML;
+var n=str.replace(pattern,"");
+x[i].innerHTML= n;
+}
+</script>
+
+</s_t3>
+</body>
+</html>
