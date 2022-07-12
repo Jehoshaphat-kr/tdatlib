@@ -62,6 +62,11 @@ section {
   }
 }
 
+#counts, #__sidebar {
+  display:none;
+}
+
+
 /*--------------------------------------------------------------
 # Breadcrumbs
 --------------------------------------------------------------*/
@@ -1709,6 +1714,11 @@ section {
 
 .blog .entry .entry-title a:hover {
   color: #4154f1;
+}
+
+.blog .entry .entry-title a img {
+  width: 20px !important;
+  height: 15px !important;
 }
 
 .blog .entry .entry-meta {
