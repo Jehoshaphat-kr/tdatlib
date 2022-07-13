@@ -23,66 +23,101 @@
   <script type="text/javascript">
     var _t_sbar_rct_obj = [];
     var _t_sbar_pop_obj = [];
-    var _t_sbar_tag_obj = [];
+    var _t_sbar_tag_obj = {
+      link:[],
+      name:[]
+    };
+
+    function sbar_post(mem, date, link, title, thumbnail){
+      var _time = document.createElement("time");
+      var _a = document.createElement('a');
+      var _h4 = document.createElement('h4');
+      var _img = document.createElement('img');
+      var _div = document.createElement("div");
+
+      _time.setAttribute('datetime', '1900-01-01');
+      _time.innerHTML = date;
+      _a.setAttribute('href', link);
+      _a.innerHTML = title;
+      _h4.appendChild(_a);
+      _img.setAttribute('src', thumbnail);
+
+      _div.classList.add('post-item');
+      _div.classList.add('clearfix');
+      _div.appendChild(_img);
+      _div.appendChild(_h4);
+      _div.appendChild(_time);
+      mem.push(_div);
+    }
+
   </script>
 </head>
 
 <body>
   <s_t3>
 
-    <s_sidebar>
-      <s_sidebar_element>
-        <s_rctps_rep>
-          <script type="text/javascript">
-            var _time = document.createElement("time");
-            var _a = document.createElement('a');
-            var _h4 = document.createElement('h4');
-            var _img = document.createElement('img');
+    <!-- Category Ojbects -->
+    [##_category_list_##]
+    <script type="text/javascript">
+      var observer = new MutationObserver(
+        function(mutations) {
+          if (document.contains(document.getElementsByClassName('link_sub_item')[0])){
+            var temp = document.getElementsByClassName('tt_category')[0];
+            observer.disconnect();
+          }
+        }
+      );
 
-            _time.setAttribute('datetime', '1900-01-01');
-            _time.innerHTML = "[##_rctps_rep_date_##]";
-            _a.setAttribute('href', "[##_rctps_rep_link_##]");
-            _a.innerHTML = "[##_rctps_rep_title_##]";
-            _h4.appendChild(_a);
-            _img.setAttribute('src', "<s_rctps_rep_thumbnail>[##_rctps_rep_thumbnail_##]</s_rctps_rep_thumbnail>");
 
-            var _div = document.createElement("div");
-            _div.classList.add('post-item');
-            _div.classList.add('clearfix');
-            _div.appendChild(_img);
-            _div.appendChild(_h4);
-            _div.appendChild(_time);
-            _t_sbar_rct_obj.push(_div);
-          </script>
-        </s_rctps_rep>
-      </s_sidebar_element>
+      var _t_sbar_list_obj = temp.getElementsByClassName('category_list')[0];
+      temp.style.display = 'none';
+      console.log(_t_sbar_list_obj);
+    </script>
 
-      <s_sidebar_element>
-        <s_rctps_popular_rep>
-          <script type="text/javascript">
-            var _time = document.createElement("time");
-            var _a = document.createElement('a');
-            var _h4 = document.createElement('h4');
-            var _img = document.createElement('img');
+    <!-- Sidebar :: Recent Post Ojbects -->
+    <s_sidebar_element>
+      <s_rctps_rep>
+        <script type="text/javascript">
+          sbar_post(
+            _t_sbar_rct_obj,
+            "[##_rctps_rep_date_##]",
+            "[##_rctps_rep_link_##]",
+            "[##_rctps_rep_title_##]",
+            "<s_rctps_rep_thumbnail>[##_rctps_rep_thumbnail_##]</s_rctps_rep_thumbnail>"
+          );
+        </script>
+      </s_rctps_rep>
+    </s_sidebar_element>
 
-            _time.setAttribute('datetime', '1900-01-01');
-            _time.innerHTML = "[##_rctps_rep_date_##]";
-            _a.setAttribute('href', "[##_rctps_rep_link_##]");
-            _a.innerHTML = "[##_rctps_rep_title_##]";
-            _h4.appendChild(_a);
-            _img.setAttribute('src', "<s_rctps_rep_thumbnail>[##_rctps_rep_thumbnail_##]</s_rctps_rep_thumbnail>");
+    <!-- Sidebar :: Popular Post Ojbects -->
+    <s_sidebar_element>
+      <s_rctps_popular_rep>
+        <script type="text/javascript">
+          sbar_post(
+            _t_sbar_pop_obj,
+            "[##_rctps_rep_date_##]",
+            "[##_rctps_rep_link_##]",
+            "[##_rctps_rep_title_##]",
+            "<s_rctps_rep_thumbnail>[##_rctps_rep_thumbnail_##]</s_rctps_rep_thumbnail>"
+          );
+        </script>
+      </s_rctps_popular_rep>
+    </s_sidebar_element>
 
-            var _div = document.createElement("div");
-            _div.classList.add('post-item');
-            _div.classList.add('clearfix');
-            _div.appendChild(_img);
-            _div.appendChild(_h4);
-            _div.appendChild(_time);
-            _t_sbar_pop_obj.push(_div);
-          </script>
-        </s_rctps_popular_rep>
-      </s_sidebar_element>
-    </s_sidebar>
+    <!-- Sidebar :: Tags Ojbects -->
+    <s_sidebar_element>
+      <s_random_tags>
+        <script type="text/javascript">
+          _t_sbar_tag_obj.link.push("[##_tag_link_##]");
+          _t_sbar_tag_obj.name.push("[##_tag_name_##]");
+        </script>
+      </s_random_tags>
+    </s_sidebar_element>
+
+
+
+
+
 
   <!-- ======= Header ======= -->
   <header id="header" class="header fixed-top">
@@ -614,8 +649,8 @@
 
               <h3 class="sidebar-title">Tags</h3>
               <div class="sidebar-item tags">
-                <ul>
-                  <li><a href="#">App</a></li>
+                <ul id="_side_tags">
+                  <!-- <li><a href="#">App</a></li>
                   <li><a href="#">IT</a></li>
                   <li><a href="#">Business</a></li>
                   <li><a href="#">Mac</a></li>
@@ -625,9 +660,19 @@
                   <li><a href="#">Studio</a></li>
                   <li><a href="#">Smart</a></li>
                   <li><a href="#">Tips</a></li>
-                  <li><a href="#">Marketing</a></li>
+                  <li><a href="#">Marketing</a></li> -->
                 </ul>
               </div><!-- End sidebar tags-->
+              <script type="text/javascript">
+                var temp = document.getElementById('_side_tags');
+                for (var i = 0; i < 10; i++) {
+                  var _li = document.createElement('li');
+                  var _a = document.createElement('a');
+                  _a.setAttribute('href', _t_sbar_tag_obj.link[i]);
+                  _a.innerHTML = _t_sbar_tag_obj.name[i];
+                  temp.appendChild(_li.appendChild(_a));
+                }
+              </script>
 
             </div><!-- End sidebar -->
 
