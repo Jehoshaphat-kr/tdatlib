@@ -22,7 +22,8 @@
 
   <script type="text/javascript">
     var _t_sbar_rct_obj = [];
-
+    var _t_sbar_pop_obj = [];
+    var _t_sbar_tag_obj = [];
   </script>
 </head>
 
@@ -54,6 +55,32 @@
             _t_sbar_rct_obj.push(_div);
           </script>
         </s_rctps_rep>
+      </s_sidebar_element>
+
+      <s_sidebar_element>
+        <s_rctps_popular_rep>
+          <script type="text/javascript">
+            var _time = document.createElement("time");
+            var _a = document.createElement('a');
+            var _h4 = document.createElement('h4');
+            var _img = document.createElement('img');
+
+            _time.setAttribute('datetime', '1900-01-01');
+            _time.innerHTML = "[##_rctps_rep_date_##]";
+            _a.setAttribute('href', "[##_rctps_rep_link_##]");
+            _a.innerHTML = "[##_rctps_rep_title_##]";
+            _h4.appendChild(_a);
+            _img.setAttribute('src', "<s_rctps_rep_thumbnail>[##_rctps_rep_thumbnail_##]</s_rctps_rep_thumbnail>");
+
+            var _div = document.createElement("div");
+            _div.classList.add('post-item');
+            _div.classList.add('clearfix');
+            _div.appendChild(_img);
+            _div.appendChild(_h4);
+            _div.appendChild(_time);
+            _t_sbar_pop_obj.push(_div);
+          </script>
+        </s_rctps_popular_rep>
       </s_sidebar_element>
     </s_sidebar>
 
@@ -575,6 +602,16 @@
               </script>
               <!-- End sidebar recent posts-->
 
+              <h3 class="sidebar-title">Popular Posts</h3>
+              <div id="_side_popular" class="sidebar-item recent-posts"></div>
+              <script type="text/javascript">
+                var temp = document.getElementById('_side_popular');
+                for (var i = 0; i < _t_sbar_pop_obj.length; i++) {
+                  temp.appendChild(_t_sbar_pop_obj[i]);
+                }
+              </script>
+              <!-- End sidebar popular posts-->
+
               <h3 class="sidebar-title">Tags</h3>
               <div class="sidebar-item tags">
                 <ul>
@@ -802,92 +839,6 @@
         </section>
       </s_permalink_article_rep>
     </s_article_rep>
-
-    <aside id="__sidebar">
-      <s_sidebar>
-      <div class="sidebar">
-
-          <!-- 오른쪽 사이드바 -->
-
-          <s_sidebar_element>
-            <!-- 검색창 -->
-            <h3 class="sidebar-title">Search</h3>
-            <div class="sidebar-item search-form">
-              <form action="">
-                <s_search>
-                  <input type="text" name="[##_search_name_##]" value="[##_search_text_##]" onkeypress="if (event.keyCode == 13) { [##_search_onclick_submit_##] }"/>
-                  <button type="submit" onclick="[##_search_onclick_submit_##]" class="submit"><i class="bi bi-search"></i></button>
-                </s_search>
-              </form>
-            </div>
-          </s_sidebar_element>
-
-          <s_sidebar_element>
-            <!-- 카테고리 -->
-            <h3 class="sidebar-title">Categories</h3>
-            <div class="sidebar-item categories">
-              [##_category_list_##]
-            </div>
-          </s_sidebar_element>
-
-          <s_sidebar_element>
-            <!-- 태그 -->
-            <h3 class="sidebar-title">Tags</h3>
-            <div class="sidebar-item tags">
-              <ul>
-                <s_random_tags>
-                  <li><a class="[##_tag_class_##]" href="[##_tag_link_##]">[##_tag_name_##]</a></li>
-                </s_random_tags>
-              </ul>
-            </div>
-          </s_sidebar_element>
-
-          <s_sidebar_element>
-            <!-- 최근 포스트 NO CSS -->
-            <div class="">
-              <h3 class="sidebar-title">Recent Posts NO CSS</h3>
-              <ul>
-                <s_rctps_rep>
-                  <li>
-                    <a href="[##_rctps_rep_link_##]">[##_rctps_rep_title_##]</a>
-                    <s_rctps_rep_thumbnail>
-                      <img src="[##_rctps_rep_thumbnail_##]" alt=""/>
-                    </s_rctps_rep_thumbnail>
-                    <a href="[##_rctps_rep_category_link_##]">[##_rctps_rep_category_##]</a>
-                  </li>
-                </s_rctps_rep>
-              </ul>
-            </div>
-          </s_sidebar_element>
-
-          <s_sidebar_element>
-            <!-- 최근 포스트 -->
-            <h3 class="sidebar-title">Recent Posts</h3>
-            <div class="sidebar-item recent-posts">
-
-              <s_rctps_rep>
-
-                <div class="post-item clearfix">
-                  <s_rctps_rep_thumbnail>
-                  <img src="[##_rctps_rep_thumbnail_##]" alt="">
-                  </s_rctps_rep_thumbnail>
-                  <h4><a href="[##_rctps_rep_link_##]">[##_rctps_rep_title_##]</a></h4>
-                  <time datetime="2020-01-01">[##_rctps_rep_simple_date_##]</time>
-                </div>
-
-              </s_rctps_rep>
-
-            </div>
-          </s_sidebar_element>
-
-
-
-
-      </div>
-      </s_sidebar>
-    </aside>
-
-
 
   </main><!-- End #main -->
 

@@ -49,17 +49,6 @@
     </tree>
     <contentWidth>500</contentWidth>
   </default>
-  <variables>
-    <variablegroup name="사이드바">
-      <variable>
-        <name>sidebar</name>
-        <label>사이드바</label>
-        <description><![CDATA[ 사이드바 ]]></description>
-        <type>BOOL</type>
-        <default>true</default>
-      </variable>
-    </variablegroup>
-  </variables>
   <cover>
     <item>
       <name>recent</name>
