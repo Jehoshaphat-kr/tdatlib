@@ -48,28 +48,55 @@ class fetch_ecos(object):
             self.__setattr__('__codes', df)
         return self.__getattribute__('__codes')
 
+    @property
+    def krw_usd(self) -> pd.DataFrame:
+        """
+        원 / 달러 환율
+        """
+        raw = self.fetch(codes=['731Y003'])
+        rev = raw[[col for col in raw.columns if '달러' in col]]
+        rev = rev.rename(columns={col:col[col.find('(') + 1:col.find(')')] for col in rev.columns})
+        rev.index = pd.to_datetime(rev.index)
+        return rev
+
+    @property
+    def krw_cny(self) -> pd.DataFrame:
+        """
+        원 / 위안 환율
+        """
+        raw = self.fetch(codes=['731Y003'])
+        rev = raw[[col for col in raw.columns if '위안' in col]]
+        rev = rev.rename(columns={col: col[col.find('(') + 1:col.find(')')] for col in rev.columns})
+        rev.index = pd.to_datetime(rev.index)
+        return rev
+
     def fetch(self, codes:list or str, start_year:str='2015', end_year:str='2022'):
         if type(codes) == str:
             codes = [codes]
 
-        yy = start_year
-        ee = end_year
+        yy, ee = start_year, end_year
         samples = self.codes[self.codes.코드.isin(codes)]
+
+        objs = list()
         for code, label, cyc in zip(samples.코드, samples.지표명, samples.주기):
-            s = f'{yy}0101' if cyc == 'D' else f'{yy}01S1' if cyc == 'SM' else f'{yy}01' if cyc == 'M' else f'{yy}{cyc}1'
-            e = f'{ee}1230' if cyc == 'D' else f'{ee}12S1' if cyc == 'SM' else f'{ee}12' if cyc == 'M' else f'{ee}{cyc}12'
-            suffix = s[-4:] if len(s) == 8 else s[-2:]
-            url = f'http://ecos.bok.or.kr/api/StatisticSearch/{KEY}/xml/kr/1/100000/{code}/{cyc}/{s}/{e}'
-            df = self._xml_to_df(url=url)
-            df.to_csv(rf'./{code}_{label}.csv', index=False, encoding='euc-kr')
+            if not hasattr(self, f'_{code}'):
+                s = f'{yy}0101' if cyc == 'D' else f'{yy}01S1' if cyc == 'SM' else f'{yy}01' if cyc == 'M' else f'{yy}{cyc}1'
+                e = f'{ee}1230' if cyc == 'D' else f'{ee}12S1' if cyc == 'SM' else f'{ee}12' if cyc == 'M' else f'{ee}{cyc}12'
+                url = f'http://ecos.bok.or.kr/api/StatisticSearch/{KEY}/xml/kr/1/100000/{code}/{cyc}/{s}/{e}'
+                df = self._xml_to_df(url=url)
+
+                _objs = list()
+                for item in df['ITEM_NAME1'].drop_duplicates(keep='first'):
+                    sr = df[df.ITEM_NAME1 == item].set_index(keys='TIME')['DATA_VALUE']
+                    sr.name = item
+                    _objs.append(sr)
+                self.__setattr__(f'_{code}', pd.concat(objs=_objs, axis=1))
+
+            objs.append(self.__getattribute__(f'_{code}'))
+        # df.to_csv(rf'./{code}_{label}.csv', index=True, encoding='euc-kr')
+        return pd.concat(objs=objs, axis=1)
 
 
-
-def fetch_kr():
-    url = "http://ecos.bok.or.kr/api/KeyStatisticList/XT2S2EESV0C0728KFJBT/json/kr/1/100/"
-    resp = requests.get(url)
-    data = resp.json()
-    return data
 
 
 if __name__ == "__main__":
@@ -84,17 +111,22 @@ if __name__ == "__main__":
 
     ecos = fetch_ecos()
     # print(ecos.codes)
+    # print(ecos.krw_usd)
+    # print(ecos.krw_cny)
+
     # ecos.codes.to_csv(r'./test.csv', encoding='euc-kr')
 
-    ecos.fetch(
+    df = ecos.fetch(
         codes=[
-            '802Y001',
-            '901Y013',
-            '301Y017',
-            '731Y003',
-            '511Y003'
+            '817Y002'
+            # '802Y001',
+            # '901Y013',
+            # '301Y017',
+            # '511Y003'
         ]
     )
+    df.to_csv(r'./test.csv', encoding='euc-kr')
+    print(df)
 
 
     # from tdatlib.tdef import labels
