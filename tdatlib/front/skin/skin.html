@@ -56,24 +56,6 @@
 <body>
   <s_t3>
 
-    <!-- Category Ojbects -->
-    [##_category_list_##]
-    <script type="text/javascript">
-      var observer = new MutationObserver(
-        function(mutations) {
-          if (document.contains(document.getElementsByClassName('link_sub_item')[0])){
-            var temp = document.getElementsByClassName('tt_category')[0];
-            observer.disconnect();
-          }
-        }
-      );
-
-
-      var _t_sbar_list_obj = temp.getElementsByClassName('category_list')[0];
-      temp.style.display = 'none';
-      console.log(_t_sbar_list_obj);
-    </script>
-
     <!-- Sidebar :: Recent Post Ojbects -->
     <s_sidebar_element>
       <s_rctps_rep>
@@ -114,7 +96,14 @@
       </s_random_tags>
     </s_sidebar_element>
 
+    <!-- Category Ojbects -->
 
+    <div style="display:none !important;">
+      [##_category_list_##]
+      <script type="text/javascript">
+        var cate = document.getElementsByClassName('tt_category')[0]
+      </script>
+    </div>
 
 
 
@@ -129,9 +118,8 @@
       </a>
 
       <nav id="navbar" class="navbar">
-        <ul>
+        <!-- <ul>
           <li><a class="nav-link scrollto active" href="#">홈</a></li>
-          <!-- <li><a href="blog.html">일반 메뉴</a></li> -->
           <li class="dropdown"><a href="#"><span>시장 보기</span> <i class="bi bi-chevron-down"></i></a>
           <ul>
             <li><a href="/category/시장 지도">시장 지도</a></li>
@@ -161,12 +149,23 @@
           </ul>
           </li>
           <li><a href="/category/투자 노트">투자 노트</a></li>
-          <!-- <li><a class="getstarted scrollto" href="#">후원하기</a></li> -->
-        </ul>
+        </ul> -->
 
         <i class="bi bi-list mobile-nav-toggle"></i>
       </nav>
       <!-- .navbar -->
+      <script type="text/javascript">
+        var temp = document.getElementById('navbar');
+        var _list = cate.getElementsByClassName('category_list')[0]
+        var _upper = _list.getElementsByTagName('li')
+        for (var i = 0; i < _upper.length; i++) {
+          _upper[i].setAttribute('class', "dropdown");
+          // _upper[i].appendChild(
+          //
+          // )
+        }
+        temp.appendChild(_list);
+      </script>
 
     </div>
   </header>
