@@ -6,8 +6,8 @@ import os
 DESKTOP = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
 DEBUG_TREEMAP = False
 DEBUG_MARKET  = False
-DEBUG_INDEX   = True
-DEBUG_STOCK   = False
+DEBUG_INDEX   = False
+DEBUG_STOCK   = True
 DEBUG_GROUP   = False
 
 if DEBUG_TREEMAP:
