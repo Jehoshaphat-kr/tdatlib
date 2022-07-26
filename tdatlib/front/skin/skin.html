@@ -160,9 +160,13 @@
         var _upper = _list.getElementsByTagName('li')
         for (var i = 0; i < _upper.length; i++) {
           _upper[i].setAttribute('class', "dropdown");
-          // _upper[i].appendChild(
-          //
-          // )
+          for (var j = 0; j < _upper[i].children.length; j++) {
+            console.log(j);
+            if (_upper[i].children[j].tagName === 'ul'){
+              console.log(_upper[i].innerText);
+              // _upper[i].appendChild('<i class="bi bi-chevron-down"></i>');
+            }
+          }
         }
         temp.appendChild(_list);
       </script>

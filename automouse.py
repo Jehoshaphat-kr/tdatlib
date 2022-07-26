@@ -21,4 +21,5 @@ def auto_mouse(t_gap:int=50, due:int=0):
 
 
 if __name__ == "__main__":
-    auto_mouse(t_gap=30, due=1755)
+    auto_mouse(t_gap=30)
+    # auto_mouse(t_gap=30, due=1755)

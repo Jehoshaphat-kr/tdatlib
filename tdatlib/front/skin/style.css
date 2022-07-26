@@ -2125,14 +2125,6 @@ section {
   font-size: 14px;
 }
 
-/* JEHYEUK REV */
-.blog .sidebar .categories span.c_cnt {}
-.blog .sidebar .categories .tt_category .link_tit {display: none;}
-.blog .sidebar .categories .tt_category .category_list li ul {display: none;}
-.blog .sidebar .categories .tt_category .category_list li a {display: table-cell;}
-.blog .sidebar .categories .tt_category .category_list li a span.c_cnt {display: inline-block; font-weight: bold !important;color: #fff !important;}
-/* JEHYEUK REV END */
-
 .blog .sidebar .recent-posts .post-item + .post-item {
   margin-top: 15px;
 }
@@ -2379,3 +2371,12 @@ section {
   font-size: 13px;
   color: #012970;
 }
+
+/* JEHYEUK REV */
+.navbar .category_list a span.c_cnt{display:none;} 
+.blog .sidebar .categories span.c_cnt {}
+.blog .sidebar .categories .tt_category .link_tit {display: none;}
+.blog .sidebar .categories .tt_category .category_list li ul {display: none;}
+.blog .sidebar .categories .tt_category .category_list li a {display: table-cell;}
+.blog .sidebar .categories .tt_category .category_list li a span.c_cnt {display: inline-block; font-weight: bold !important;color: #fff !important;}
+/* JEHYEUK REV END */
