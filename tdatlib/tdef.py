@@ -24,6 +24,9 @@ class labels(object):
         상상인
     ]
 
+    # 미디어엔터테인먼트 > 플랫폼
+    아프리카TV      = '067160'
+
 
     # FRED
     KR환율           = 'DEXKOUS'

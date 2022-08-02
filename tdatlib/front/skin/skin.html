@@ -97,7 +97,6 @@
     </s_sidebar_element>
 
     <!-- Category Ojbects -->
-
     <div style="display:none !important;">
       [##_category_list_##]
       <script type="text/javascript">
@@ -106,67 +105,31 @@
     </div>
 
 
-
-
   <!-- ======= Header ======= -->
   <header id="header" class="header fixed-top">
     <div class="container-fluid container-xl d-flex align-items-center justify-content-between">
 
-      <a href="index.html" class="logo d-flex align-items-center">
+      <a href="." class="logo d-flex align-items-center">
         <img src="./images/logo.png" alt="">
         <span>Snow Ball.com</span>
       </a>
 
       <nav id="navbar" class="navbar">
-        <!-- <ul>
-          <li><a class="nav-link scrollto active" href="#">홈</a></li>
-          <li class="dropdown"><a href="#"><span>시장 보기</span> <i class="bi bi-chevron-down"></i></a>
-          <ul>
-            <li><a href="/category/시장 지도">시장 지도</a></li>
-            <li><a href="#">버블 지도</a></li>
-            <li><a href="#">산업/업종 등락률</a></li>
-          </ul>
-          </li>
-          <li class="dropdown"><a href="#"><span>기술 분석</span> <i class="bi bi-chevron-down"></i></a>
-          <ul>
-            <li class="dropdown"><a href="#"><span>투자 지표</span> <i class="bi bi-chevron-right"></i></a>
-            <ul>
-              <li><a href="#">지지선과 저항선</a></li>
-              <li><a href="#">볼린저밴드</a></li>
-              <li><a href="#">MACD</a></li>
-              <li><a href="#">RSI</a></li>
-              <li><a href="#">ROC</a></li>
-            </ul>
-            </li>
-            <li><a href="#">백 테스트</a></li>
-            <li><a href="#">실전 투자</a></li>
-          </ul>
-          </li>
-          <li class="dropdown"><a href="#"><span>기본 분석</span> <i class="bi bi-chevron-down"></i></a>
-          <ul>
-            <li><a href="#">기업 조사</a></li>
-            <li><a href="#">실전 투자</a></li>
-          </ul>
-          </li>
-          <li><a href="/category/투자 노트">투자 노트</a></li>
-        </ul> -->
-
         <i class="bi bi-list mobile-nav-toggle"></i>
       </nav>
-      <!-- .navbar -->
       <script type="text/javascript">
         var temp = document.getElementById('navbar');
-        var _list = cate.getElementsByClassName('category_list')[0]
-        var _upper = _list.getElementsByTagName('li')
+        var _list = cate.getElementsByClassName('category_list')[0];
+        var _upper = _list.getElementsByTagName('li');
         for (var i = 0; i < _upper.length; i++) {
           _upper[i].setAttribute('class', "dropdown");
-          for (var j = 0; j < _upper[i].children.length; j++) {
-            console.log(j);
-            if (_upper[i].children[j].tagName === 'ul'){
-              console.log(_upper[i].innerText);
-              // _upper[i].appendChild('<i class="bi bi-chevron-down"></i>');
-            }
-          }
+        }
+
+        var _link = _list.getElementsByClassName('link_item');
+        for (var i = 0; i < _link.length; i++) {
+          var _li = document.createElement('i');
+          _li.setAttribute('class', 'bi bi-chevron-down');
+          _link[i].appendChild(_li);
         }
         temp.appendChild(_list);
       </script>
@@ -191,7 +154,6 @@
             <div class="count-box">
               <i class="bi bi-collection"></i>
               <div>
-                <!-- <span data-purecounter-start="0" data-purecounter-end="17" data-purecounter-duration="1" class="purecounter"></span> -->
                 <span>17</span>
                 <p>투자 진행 종목</p>
               </div>
@@ -220,7 +182,6 @@
               <i class="bi bi-percent" style="color: #bb0852;"></i>
               <div>
                 <span>-15.4%</span>
-                <!-- <span data-purecounter-start="0" data-purecounter-end="-15.4" data-purecounter-duration="0.1" class="purecounter"></span> -->
                 <p>수익률</p>
               </div>
             </div>
@@ -652,20 +613,9 @@
 
               <h3 class="sidebar-title">Tags</h3>
               <div class="sidebar-item tags">
-                <ul id="_side_tags">
-                  <!-- <li><a href="#">App</a></li>
-                  <li><a href="#">IT</a></li>
-                  <li><a href="#">Business</a></li>
-                  <li><a href="#">Mac</a></li>
-                  <li><a href="#">Design</a></li>
-                  <li><a href="#">Office</a></li>
-                  <li><a href="#">Creative</a></li>
-                  <li><a href="#">Studio</a></li>
-                  <li><a href="#">Smart</a></li>
-                  <li><a href="#">Tips</a></li>
-                  <li><a href="#">Marketing</a></li> -->
-                </ul>
-              </div><!-- End sidebar tags-->
+                <ul id="_side_tags"></ul>
+              </div>
+              <!-- End sidebar tags-->
               <script type="text/javascript">
                 var temp = document.getElementById('_side_tags');
                 for (var i = 0; i < 10; i++) {

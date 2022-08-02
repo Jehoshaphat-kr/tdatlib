@@ -25,7 +25,8 @@ if DEBUG_INDEX:
 
 if DEBUG_STOCK:
     viewer = stock.KR(
-        ticker=labels.우리금융지주,
+        # ticker=labels.우리금융지주,
+        ticker=labels.아프리카TV,
         period=3
     )
     viewer.saveall()
