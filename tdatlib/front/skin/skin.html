@@ -60,6 +60,15 @@
     <!-- 티스토리 제공 치환자 데이터 사전 변수화 작업                    -->
     <!-- ************************************************************ -->
 
+    <!-- Category Ojbects -->
+    <div style="display:none !important;">
+      [##_category_list_##]
+    </div>
+    <script type="text/javascript">
+      setTimeout(() => {  }, 5000);
+      var cate = document.getElementsByClassName('tt_category')[0];
+    </script>
+
     <!-- Sidebar :: Recent Post Ojbects -->
     <s_sidebar_element>
       <s_rctps_rep>
@@ -100,14 +109,6 @@
       </s_random_tags>
     </s_sidebar_element>
 
-    <!-- Category Ojbects -->
-    <div style="display:none !important;">
-      [##_category_list_##]
-    </div>
-    <script type="text/javascript">
-      var cate = document.getElementsByClassName('tt_category')[0];
-    </script>
-
     <!-- Paging Object -->
     <div style="display:none !important;">
       <s_paging>
@@ -132,7 +133,6 @@
         <s_search>
           <input id="searchbar" type="text" name="[##_search_name_##]" value="[##_search_text_##]" onkeypress="if (event.keyCode == 13) { [##_search_onclick_submit_##] }"/>
           <button id="searchbutton" type="submit" onclick="[##_search_onclick_submit_##]"><i class="bi bi-search"></i></button>
-          <!-- <input value="검색" type="button" onclick="[##_search_onclick_submit_##]" class="submit" /> -->
         </s_search>
       </div>
     </s_sidebar_element>
@@ -149,7 +149,7 @@
   <header id="header" class="header fixed-top">
     <div class="container-fluid container-xl d-flex align-items-center justify-content-between">
 
-      <a href="." class="logo d-flex align-items-center">
+      <a href="jehoshaphat.tistory.com" class="logo d-flex align-items-center">
         <img src="./images/logo.png" alt="">
         <span>Snow Ball.com</span>
       </a>
@@ -520,8 +520,21 @@
                   <li><a href="#">Educaion <span>(14)</span></a></li>
                 </ul>
               </div>
+              [##_category_list_##]
               <script type="text/javascript">
-                console.log(cate);
+                // console.log(cate);
+                // var _list = cate.getElementsByClassName('category_list')[0];
+                // var _upper = _list.getElementsByTagName('li');
+                // for (var i = 0; i < _upper.length; i++) {
+                //   console.log(i);
+                // }
+                //
+                // var _link = _list.getElementsByClassName('link_item');
+                // for (var i = 0; i < _link.length; i++) {
+                //   var _li = document.createElement('i');
+                //   _li.setAttribute('class', 'bi bi-chevron-down');
+                //   _link[i].appendChild(_li);
+                // }
               </script>
                 <!-- var temp = document.getElementById('navbar');
                 var _list = cate.getElementsByClassName('category_list')[0];
