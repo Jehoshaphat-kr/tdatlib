@@ -59,15 +59,15 @@ class technical(object):
     @property
     def label(self) -> str:
         if not hasattr(self, '__name'):
-            if self.ticker.isalpha():
-                self.__setattr__('__name', self.ticker)
-            elif len(self.ticker) == 4:
+            if self.ticker.isdigit() and len(self.ticker) == 4:
                 self.__setattr__('__name', get_index_ticker_name(ticker=self.ticker))
-            elif len(self.ticker) == 6:
+            elif self.ticker.isdigit() and len(self.ticker) == 6:
                 name = get_market_ticker_name(ticker=self.ticker)
                 if isinstance(name, pd.DataFrame):
                     self.__setattr__('__name', get_etf_ticker_name(ticker=self.ticker))
                 self.__setattr__('__name', name)
+            else:
+                self.__setattr__('__name', self.ticker)
         return self.__getattribute__('__name')
 
     @label.setter
@@ -77,7 +77,12 @@ class technical(object):
 
     @property
     def currency(self) -> str:
-        return 'USD' if self.ticker.isalpha() else '원' if len(self.ticker) == 6 else 'pt'
+        if self.ticker.isdigit() and len(self.ticker) == 6:
+            return '원'
+        elif self.ticker.isdigit() and len(self.ticker) == 4:
+            return '-'
+        else:
+            return 'USD'
 
     @property
     def ohlcv_btr(self) -> pd.DataFrame:
