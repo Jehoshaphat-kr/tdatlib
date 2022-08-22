@@ -46,10 +46,11 @@ if DEBUG_GROUP:
     #     myStock = stock.KR(ticker=ticker, period=3)
     #     myStock.saveall()
 
+    crypto = crypto()
     data = list()
 
     process = tqdm(
-        crypto.ALL
+        crypto.tickers
         # random.sample(population=crypto.ALL, k=20)
         # ['BTC', 'ETH', 'SOL', 'ADA', 'USDT', 'XRP', 'DOGE']
     )

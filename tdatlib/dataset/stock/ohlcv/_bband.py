@@ -148,7 +148,7 @@ if __name__ == "__main__":
 
 
     market = market.KR()
-    endate = '20220607'
+    endate = '20220810'
     # kosdaq = market.get_deposit(label='kosdaq')
     # kospi_mid = market.get_deposit(label='1003')
     # kospi_small = market.get_deposit(label='1004')
@@ -163,6 +163,10 @@ if __name__ == "__main__":
         proc.set_description(desc=f'{stocks.loc[ticker, "종목명"]}({ticker}) ...')
         my = stock.KR(ticker=ticker, period=2, endate=endate)
         sqz = my.ohlcv_bband.est_squeeze_break
+        _ = my.ohlcv_btr.copy()
+        ans_mx = _.iloc[0, -2]
+        ans_mn = _.iloc[0, -1]
+        print(ans_mx, ans_mn)
         data.append({
             '종목코드': ticker,
             '종목명': stocks.loc[ticker, "종목명"],
@@ -170,10 +174,12 @@ if __name__ == "__main__":
             'esc_term': float(sqz.t_esc),
             'vol_fact': float(sqz.k_vol),
             'lvl_fact': float(sqz.k_lvl),
-            'sqz_est': float(sqz.est)
+            'sqz_est': float(sqz.est),
+            'ans_mx': float(ans_mx),
+            'ans_mn': float(ans_mn)
         })
     df = pd.DataFrame(data=data)
-    df.to_csv(r'./test.csv', encoding='euc-kr')
+    df.to_csv(r'C:\Users\Administrator\Desktop\tdat\test.csv', encoding='euc-kr')
 
     # my = stock.KR('389260', period=2, endate='20220504')
     # sqz = my.ohlcv_bband.est_squeeze(span='last', win=5)
