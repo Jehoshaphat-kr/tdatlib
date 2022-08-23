@@ -28,19 +28,6 @@ class labels(object):
     아프리카TV      = '067160'
 
 
-    # FRED
-    KR환율           = 'DEXKOUS'
-    KR수출량         = 'XTEXVA01KRM664S'
-    US기준금리       = 'EFFR'
-    US10년물금리     = 'T10YFF'
-    US5년기대인플레  = 'T5YIFR'
-    US소비자물가지수 = 'CPIAUCSL'
-    US10년평형인플레 = 'T10YIE'
-    BRENT유가        = 'DCOILBRENTEU'
-    WTI유가          = 'DCOILWTICO'
-    CRUDE유가변동성  = 'OVXCLS'
-
-
 class crypto(object):
 
     # CRYPTO
