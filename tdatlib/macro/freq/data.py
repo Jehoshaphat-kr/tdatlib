@@ -25,20 +25,19 @@ class data(fetch):
 
     recession_kr = [
         {'label': 'blank#01', 'from': datetime(1994, 11, 8), 'to': datetime(1995, 5, 27)},
-        {'label': 'blank#02', 'from': datetime(1996, 5, 13), 'to': datetime(1997, 1, 7)},
-        {'label': 'blank#03', 'from': datetime(1996, 6, 17), 'to': datetime(1997, 12, 12)},
+        {'label': 'blank#02', 'from': datetime(1996, 5, 7), 'to': datetime(1997, 1, 7)},
+        {'label': 'blank#03', 'from': datetime(1997, 8, 11), 'to': datetime(1997, 12, 12)},
         {'label': 'blank#04', 'from': datetime(1998, 3, 2), 'to': datetime(1998, 6, 16)},
         {'label': 'blank#05', 'from': datetime(1999, 1, 11), 'to': datetime(1999, 2, 24)},
         {'label': 'blank#06', 'from': datetime(1999, 7, 19), 'to': datetime(1999, 10, 5)},
         {'label': 'blank#07', 'from': datetime(2000, 1, 4), 'to': datetime(2000, 12, 22)},
         {'label': 'blank#08', 'from': datetime(2002, 4, 17), 'to': datetime(2003, 3, 17)},
         {'label': 'blank#09', 'from': datetime(2004, 4, 23), 'to': datetime(2004, 8, 2)},
-        {'label': 'blank#10', 'from': datetime(2004, 4, 23), 'to': datetime(2004, 8, 2)},
-        {'label': 'blank#11', 'from': datetime(2007, 11, 1), 'to': datetime(2008, 10, 24)},
-        {'label': 'blank#12', 'from': datetime(2011, 5, 2), 'to': datetime(2011, 9, 26)},
-        {'label': 'blank#13', 'from': datetime(2018, 1, 29), 'to': datetime(2019, 1, 3)},
-        {'label': 'blank#14', 'from': datetime(2020, 1, 22), 'to': datetime(2020, 3, 19)},
-        {'label': 'blank#15', 'from': datetime(2021, 7, 6), 'to': datetime(2022, 7, 6)},
+        {'label': 'blank#10', 'from': datetime(2007, 11, 1), 'to': datetime(2008, 10, 24)},
+        {'label': 'blank#11', 'from': datetime(2011, 5, 2), 'to': datetime(2011, 9, 26)},
+        {'label': 'blank#12', 'from': datetime(2018, 1, 29), 'to': datetime(2019, 1, 3)},
+        {'label': 'blank#13', 'from': datetime(2020, 1, 22), 'to': datetime(2020, 3, 19)},
+        {'label': 'blank#14', 'from': datetime(2021, 7, 6), 'to': datetime(2022, 7, 6)},
     ]
 
 
@@ -51,7 +50,7 @@ class data(fetch):
         rev = raw[[col for col in raw.columns if '달러' in col]]
         rev = rev.rename(columns={col: col[col.find('(') + 1:col.find(')')] for col in rev.columns})
         rev.index = pd.to_datetime(rev.index)
-        return rev
+        return rev.astype(float)
 
     @property
     def ecos_cny2krw(self) -> pd.DataFrame:
@@ -62,7 +61,7 @@ class data(fetch):
         rev = raw[[col for col in raw.columns if '위안' in col]]
         rev = rev.rename(columns={col: col[col.find('(') + 1:col.find(')')] for col in rev.columns})
         rev.index = pd.to_datetime(rev.index)
-        return rev
+        return rev.astype(float)
 
     @property
     def ecos_interest_rate(self) -> pd.DataFrame:
@@ -124,3 +123,9 @@ class data(fetch):
         rev = raw['경상수지']
         rev.index = pd.to_datetime(rev.index)
         return rev
+
+
+if __name__ == "__main__":
+
+    data = data()
+    # print(data.ecos_usd2krw)

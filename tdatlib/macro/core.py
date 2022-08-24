@@ -12,6 +12,7 @@ class fetch(object):
     US기준금리            = 'EFFR'
     US실질금리            = 'FEDFUNDS'
     US10년물금리          = 'T10YFF'
+    US2년물금리           = 'DGS2'
     US장단기금리차10Y2Y   = 'T10Y2Y'
     US30년만기모기지금리  = 'MORTGAGE30US'
 
@@ -28,6 +29,16 @@ class fetch(object):
 
     def __init__(self):
         self.today = datetime.now().date()
+        self.__period = 20
+        return
+
+    @property
+    def period(self) -> int:
+        return self.__period
+
+    @period.setter
+    def period(self, period:int):
+        self.__period = period
         return
 
 
@@ -57,14 +68,14 @@ class fetch(object):
         return self.__getattribute__('__codes')
 
 
-    def fred(self, symbols:str or list, period:int = 10):
+    def fred(self, symbols:str or list):
         """
         Fetch data from Federal Reserve Economic Data | FRED | St. Louis Fed
         :param symbols : symbols
         :param period  : period
         :return:
         """
-        start, end = self.today - timedelta(period * 365), self.today
+        start, end = self.today - timedelta(self.__period * 365), self.today
         if isinstance(symbols, str):
             symbols = [symbols]
 
@@ -74,7 +85,7 @@ class fetch(object):
         return pd.concat(objs=[self.__getattribute__(symbol) for symbol in symbols], axis=1)
 
 
-    def ecos(self, symbols:str or list, period:int = 10) -> pd.DataFrame:
+    def ecos(self, symbols:str or list) -> pd.DataFrame:
         """
         Fetch data from Economic Statistics System | ECOS | Korea Bank
         :param symbols : symbols
@@ -84,7 +95,7 @@ class fetch(object):
         if type(symbols) == str:
             symbols = [symbols]
 
-        yy, ee = self.today.year - period, self.today.year
+        yy, ee = self.today.year - self.__period, self.today.year
         samples = self.ecos_symbols[self.ecos_symbols.코드.isin(symbols)]
 
         objs = list()
@@ -112,3 +123,4 @@ if __name__ == "__main__":
     pd.set_option('display.expand_frame_repr', False)
 
     fetch = fetch()
+    print(fetch.fred(fetch.US2년물금리))
