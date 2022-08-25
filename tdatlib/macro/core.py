@@ -209,17 +209,22 @@ class data(_fetch):
 
     @property
     def 미국금리(self) -> pd.DataFrame:
-        cols = {
-            "EFFR": "기준금리",
-            "FEDFUNDS": "실질금리",
-            "DGS2": "2년물",
-            "DGS10": "10년물",
-            "T10Y2Y": "10년-2년금리차",
-            "MORTGAGE30US": "30년모기지",
-        }
-        raw = self.fred(symbols=list(cols.keys()))
-        raw = raw.rename(columns=cols)
-        return raw
+        if not hasattr(self, '미국금리'):
+            cols = {
+                "DFF": "기준금리",
+                "TB3MS": "3개월물",
+                "DGS2": "2년물",
+                "DGS10": "10년물",
+                "DFII10": "10년물w기대인플레이션",
+                "T10Y3M": "10년-3개월금리차",
+                "T10Y2Y": "10년-2년금리차",
+                "BAMLH0A0HYM2": "하이일드스프레드",
+                "MORTGAGE30US": "30년모기지",
+            }
+            raw = self.fred(symbols=list(cols.keys()))
+            raw = raw.rename(columns=cols)
+            self.__setattr__('미국금리', raw)
+        return self.__getattribute__('미국금리')
 
     @property
     def 미국물가(self) -> pd.DataFrame:

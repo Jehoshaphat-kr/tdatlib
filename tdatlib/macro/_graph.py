@@ -18,12 +18,29 @@ class _trace(object):
     #     return fig
 
     @property
-    def 미국채10Y(self) -> go.Scatter:
+    def 미국기준금리(self) -> go.Scatter:
         _ = self._src.미국금리
         return go.Scatter(
-            name='US-10년물금리',
+            name='US-기준금리',
             x=_.index,
-            y=_["10년물"],
+            y=_["기준금리"],
+            mode='lines',
+            line=dict(
+                dash='solid',
+            ),
+            visible=True,
+            showlegend=True,
+            xhoverformat='%Y/%m/%d',
+            hovertemplate='%{x}<br>%{y:.2f}%<extra></extra>'
+        )
+
+    @property
+    def 미국채3M(self) -> go.Scatter:
+        _ = self._src.미국금리
+        return go.Scatter(
+            name='US-3개월물금리',
+            x=_.index,
+            y=_["3개월물"],
             mode='lines',
             line=dict(
                 dash='dot',
@@ -52,6 +69,58 @@ class _trace(object):
         )
 
     @property
+    def 미국채10Y(self) -> go.Scatter:
+        _ = self._src.미국금리
+        return go.Scatter(
+            name='US-10년물금리',
+            x=_.index,
+            y=_["10년물"],
+            mode='lines',
+            line=dict(
+                dash='dot',
+            ),
+            visible='legendonly',
+            showlegend=True,
+            xhoverformat='%Y/%m/%d',
+            hovertemplate='%{x}<br>%{y:.2f}%<extra></extra>'
+        )
+
+    @property
+    def 미국채10Yw인플레이션(self) -> go.Scatter:
+        _ = self._src.미국금리
+        return go.Scatter(
+            name='US-10년물금리(w인플레이션)',
+            x=_.index,
+            y=_["10년물w기대인플레이션"],
+            mode='lines',
+            line=dict(
+                dash='dot',
+            ),
+            visible='legendonly',
+            showlegend=True,
+            xhoverformat='%Y/%m/%d',
+            hovertemplate='%{x}<br>%{y:.2f}%<extra></extra>'
+        )
+
+    @property
+    def 미국채10Y3M금리차(self) -> go.Scatter:
+        _ = self._src.미국금리
+        return go.Scatter(
+            name='US-10년-3개월물금리차',
+            x=_.index,
+            y=_["10년-3개월금리차"],
+            mode='lines',
+            line=dict(
+                color='#2a344d',
+                width=0.8
+            ),
+            visible=True,
+            showlegend=True,
+            xhoverformat='%Y/%m/%d',
+            hovertemplate='%{x}<br>%{y:.2f}%<extra></extra>'
+        )
+
+    @property
     def 미국채10Y2Y금리차(self) -> go.Scatter:
         _ = self._src.미국금리
         return go.Scatter(
@@ -60,7 +129,7 @@ class _trace(object):
             y=_["10년-2년금리차"],
             mode='lines',
             line=dict(
-                color='black',
+                color='#000000',
                 width=0.8
             ),
             visible=True,
