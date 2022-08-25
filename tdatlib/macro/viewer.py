@@ -30,9 +30,15 @@ class viewer(object):
         fig.add_trace(trace=self._s.trace.미국채10Yw인플레이션)
         fig.add_trace(trace=self._s.trace.미국채10Y3M금리차)
         fig.add_trace(trace=self._s.trace.미국채10Y2Y금리차)
+        self._s.trace.add_us_recession(fig)
+
         fig.update_layout(
             title=f'미국 기준/시중 금리 및 장단기 금리차',
             plot_bgcolor='white',
+            legend=dict(
+                groupclick="toggleitem",
+                tracegroupgap=5
+            ),
             xaxis=dict(
                 title='날짜',
                 showticklabels=True,

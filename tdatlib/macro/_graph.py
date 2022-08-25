@@ -17,6 +17,22 @@ class _trace(object):
     #             fillcolor="grey", opacity=0.25, line_width=0)
     #     return fig
 
+    def add_us_recession(self, fig:go.Figure):
+        xs = [f['x'][0] for f in fig['data']]
+        for elem in self._src.US_recession:
+            if elem['to'] < min(xs):
+                continue
+            fig.add_vrect(
+                x0=elem['from'],
+                x1=elem['to'],
+                row='all',
+                col='all',
+                fillcolor='grey',
+                opacity=0.2,
+                line_width=0
+            )
+        return
+
     @property
     def 미국기준금리(self) -> go.Scatter:
         _ = self._src.미국금리
@@ -45,7 +61,7 @@ class _trace(object):
             line=dict(
                 dash='dot',
             ),
-            visible='legendonly',
+            visible=True,
             showlegend=True,
             xhoverformat='%Y/%m/%d',
             hovertemplate='%{x}<br>%{y:.2f}%<extra></extra>'
@@ -114,7 +130,7 @@ class _trace(object):
                 color='#2a344d',
                 width=0.8
             ),
-            visible=True,
+            visible='legendonly',
             showlegend=True,
             xhoverformat='%Y/%m/%d',
             hovertemplate='%{x}<br>%{y:.2f}%<extra></extra>'
@@ -132,7 +148,7 @@ class _trace(object):
                 color='#000000',
                 width=0.8
             ),
-            visible=True,
+            visible='legendonly',
             showlegend=True,
             xhoverformat='%Y/%m/%d',
             hovertemplate='%{x}<br>%{y:.2f}%<extra></extra>'

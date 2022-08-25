@@ -209,10 +209,10 @@ class data(_fetch):
 
     @property
     def 미국금리(self) -> pd.DataFrame:
-        if not hasattr(self, '미국금리'):
+        if not hasattr(self, '__미국금리'):
             cols = {
                 "DFF": "기준금리",
-                "TB3MS": "3개월물",
+                "DGS3MO": "3개월물",
                 "DGS2": "2년물",
                 "DGS10": "10년물",
                 "DFII10": "10년물w기대인플레이션",
@@ -223,8 +223,8 @@ class data(_fetch):
             }
             raw = self.fred(symbols=list(cols.keys()))
             raw = raw.rename(columns=cols)
-            self.__setattr__('미국금리', raw)
-        return self.__getattribute__('미국금리')
+            self.__setattr__('__미국금리', raw)
+        return self.__getattribute__('__미국금리')
 
     @property
     def 미국물가(self) -> pd.DataFrame:
@@ -255,15 +255,8 @@ if __name__ == "__main__":
     app = data()
     app.period = 90
 
-    # print(app.미국금리)
+    print(app.미국금리)
+    print(app.미국금리['3개월물'])
     # print(app.한국금리)
     # print(app.원달러환율)
 
-    fig = go.Figure()
-
-    fig.add_trace(trace=app.trace.미국채10Y)
-    fig.add_trace(trace=app.trace.미국채2Y)
-    fig.add_trace(trace=app.trace.미국채10Y2Y금리차)
-    # fig = trace.add_recession(fig=fig, market='us')
-
-    fig.show()
