@@ -167,31 +167,30 @@ class data(_fetch):
     @property
     def KR_IR(self) -> pd.Series:
         return self.__getter__('722Y001', '한국은행 기준금리', inspect.currentframe().f_code.co_name)
-        # return self.ecos(symbols='722Y001')["한국은행 기준금리"].rename(columns={"한국은행 기준금리":inspect.currentframe().f_code.co_name})
 
     @property
     def KR_3M_CD(self) -> pd.Series:
-        return self.ecos(symbols='722Y001')["CD(91일)"].rename(columns={"CD(91일)": inspect.currentframe().f_code.co_name})
+        return self.__getter__('722Y001', "CD(91일)", inspect.currentframe().f_code.co_name)
 
     @property
     def KR_3M_CP(self) -> pd.Series:
-        return self.ecos(symbols='722Y001')["CP(91일)"].rename(columns={"CP(91일)": inspect.currentframe().f_code.co_name})
+        return self.__getter__('722Y001', "CP(91일)", inspect.currentframe().f_code.co_name)
 
     @property
     def KR_2Y_TY(self) -> pd.Series:
-        return self.ecos(symbols='817Y002')["국고채(2년)"].rename(columns={"국고채(2년)": inspect.currentframe().f_code.co_name})
+        return self.__getter__('817Y002', "국고채(2년)", inspect.currentframe().f_code.co_name)
 
     @property
     def KR_10Y_TY(self) -> pd.Series:
-        return self.ecos(symbols='817Y002')["국고채(10년)"].rename(columns={"국고채(2년)": inspect.currentframe().f_code.co_name})
+        return self.__getter__('817Y002', "국고채(10년)", inspect.currentframe().f_code.co_name)
 
     @property
     def KR_3Y_CB_AAm(self) -> pd.Series:
-        return self.ecos(symbols='817Y002')["회사채(3년, AA-)"].rename(columns={"회사채(3년, AA-)": inspect.currentframe().f_code.co_name})
+        return self.__getter__('817Y002', "회사채(3년, AA-)", inspect.currentframe().f_code.co_name)
 
     @property
     def KR_3Y_CB_BBBm(self) -> pd.Series:
-        return self.ecos(symbols='817Y002')["회사채(3년, BBBA-)"].rename(columns={"회사채(3년, BBB-)": inspect.currentframe().f_code.co_name})
+        return self.__getter__('817Y002', "회사채(3년, BBBA-)", inspect.currentframe().f_code.co_name)
 
     @property
     def KR_NSI(self) -> pd.Series:
