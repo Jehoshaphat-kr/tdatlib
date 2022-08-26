@@ -3,3 +3,4 @@
 # from tdatlib.viewer.market import view_market
 # from tdatlib.viewer.compare import view_compare
 
+from tdatlib.macro import macro

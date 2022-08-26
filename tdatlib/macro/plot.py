@@ -1,5 +1,4 @@
 import plotly.graph_objects as go
-from tdatlib.macro.core import data
 
 
 class viewer(object):
@@ -15,7 +14,7 @@ class viewer(object):
         ])
     )
 
-    def __init__(self, src:data):
+    def __init__(self, src):
         self._s = src
         return
 

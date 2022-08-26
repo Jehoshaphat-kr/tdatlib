@@ -1,8 +1,8 @@
-from tdatlib.dataset import market, index
-from tdatlib.viewer import stock
-from tdatlib.tdef import labels, crypto
 from tqdm import tqdm
-from tdatlib.macro import macro_data, macro_view
+from tdatlib import macro
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
+
 import pandas as pd
 import os, random
 
@@ -10,4 +10,10 @@ import os, random
 DESKTOP = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
 
 
-macro_view.미국금리.show()
+macro = macro()
+macro.data.describe()
+
+
+fig = make_subplots(specs=[[{"secondary_y":True}]])
+fig.add_trace(macro.trace('US_10Y3M_dTY'))
+fig.show()

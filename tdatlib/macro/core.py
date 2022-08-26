@@ -1,8 +1,8 @@
 from pandas_datareader import get_data_fred as fred
 from datetime import datetime, timedelta
 from tdatlib import toolbox
-from tdatlib.macro._graph import _trace
 import pandas as pd
+import inspect
 
 
 class _fetch(object):
@@ -19,7 +19,6 @@ class _fetch(object):
     def period(self, period:int):
         self.__period = period
         return
-
 
     @property
     def ecos_symbols(self) -> pd.DataFrame:
@@ -49,7 +48,7 @@ class _fetch(object):
 
     def fred(self, symbols:str or list):
         """
-        Fetch data from Federal Reserve Economic Data | FRED | St. Louis Fed
+        Fetch src from Federal Reserve Economic Data | FRED | St. Louis Fed
         :param symbols : symbols
         :param period  : period
         :return:
@@ -59,14 +58,14 @@ class _fetch(object):
             symbols = [symbols]
 
         for symbol in symbols:
-            if not hasattr(self, symbol):
+            if not hasattr(self, f'{symbol}{self.__period}'):
                 self.__setattr__(f'{symbol}{self.__period}', fred(symbols=symbol, start=start, end=end))
         return pd.concat(objs=[self.__getattribute__(f'{symbol}{self.__period}') for symbol in symbols], axis=1)
 
 
-    def ecos(self, symbols:str or list) -> pd.DataFrame:
+    def ecos(self, symbols:str or list) -> pd.DataFrame or pd.Series:
         """
-        Fetch data from Economic Statistics System | ECOS | Korea Bank
+        Fetch src from Economic Statistics System | ECOS | Korea Bank
         :param symbols : symbols
         :param period  : period
         :return:
@@ -79,7 +78,7 @@ class _fetch(object):
 
         objs = list()
         for code, label, cyc in zip(samples.코드, samples.지표명, samples.주기):
-            if not hasattr(self, f'_{code}'):
+            if not hasattr(self, f'_{code}{self.__period}'):
                 s = f'{yy}0101' if cyc == 'D' else f'{yy}01S1' if cyc == 'SM' else f'{yy}01' if cyc == 'M' else f'{yy}{cyc}1'
                 e = f'{ee}1230' if cyc == 'D' else f'{ee}12S1' if cyc == 'SM' else f'{ee}12' if cyc == 'M' else f'{ee}{cyc}12'
                 url = f'http://ecos.bok.or.kr/api/StatisticSearch/{self.KEY}/xml/kr/1/100000/{code}/{cyc}/{s}/{e}'
@@ -92,17 +91,16 @@ class _fetch(object):
                     sr = df[df.ITEM_NAME1 == item].set_index(keys='TIME')['DATA_VALUE']
                     sr.name = item
                     _objs.append(sr)
-                self.__setattr__(f'_{code}{self.__period}', pd.concat(objs=_objs, axis=1))
+
+                df = pd.concat(objs=_objs, axis=1)
+                df.index = pd.to_datetime(df.index.tolist())
+                self.__setattr__(f'_{code}{self.__period}', df)
 
             objs.append(self.__getattribute__(f'_{code}{self.__period}'))
         return pd.concat(objs=objs, axis=1)
 
 
 class data(_fetch):
-
-    def __init__(self):
-        self.trace = _trace(self)
-        return
 
     @property
     def US_recession(self) -> list:
@@ -143,7 +141,7 @@ class data(_fetch):
         ]
     
     @property
-    def 원달러환율(self) -> pd.DataFrame:
+    def KRW_USD_exchange(self) -> pd.DataFrame:
         raw = self.ecos(symbols=['731Y003'])
         rev = raw[[col for col in raw.columns if '달러' in col]]
         rev = rev.rename(columns={col: col[col.find('(') + 1:col.find(')')] for col in rev.columns})
@@ -151,37 +149,52 @@ class data(_fetch):
         return rev.astype(float)
 
     @property
-    def 원위안환율(self) -> pd.DataFrame:
+    def KRW_CHY_exchange(self) -> pd.DataFrame:
         raw = self.ecos(symbols=['731Y003'])
         rev = raw[[col for col in raw.columns if '위안' in col]]
         rev = rev.rename(columns={col: col[col.find('(') + 1:col.find(')')] for col in rev.columns})
         rev.index = pd.to_datetime(rev.index)
         return rev.astype(float)
 
-    @property
-    def 한국금리(self) -> pd.DataFrame:
-        cols = {
-            "자금조정 예금금리": "예금금리",
-            "자금조정 대출금리": "대출금리",
-            "한국은행 기준금리": "기준금리",
-            "콜금리(1일, 전체거래)": "콜금리1D",
-            "CD(91일)": "CD금리91D",
-            "CP(91일)": "CP금리91D",
-            "국고채(2년)": "국고채2Y",
-            "국고채(3년)": "국고채3Y",
-            "국고채(5년)": "국고채5Y",
-            "국고채(10년)": "국고채10Y",
-            "국고채(30년)": "국고채20Y",
-            "회사채(3년, AA-)": "회사채3YAA-",
-            "회사채(3년, BBB-)": "회사채3YBBB-",
-        }
-        raw = self.ecos(symbols=['722Y001', '817Y002'])
-        rev = raw[list(cols.keys())].rename(columns=cols)
-        rev.index = pd.to_datetime(rev.index)
-        return rev
+    def __getter__(self, code:str, label:str, name:str) -> pd.Series:
+        if label:
+            _ = self.ecos(symbols=code)[label]
+            _.name = name
+            return _
+        else:
+            return self.fred(symbols=code).rename(columns={code:name})
 
     @property
-    def NSI(self) -> pd.DataFrame:
+    def KR_IR(self) -> pd.Series:
+        return self.__getter__('722Y001', '한국은행 기준금리', inspect.currentframe().f_code.co_name)
+        # return self.ecos(symbols='722Y001')["한국은행 기준금리"].rename(columns={"한국은행 기준금리":inspect.currentframe().f_code.co_name})
+
+    @property
+    def KR_3M_CD(self) -> pd.Series:
+        return self.ecos(symbols='722Y001')["CD(91일)"].rename(columns={"CD(91일)": inspect.currentframe().f_code.co_name})
+
+    @property
+    def KR_3M_CP(self) -> pd.Series:
+        return self.ecos(symbols='722Y001')["CP(91일)"].rename(columns={"CP(91일)": inspect.currentframe().f_code.co_name})
+
+    @property
+    def KR_2Y_TY(self) -> pd.Series:
+        return self.ecos(symbols='817Y002')["국고채(2년)"].rename(columns={"국고채(2년)": inspect.currentframe().f_code.co_name})
+
+    @property
+    def KR_10Y_TY(self) -> pd.Series:
+        return self.ecos(symbols='817Y002')["국고채(10년)"].rename(columns={"국고채(2년)": inspect.currentframe().f_code.co_name})
+
+    @property
+    def KR_3Y_CB_AAm(self) -> pd.Series:
+        return self.ecos(symbols='817Y002')["회사채(3년, AA-)"].rename(columns={"회사채(3년, AA-)": inspect.currentframe().f_code.co_name})
+
+    @property
+    def KR_3Y_CB_BBBm(self) -> pd.Series:
+        return self.ecos(symbols='817Y002')["회사채(3년, BBBA-)"].rename(columns={"회사채(3년, BBB-)": inspect.currentframe().f_code.co_name})
+
+    @property
+    def KR_NSI(self) -> pd.Series:
         """
         Frequently Used ECOS :: 뉴스심리지수[한국은행]
         한국은행은 경제분야 뉴스기사에 나타난 경제심리를 지수화한 뉴스심리지수(NSI)를 ECOS에 실험적으로 공개
@@ -196,57 +209,77 @@ class data(_fetch):
         * ’05.1.1~’22.1.31일중 일별 뉴스심리지수를 작성한 결과,
           장기평균치 100을 기준으로 대체로 대칭적인 흐름을 보이는 가운데 경제심리의 변화를 신속하게 포착됨.
         """
-        raw = self.ecos(symbols='521Y001')
-        raw.index = pd.to_datetime(raw.index)
-        return raw
+        return self.ecos(symbols='521Y001')
 
     @property
-    def 한국경상수지(self) -> pd.DataFrame:
-        raw = self.ecos(symbols='301Y017')
-        rev = raw['경상수지']
-        rev.index = pd.to_datetime(rev.index)
-        return rev
+    def US_IR(self) -> pd.Series:
+        return self.fred(symbols="DFF").rename(columns={"DFF": inspect.currentframe().f_code.co_name})
 
     @property
-    def 미국금리(self) -> pd.DataFrame:
-        if not hasattr(self, '__미국금리'):
-            cols = {
-                "DFF": "기준금리",
-                "DGS3MO": "3개월물",
-                "DGS2": "2년물",
-                "DGS10": "10년물",
-                "DFII10": "10년물w기대인플레이션",
-                "T10Y3M": "10년-3개월금리차",
-                "T10Y2Y": "10년-2년금리차",
-                "BAMLH0A0HYM2": "하이일드스프레드",
-                "MORTGAGE30US": "30년모기지",
-            }
-            raw = self.fred(symbols=list(cols.keys()))
-            raw = raw.rename(columns=cols)
-            self.__setattr__('__미국금리', raw)
-        return self.__getattribute__('__미국금리')
+    def US_3M_TY(self) -> pd.Series:
+        return self.fred(symbols="DGS3MO").rename(columns={"DGS3MO": inspect.currentframe().f_code.co_name})
 
     @property
-    def 미국물가(self) -> pd.DataFrame:
-        cols = {
-            'T5YIFR': '5년기대인플레이션',
-            'T10YIE': '10년평형인플레이션',
-            'CPIAUCSL': '소비자물가지수',
-        }
-        raw = self.fred(symbols=list(cols.keys()))
-        raw = raw.rename(columns=cols)
-        return raw
+    def US_2Y_TY(self) -> pd.Series:
+        return self.fred(symbols="DGS2").rename(columns={"DGS2": inspect.currentframe().f_code.co_name})
 
     @property
-    def 국제유가(self) -> pd.DataFrame:
-        cols = {
-            'DCOILBRENTEU':'BRENT유',
-            'DCOILWTICO': 'WTI유',
-        }
-        raw = self.fred(symbols=list(cols.keys()))
-        raw = raw.rename(columns=cols)
-        return raw
+    def US_10Y_TY(self) -> pd.Series:
+        return self.fred(symbols="DGS10").rename(columns={"DGS10": inspect.currentframe().f_code.co_name})
 
+    @property
+    def US_10Y_TY_Inflation(self) -> pd.Series:
+        return self.fred(symbols="DFII10").rename(columns={"DFII10": inspect.currentframe().f_code.co_name})
+
+    @property
+    def US_10Y3M_dTY(self) -> pd.Series:
+        return self.fred(symbols="T10Y3M").rename(columns={"T10Y3M": inspect.currentframe().f_code.co_name})
+
+    @property
+    def US_10Y2Y_dTY(self) -> pd.Series:
+        return self.fred(symbols="T10Y2Y").rename(columns={"T10Y2Y": inspect.currentframe().f_code.co_name})
+
+    @property
+    def US_HY_Spread(self) -> pd.Series:
+        return self.fred(symbols="BAMLH0A0HYM2").rename(columns={"T10Y2Y": inspect.currentframe().f_code.co_name})
+
+    @property
+    def US_5Y_BEI(self) -> pd.Series:
+        return self.fred(symbols="T5YIFR").rename(columns={'T5YIFR': inspect.currentframe().f_code.co_name})
+
+    @property
+    def US_10Y_BEI(self) -> pd.Series:
+        return self.fred(symbols='T10YIE').rename(columns={'T10YIE': inspect.currentframe().f_code.co_name})
+
+    @property
+    def US_CPI(self) -> pd.Series:
+        return self.fred(symbols='CPIAUCSL').rename(columns={'CPIAUCSL': inspect.currentframe().f_code.co_name})
+
+    @property
+    def Oil_Brent(self) -> pd.Series:
+        return self.fred(symbols='DCOILBRENTEU').rename(columns={'DCOILBRENTEU':'BRENT유'})
+
+    @property
+    def Oil_WTI(self) -> pd.Series:
+        return self.fred(symbols='DCOILWTICO').rename(columns={'DCOILWTICO': 'WTI유'})
+
+    @property
+    def properties(self) -> list:
+        exclude =[
+            'properties',
+            'KEY',
+            'period',
+            'ecos_symbols',
+            'fred',
+            'ecos',
+            'describe'
+        ]
+        return [elem for elem in self.__dir__() if not elem.startswith('_') and not elem in exclude]
+
+    def describe(self):
+        for e in self.properties:
+            print(e)
+        return
 
 if __name__ == "__main__":
     import plotly.graph_objects as go
@@ -255,8 +288,5 @@ if __name__ == "__main__":
     app = data()
     app.period = 90
 
-    print(app.미국금리)
-    print(app.미국금리['3개월물'])
-    # print(app.한국금리)
-    # print(app.원달러환율)
+    print(app.KR_IR)
 

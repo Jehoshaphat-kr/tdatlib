@@ -7,6 +7,7 @@ from pykrx.stock import (
     get_index_ohlcv_by_date
 )
 import pandas as pd
+import yfinance as yf
 
 
 class _fetch(object):
@@ -53,13 +54,20 @@ class _fetch(object):
         return pd.concat(objs=objs, axis=1)
 
     def ohlcv(self, ticker:str) -> pd.DataFrame:
-        end = self.trading_date if self.trading_date else self.__today.strftime("%Y%m%d")
-        start = datetime.strptime(end, "%Y%m%d") - timedelta(self.period * 365)
-        return get_index_ohlcv_by_date(fromdate=start.strftime("%Y%m%d"), todate=end, ticker=ticker)
+        curr = datetime.strptime(self.trading_date, '%Y%m%d') if self.trading_date else self.__today
+        prev = curr - timedelta(self.period * 365)
+        if ticker.isdigit():
+            return get_index_ohlcv_by_date(fromdate=prev.strftime("%Y%m%d"), todate=curr.strftime("%Y%m%d"), ticker=ticker)
+        else:
+            o_names = ['Open', 'High', 'Low', 'Close', 'Volume']
+            c_names = ['시가', '고가', '저가', '종가', '거래량']
+            _ohlcv = yf.Ticker(ticker).history(period=f'{self.period}y')[o_names]
+            _ohlcv.index.name = '날짜'
+            _ohlcv = _ohlcv.rename(columns=dict(zip(o_names, c_names)))
+        return _ohlcv
 
     def deposit(self, ticker: str) -> list:
         return get_index_portfolio_deposit_file(ticker, date=self.__trading_date)
-
 
 
 class data(_fetch):
@@ -92,6 +100,12 @@ class data(_fetch):
             self.__setattr__('__financial', self.ohlcv(ticker='5352'))
         return self.__getattribute__('__financial')
 
+    @property
+    def snp500(self) -> pd.DataFrame:
+        if not hasattr(self, '__snp500'):
+            self.__setattr__('__snp500', self.ohlcv(ticker='^GSPC'))
+        return self.__getattribute__('__snp500')
+
 
 if __name__ == "__main__":
     import plotly.graph_objects as go
@@ -101,6 +115,6 @@ if __name__ == "__main__":
     app = data()
     app.period = 90
 
-    print(app.kind)
-    print(len(app.deposit(ticker='5352')), app.deposit(ticker='5352'))
-    print(app.ohlcv(ticker='5352'))
+    # print(app.kind)
+    # print(len(app.deposit(ticker='5352')), app.deposit(ticker='5352'))
+    print(app.ohlcv(ticker='^GSPC'))
