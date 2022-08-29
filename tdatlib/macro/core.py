@@ -162,7 +162,7 @@ class data(_fetch):
             _.name = name
             return _
         else:
-            return self.fred(symbols=code).rename(columns={code:name})
+            return self.fred(symbols=code).rename(columns={code:name})[name].astype(float)
 
     @property
     def KR_IR(self) -> pd.Series:
@@ -208,27 +208,32 @@ class data(_fetch):
         * ’05.1.1~’22.1.31일중 일별 뉴스심리지수를 작성한 결과,
           장기평균치 100을 기준으로 대체로 대칭적인 흐름을 보이는 가운데 경제심리의 변화를 신속하게 포착됨.
         """
-        return self.ecos(symbols='521Y001')
+        return self.__getter__('521Y001', "NSI", inspect.currentframe().f_code.co_name)
 
     @property
     def US_IR(self) -> pd.Series:
-        return self.fred(symbols="DFF").rename(columns={"DFF": inspect.currentframe().f_code.co_name})
+        return self.__getter__('DFF', '', inspect.currentframe().f_code.co_name)
+        # return self.fred(symbols="DFF").rename(columns={"DFF": inspect.currentframe().f_code.co_name})
 
     @property
     def US_3M_TY(self) -> pd.Series:
-        return self.fred(symbols="DGS3MO").rename(columns={"DGS3MO": inspect.currentframe().f_code.co_name})
+        return self.__getter__('DGS3MO', '', inspect.currentframe().f_code.co_name)
+        # return self.fred(symbols="DGS3MO").rename(columns={"DGS3MO": inspect.currentframe().f_code.co_name})
 
     @property
     def US_2Y_TY(self) -> pd.Series:
-        return self.fred(symbols="DGS2").rename(columns={"DGS2": inspect.currentframe().f_code.co_name})
+        return self.__getter__('DGS2', '', inspect.currentframe().f_code.co_name)
+        # return self.fred(symbols="DGS2").rename(columns={"DGS2": inspect.currentframe().f_code.co_name})
 
     @property
     def US_10Y_TY(self) -> pd.Series:
-        return self.fred(symbols="DGS10").rename(columns={"DGS10": inspect.currentframe().f_code.co_name})
+        return self.__getter__('DGS10', '', inspect.currentframe().f_code.co_name)
+        # return self.fred(symbols="DGS10").rename(columns={"DGS10": inspect.currentframe().f_code.co_name})
 
     @property
     def US_10Y_TY_Inflation(self) -> pd.Series:
-        return self.fred(symbols="DFII10").rename(columns={"DFII10": inspect.currentframe().f_code.co_name})
+        return self.__getter__('DFII10', '', inspect.currentframe().f_code.co_name)
+        # return self.fred(symbols="DFII10").rename(columns={"DFII10": inspect.currentframe().f_code.co_name})
 
     @property
     def US_10Y3M_dTY(self) -> pd.Series:

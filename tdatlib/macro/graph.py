@@ -16,13 +16,11 @@ class trace(object):
 
         if not getattr(self, prop):
             src = getattr(self.__, prop)
-            if len(src.columns) > 1:
-                src = src[kwargs['key']]
 
             tr = go.Scatter(
                 name=kwargs['name'] if 'name' in kwargs.keys() else prop,
                 x=src.index,
-                y=src,
+                y=src[kwargs['key']] if 'key' in kwargs.keys() else src,
                 mode='lines',
                 line=dict(
                     dash=kwargs['dash'] if 'dash' in kwargs.keys() else 'solid',
@@ -32,7 +30,8 @@ class trace(object):
                 showlegend=kwargs['showlegend'] if 'showlegend' in kwargs.keys() else True,
                 xhoverformat='%Y/%m/%d',
                 yhoverformat=kwargs['yhovertemplate'] if 'yhovertemplate' in kwargs.keys() else '%{.2f}',
-                hovertemplate='%{y}' + kwargs['unit'] if 'unit' in kwargs.keys() else '' + ' @%{x}'
+                hovertemplate=f"{kwargs['name'] if 'name' in kwargs.keys() else prop}<br>" + \
+                              '%{y}' + (kwargs['unit'] if 'unit' in kwargs.keys() else '') + ' @%{x}<extra></extra>'
             )
             setattr(self, prop, tr)
 

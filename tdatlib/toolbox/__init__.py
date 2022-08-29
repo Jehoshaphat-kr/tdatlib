@@ -1,4 +1,9 @@
 from xml.etree.ElementTree import ElementTree, fromstring
+from tdatlib.toolbox.plotter import (
+    set_xaxis,
+    set_yaxis,
+    add_layout
+)
 import pandas as pd
 import requests
 

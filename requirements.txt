@@ -13,3 +13,4 @@ yfinance
 tqdm
 pytz
 matplotlib
+pandas_datareader
