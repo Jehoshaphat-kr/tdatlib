@@ -213,59 +213,54 @@ class data(_fetch):
     @property
     def US_IR(self) -> pd.Series:
         return self.__getter__('DFF', '', inspect.currentframe().f_code.co_name)
-        # return self.fred(symbols="DFF").rename(columns={"DFF": inspect.currentframe().f_code.co_name})
 
     @property
     def US_3M_TY(self) -> pd.Series:
         return self.__getter__('DGS3MO', '', inspect.currentframe().f_code.co_name)
-        # return self.fred(symbols="DGS3MO").rename(columns={"DGS3MO": inspect.currentframe().f_code.co_name})
 
     @property
     def US_2Y_TY(self) -> pd.Series:
         return self.__getter__('DGS2', '', inspect.currentframe().f_code.co_name)
-        # return self.fred(symbols="DGS2").rename(columns={"DGS2": inspect.currentframe().f_code.co_name})
 
     @property
     def US_10Y_TY(self) -> pd.Series:
         return self.__getter__('DGS10', '', inspect.currentframe().f_code.co_name)
-        # return self.fred(symbols="DGS10").rename(columns={"DGS10": inspect.currentframe().f_code.co_name})
 
     @property
     def US_10Y_TY_Inflation(self) -> pd.Series:
         return self.__getter__('DFII10', '', inspect.currentframe().f_code.co_name)
-        # return self.fred(symbols="DFII10").rename(columns={"DFII10": inspect.currentframe().f_code.co_name})
 
     @property
     def US_10Y3M_dTY(self) -> pd.Series:
-        return self.fred(symbols="T10Y3M").rename(columns={"T10Y3M": inspect.currentframe().f_code.co_name})
+        return self.__getter__('T10Y3M', '', inspect.currentframe().f_code.co_name)
 
     @property
     def US_10Y2Y_dTY(self) -> pd.Series:
-        return self.fred(symbols="T10Y2Y").rename(columns={"T10Y2Y": inspect.currentframe().f_code.co_name})
+        return self.__getter__('T10Y2Y', '', inspect.currentframe().f_code.co_name)
 
     @property
     def US_HY_Spread(self) -> pd.Series:
-        return self.fred(symbols="BAMLH0A0HYM2").rename(columns={"T10Y2Y": inspect.currentframe().f_code.co_name})
+        return self.__getter__('BAMLH0A0HYM2', '', inspect.currentframe().f_code.co_name)
 
     @property
     def US_5Y_BEI(self) -> pd.Series:
-        return self.fred(symbols="T5YIFR").rename(columns={'T5YIFR': inspect.currentframe().f_code.co_name})
+        return self.__getter__('T5YIFR', '', inspect.currentframe().f_code.co_name)
 
     @property
     def US_10Y_BEI(self) -> pd.Series:
-        return self.fred(symbols='T10YIE').rename(columns={'T10YIE': inspect.currentframe().f_code.co_name})
+        return self.__getter__('T10YIE', '', inspect.currentframe().f_code.co_name)
 
     @property
     def US_CPI(self) -> pd.Series:
-        return self.fred(symbols='CPIAUCSL').rename(columns={'CPIAUCSL': inspect.currentframe().f_code.co_name})
+        return self.__getter__('CPIAUCSL', '', inspect.currentframe().f_code.co_name)
 
     @property
     def Oil_Brent(self) -> pd.Series:
-        return self.fred(symbols='DCOILBRENTEU').rename(columns={'DCOILBRENTEU':'BRENT유'})
+        return self.__getter__('DCOILBRENTEU', '', inspect.currentframe().f_code.co_name)
 
     @property
     def Oil_WTI(self) -> pd.Series:
-        return self.fred(symbols='DCOILWTICO').rename(columns={'DCOILWTICO': 'WTI유'})
+        return self.__getter__('DCOILWTICO', '', inspect.currentframe().f_code.co_name)
 
     @property
     def properties(self) -> list:

@@ -1902,6 +1902,10 @@ section {
   margin-bottom: 30px;
 }
 
+.blog .blog-comments .comments-list {
+  list-style-type: none;
+}
+
 .blog .blog-comments .comments-count {
   font-weight: bold;
 }
