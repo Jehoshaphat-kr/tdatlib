@@ -9,7 +9,7 @@ class _fetch(object):
 
     KEY = "CEW3KQU603E6GA8VX0O9"
     __today  = datetime.now().date()
-    __period = 20
+    __period = 15
 
     @property
     def period(self) -> int:
@@ -162,7 +162,7 @@ class data(_fetch):
         if label:
             _ = self.ecos(symbols=code)[label]
             _.name = name
-            return _
+            return _.astype(float)
         else:
             return self.fred(symbols=code).rename(columns={code:name})[name].astype(float)
 

@@ -15,25 +15,26 @@ class trace(object):
             raise AttributeError
 
         if not getattr(self, prop):
-            kkeys = kwargs.keys()
+            src = getattr(self.__, prop).copy()
+            key = kwargs.keys()
             setattr(
                 self,
                 prop,
                 go.Scatter(
-                    name=kwargs['name'] if 'name' in kkeys else prop,
-                    x=getattr(self.__, prop).index,
-                    y=getattr(self.__, prop)[kwargs['key']] if 'key' in kkeys else getattr(self.__, prop),
+                    name=kwargs['name'] if 'name' in key else prop,
+                    x=src.index,
+                    y=src[kwargs['key']] if 'key' in key else src,
                     mode='lines',
                     line=dict(
-                        dash=kwargs['dash'] if 'dash' in kkeys else 'solid',
-                        width=kwargs['width'] if 'width' in kkeys else 1
+                        dash=kwargs['dash'] if 'dash' in key else 'solid',
+                        width=kwargs['width'] if 'width' in key else 1
                     ),
-                    visible=kwargs['visible'] if 'visible' in kkeys else True,
-                    showlegend=kwargs['showlegend'] if 'showlegend' in kkeys else True,
+                    visible=kwargs['visible'] if 'visible' in key else True,
+                    showlegend=kwargs['showlegend'] if 'showlegend' in key else True,
                     xhoverformat='%Y/%m/%d',
-                    yhoverformat=kwargs['yhovertemplate'] if 'yhovertemplate' in kkeys else '%{.2f}',
-                    hovertemplate=f"{kwargs['name'] if 'name' in kkeys else prop}<br>" + \
-                                  '%{y}' + (kwargs['unit'] if 'unit' in kkeys else '') + ' @%{x}<extra></extra>'
+                    yhoverformat=kwargs['yhovertemplate'] if 'yhovertemplate' in key else '%{.2f}',
+                    hovertemplate=f"{kwargs['name'] if 'name' in key else prop}<br>" + \
+                                  '%{y}' + (kwargs['unit'] if 'unit' in key else '') + ' @%{x}<extra></extra>'
                 )
             )
         return self.__getattribute__(prop)

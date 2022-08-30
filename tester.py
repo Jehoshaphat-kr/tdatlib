@@ -16,7 +16,7 @@ macro.data.describe()
 fig = make_subplots(specs=[[{"secondary_y":True}]])
 fig.add_trace(macro.trace('KRW_USD_exchange', key='종가', unit='원'))
 fig.add_trace(macro.trace('KR_10Y_TY', unit='%'), secondary_y=True)
-fig.add_trace(macro.trace('US_10Y_TY_Inflation', unit='%'), secondary_y=True)
+fig.add_trace(macro.trace('US_10Y_TY', unit='%'), secondary_y=True)
 
 toolbox.add_layout(
     fig,
