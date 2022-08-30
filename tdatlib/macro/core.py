@@ -73,14 +73,16 @@ class _fetch(object):
         if type(symbols) == str:
             symbols = [symbols]
 
-        yy, ee = self.__today.year - self.__period, self.__today.year
+        py = self.__today.year - self.__period
+        cy, cm, cd = self.__today.year, self.__today.month, self.__today.day
+        today = self.__today.strftime("%Y%m%d")
         samples = self.ecos_symbols[self.ecos_symbols.코드.isin(symbols)]
 
         objs = list()
         for code, label, cyc in zip(samples.코드, samples.지표명, samples.주기):
             if not hasattr(self, f'_{code}{self.__period}'):
-                s = f'{yy}0101' if cyc == 'D' else f'{yy}01S1' if cyc == 'SM' else f'{yy}01' if cyc == 'M' else f'{yy}{cyc}1'
-                e = f'{ee}1230' if cyc == 'D' else f'{ee}12S1' if cyc == 'SM' else f'{ee}12' if cyc == 'M' else f'{ee}{cyc}12'
+                s = f'{py}0101' if cyc == 'D' else f'{py}01S1' if cyc == 'SM' else f'{py}01' if cyc == 'M' else f'{py}{cyc}1'
+                e = today if cyc == 'D' else f'{cy}12S1' if cyc == 'SM' else f'{cy}12' if cyc == 'M' else f'{cy}{cyc}12'
                 url = f'http://ecos.bok.or.kr/api/StatisticSearch/{self.KEY}/xml/kr/1/100000/{code}/{cyc}/{s}/{e}'
                 df = toolbox.xml_to_df(url=url)
                 if cyc == 'M':
@@ -97,7 +99,7 @@ class _fetch(object):
                 self.__setattr__(f'_{code}{self.__period}', df)
 
             objs.append(self.__getattribute__(f'_{code}{self.__period}'))
-        return pd.concat(objs=objs, axis=1)
+        return pd.concat(objs=objs, axis=1).sort_index()
 
 
 class data(_fetch):
@@ -281,11 +283,13 @@ class data(_fetch):
         return
 
 if __name__ == "__main__":
-    import plotly.graph_objects as go
     pd.set_option('display.expand_frame_repr', False)
 
     app = data()
-    app.period = 90
+    app.period = 15
 
-    print(app.KR_IR)
+    # print(app.KR_IR)
+    # print(app.US_10Y_TY)
+    print(app.ecos('817Y002'))
 
+    # app.ecos('817Y002').to_csv(r'C:\Users\Administrator\Desktop\Temp\test.csv', encoding='euc-kr')
