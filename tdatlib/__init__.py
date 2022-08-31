@@ -4,3 +4,4 @@
 # from tdatlib.viewer.compare import view_compare
 
 from tdatlib.macro import macro
+from tdatlib.index import index

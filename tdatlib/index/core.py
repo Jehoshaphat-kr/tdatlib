@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from tdatlib.index._graph import _trace
 from pykrx.stock import (
     get_index_ticker_list,
     get_index_ticker_name,
@@ -72,10 +71,6 @@ class _fetch(object):
 
 class data(_fetch):
 
-    def __init__(self):
-        self.trace = _trace(self)
-        return
-
     @property
     def kospi(self) -> pd.DataFrame:
         if not hasattr(self, '__kospi'):
@@ -106,6 +101,24 @@ class data(_fetch):
             self.__setattr__('__snp500', self.ohlcv(ticker='^GSPC'))
         return self.__getattribute__('__snp500')
 
+    @property
+    def properties(self) -> list:
+        exclude = [
+            'properties',
+            'deposit',
+            'period',
+            'trading_date',
+            'kind',
+            'ohlcv',
+            'describe'
+        ]
+        return [elem for elem in self.__dir__() if not elem.startswith('_') and not elem in exclude]
+
+    def describe(self):
+        for e in self.properties:
+            print(e)
+        return
+
 
 if __name__ == "__main__":
     import plotly.graph_objects as go
@@ -113,8 +126,8 @@ if __name__ == "__main__":
     pd.set_option('display.expand_frame_repr', False)
 
     app = data()
-    app.period = 90
+    app.period = 20
 
     # print(app.kind)
     # print(len(app.deposit(ticker='5352')), app.deposit(ticker='5352'))
-    print(app.ohlcv(ticker='^GSPC'))
+    app.describe()
