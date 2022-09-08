@@ -19,8 +19,7 @@ def auto_mouse(t_gap:int=50, due:int=0):
         t.sleep(t_gap)
     return
 
-Te
 
 if __name__ == "__main__":
-    # auto_mouse(t_gap=90)
-    auto_mouse(t_gap=90, due=1900)
+    auto_mouse(t_gap=90)
+    # auto_mouse(t_gap=90, due=1900)
