@@ -211,55 +211,114 @@ def getMultipleSeries(ticker:str) -> pd.DataFrame:
 
 class _fnguide(object):
 
-    __timegap = 'annual'
+    __period = 'annual'
     def __init__(self, ticker:str):
         self._t = ticker
         return
 
     def __property__(self, key, **kwargs):
         if not hasattr(self, f'_{self._t}_{key}'):
-            self.__setattr__(f'_{self._t}_{key}', globals()[f'get{key}'](self._t, **kwargs))
+            fname = f'get{key}' if not key.startswith('Statement') else f'getStatement'
+            self.__setattr__(f'_{self._t}_{key}', globals()[fname](self._t, **kwargs))
         return self.__getattribute__(f'_{self._t}_{key}')
 
     @property
-    def timegap(self) -> str:
-        return self.__timegap
+    def period(self) -> str:
+        return self.__period
 
-    @timegap.setter
-    def timegap(self, timegap:str):
-        if not timegap in ['annual', 'quarter']:
+    @period.setter
+    def period(self, period:str):
+        if not period in ['annual', 'quarter']:
             raise KeyError
-        self.__timegap = timegap
+        self.__period = period
 
     @property
     def Summary(self) -> str:
         return self.__property__(key=inner().f_code.co_name)
 
     @property
-    def Products(self) -> str:
+    def Products(self) -> pd.DataFrame:
         return self.__property__(key=inner().f_code.co_name)
 
     @property
-    def Statement(self) -> str:
-        return self.__property__(key=inner().f_code.co_name, kine=self.timegap)
+    def Statement(self) -> pd.DataFrame:
+        return self.__property__(key=f'{inner().f_code.co_name}_{self.period}', kind=self.period)
 
+    @property
+    def Asset(self) -> pd.DataFrame:
+        asset = self.Statement[['자산총계', '부채총계', '자본총계']].dropna().astype(int).copy()
+        for col in asset.columns:
+            asset[f'{col}LB'] = asset[col].apply(lambda x: f'{x}억원' if x < 10000 else f'{str(x)[:-4]}조 {str(x)[-4:]}억원')
+        return asset
 
-# def interface_asset(table:pd.DataFrame) -> pd.DataFrame:
-#     asset = table[['자산총계', '부채총계', '자본총계']].dropna().astype(int).copy()
-#     for col in asset.columns:
-#         asset[f'{col}LB'] = asset[col].apply(lambda x: f'{x}억원' if x < 10000 else f'{str(x)[:-4]}조 {str(x)[-4:]}억원')
-#     return asset
-#
-# def interface_profit(table:pd.DataFrame) -> pd.DataFrame:
-#     key = [_ for _ in ['매출액', '순영업수익', '이자수익', '보험료수익'] if _ in table.columns][0]
-#     profit = table[[key, '영업이익', '당기순이익']].dropna().astype(int)
-#     for col in [key, '영업이익', '당기순이익']:
-#         profit[f'{col}LB'] = profit[col].apply(lambda x: f'{x}억원' if x < 10000 else f'{str(x)[:-4]}조 {str(x)[-4:]}억원')
-#     return profit
+    @property
+    def Profit(self) -> pd.DataFrame:
+        key = [_ for _ in ['매출액', '순영업수익', '이자수익', '보험료수익'] if _ in self.Statement.columns][0]
+        profit = self.Statement[[key, '영업이익', '당기순이익']].dropna().astype(int)
+        for col in [key, '영업이익', '당기순이익']:
+            profit[f'{col}LB'] = profit[col].apply(lambda x: f'{x}억원' if x < 10000 else f'{str(x)[:-4]}조 {str(x)[-4:]}억원')
+        return profit
+
+    @property
+    def Expenses(self) -> pd.DataFrame:
+        return self.__property__(key=inner().f_code.co_name)
+
+    @property
+    def Foreigner(self) -> pd.DataFrame:
+        return self.__property__(key=inner().f_code.co_name)
+
+    @property
+    def Consensus(self) -> pd.DataFrame:
+        return self.__property__(key=inner().f_code.co_name)
+
+    @property
+    def Nps(self) -> pd.DataFrame:
+        return self.__property__(key=inner().f_code.co_name)
+
+    @property
+    def BenchmarkReturn(self) -> pd.DataFrame:
+        return self.__property__(key=inner().f_code.co_name)
+
+    @property
+    def BenchmarkMultiple(self) -> pd.DataFrame:
+        return self.__property__(key=inner().f_code.co_name)
+
+    @property
+    def Multifactor(self) -> pd.DataFrame:
+        return self.__property__(key=inner().f_code.co_name)
+
+    @property
+    def MultipleSeries(self) -> pd.DataFrame:
+        return self.__property__(key=inner().f_code.co_name)
+
+    @property
+    def MultipleBand(self) -> pd.DataFrame:
+        return self.__property__(key=inner().f_code.co_name)
+
+    @property
+    def ShortSell(self) -> pd.DataFrame:
+        return self.__property__(key=inner().f_code.co_name)
+
+    @property
+    def ShortBalance(self) -> pd.DataFrame:
+        return self.__property__(key=inner().f_code.co_name)
+
 
 if __name__ == '__main__':
     tester = _fnguide(ticker='316140')
     print(tester.Summary)
     print(tester.Products)
     print(tester.Statement)
-    tester.timegap = 'quarter'
+    print(tester.Asset)
+    print(tester.Profit)
+    print(tester.Expenses)
+    print(tester.Foreigner)
+    print(tester.Consensus)
+    print(tester.Nps)
+    print(tester.BenchmarkReturn)
+    print(tester.BenchmarkMultiple)
+    print(tester.Multifactor)
+    print(tester.MultipleSeries)
+    print(tester.MultipleBand)
+    print(tester.ShortSell)
+    print(tester.ShortBalance)
