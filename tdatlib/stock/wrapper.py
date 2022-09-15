@@ -1,22 +1,15 @@
+from tdatlib.stock.fnguide import _fnguide
 
 
-class stock(object):
+class krx(object):
 
     def __init__(self, ticker:str):
-        self.__t = ticker
+        self.fnguide = _fnguide(ticker=ticker)
         return
 
 
 
 
 if __name__ == "__main__":
-
-    tester = _fnguide(ticker='316140')
-    # print(tester.summary)
-    # print(tester.product)
-    # print(tester.statement)
-    # print(tester.asset)
-    # print(tester.profit)
-    # print(tester.expenses)
-    # print(tester.consensus)
-    print(tester.foreigner)
+    kr = krx(ticker='316140')
+    print(kr.fnguide.Products)
