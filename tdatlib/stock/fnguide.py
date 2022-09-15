@@ -211,7 +211,7 @@ def getMultipleSeries(ticker:str) -> pd.DataFrame:
 
 class _fnguide(object):
 
-    __period = 'annual'
+    __by = 'annual'
     def __init__(self, ticker:str):
         self._t = ticker
         return
@@ -223,14 +223,14 @@ class _fnguide(object):
         return self.__getattribute__(f'_{self._t}_{key}')
 
     @property
-    def period(self) -> str:
-        return self.__period
+    def by(self) -> str:
+        return self.__by
 
-    @period.setter
-    def period(self, period:str):
+    @by.setter
+    def by(self, period:str):
         if not period in ['annual', 'quarter']:
             raise KeyError
-        self.__period = period
+        self.__by = period
 
     @property
     def Summary(self) -> str:
@@ -242,7 +242,7 @@ class _fnguide(object):
 
     @property
     def Statement(self) -> pd.DataFrame:
-        return self.__property__(key=f'{inner().f_code.co_name}_{self.period}', kind=self.period)
+        return self.__property__(key=f'{inner().f_code.co_name}_{self.by}', kind=self.by)
 
     @property
     def Asset(self) -> pd.DataFrame:
