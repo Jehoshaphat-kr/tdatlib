@@ -192,7 +192,7 @@ class data(_fetch):
 
     @property
     def KR_3Y_CB_BBBm(self) -> pd.Series:
-        return self.__getter__('817Y002', "회사채(3년, BBBA-)", inspect.currentframe().f_code.co_name)
+        return self.__getter__('817Y002', "회사채(3년, BBB-)", inspect.currentframe().f_code.co_name)
 
     @property
     def KR_NSI(self) -> pd.Series:
