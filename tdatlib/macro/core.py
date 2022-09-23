@@ -88,11 +88,20 @@ class _fetch(object):
                 if cyc == 'M':
                     df['TIME'] = df['TIME'] + '15'
 
+                temp = list()
                 _objs = list()
                 for item in df['ITEM_NAME1'].drop_duplicates(keep='first'):
+                    name = item.replace('~', '-').replace(' ', '_')
                     sr = df[df.ITEM_NAME1 == item].set_index(keys='TIME')['DATA_VALUE']
-                    sr.name = item
+                    sr.rename(index=name, inplace=True)
                     _objs.append(sr)
+                    print(item, '->', name, end =' ')
+                    print(sr)
+                    # if name in temp:
+                    #     print('ㅇ')
+                    # else:
+                    #     print('x')
+                    #     temp.append(name)
 
                 df = pd.concat(objs=_objs, axis=1)
                 df.index = pd.to_datetime(df.index.tolist())
@@ -290,6 +299,6 @@ if __name__ == "__main__":
 
     # print(app.KR_IR)
     # print(app.US_10Y_TY)
-    print(app.ecos('817Y002'))
+    print(app.ecos('121Y002'))
 
     # app.ecos('817Y002').to_csv(r'C:\Users\Administrator\Desktop\Temp\test.csv', encoding='euc-kr')
