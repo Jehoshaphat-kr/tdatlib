@@ -160,6 +160,10 @@ class treemap(object):
 
             if pos.empty:
                 pass
+            elif pos_bin == 3:
+                p_color = pd.cut(pos[t], bins=pos_bin, labels=scale[4:], right=True)
+                p_color.fillna(scale[4], inplace=True)
+                objs.append(p_color)
             else:
                 if pos_bin[0] == pos_bin[1]:
                     pos_bin[0] = 0.01

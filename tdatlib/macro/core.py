@@ -88,23 +88,16 @@ class _fetch(object):
                 if cyc == 'M':
                     df['TIME'] = df['TIME'] + '15'
 
-                temp = list()
                 _objs = list()
                 for item in df['ITEM_NAME1'].drop_duplicates(keep='first'):
                     name = item.replace('~', '-').replace(' ', '_')
                     sr = df[df.ITEM_NAME1 == item].set_index(keys='TIME')['DATA_VALUE']
+                    if not sr.index.is_unique:
+                        continue
                     sr.rename(index=name, inplace=True)
                     _objs.append(sr)
-                    print(item, '->', name, end =' ')
-                    print(sr)
-                    # if name in temp:
-                    #     print('ㅇ')
-                    # else:
-                    #     print('x')
-                    #     temp.append(name)
-
                 df = pd.concat(objs=_objs, axis=1)
-                df.index = pd.to_datetime(df.index.tolist())
+                df.index = pd.to_datetime(df.index.to_list())
                 self.__setattr__(f'_{code}{self.__period}', df)
 
             objs.append(self.__getattribute__(f'_{code}{self.__period}'))
