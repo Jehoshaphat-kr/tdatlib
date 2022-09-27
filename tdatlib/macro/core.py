@@ -86,7 +86,7 @@ class _fetch(object):
                 url = f'http://ecos.bok.or.kr/api/StatisticSearch/{self.KEY}/xml/kr/1/100000/{code}/{cyc}/{s}/{e}'
                 df = toolbox.xml_to_df(url=url)
                 if cyc == 'M':
-                    df['TIME'] = df['TIME'] + '15'
+                    df['TIME'] = df['TIME'] + '30'
 
                 _objs = list()
                 for item in df['ITEM_NAME1'].drop_duplicates(keep='first'):
@@ -141,7 +141,7 @@ class data(_fetch):
             {'label': 'blank#11', 'from': datetime(2011, 5, 2), 'to': datetime(2011, 9, 26)},
             {'label': 'blank#12', 'from': datetime(2018, 1, 29), 'to': datetime(2019, 1, 3)},
             {'label': 'blank#13', 'from': datetime(2020, 1, 22), 'to': datetime(2020, 3, 19)},
-            {'label': 'blank#14', 'from': datetime(2021, 7, 6), 'to': datetime(2022, 7, 6)},
+            {'label': 'blank#14', 'from': datetime(2021, 7, 6), 'to': datetime(2022, 9, 27)},
         ]
     
     @property
@@ -170,7 +170,7 @@ class data(_fetch):
 
     @property
     def KR_IR(self) -> pd.Series:
-        return self.__getter__('722Y001', '한국은행 기준금리', inspect.currentframe().f_code.co_name)
+        return self.__getter__('722Y001', '한국은행_기준금리', inspect.currentframe().f_code.co_name)
 
     @property
     def KR_3M_CD(self) -> pd.Series:
@@ -190,11 +190,11 @@ class data(_fetch):
 
     @property
     def KR_3Y_CB_AAm(self) -> pd.Series:
-        return self.__getter__('817Y002', "회사채(3년, AA-)", inspect.currentframe().f_code.co_name)
+        return self.__getter__('817Y002', "회사채(3년,_AA-)", inspect.currentframe().f_code.co_name)
 
     @property
     def KR_3Y_CB_BBBm(self) -> pd.Series:
-        return self.__getter__('817Y002', "회사채(3년, BBB-)", inspect.currentframe().f_code.co_name)
+        return self.__getter__('817Y002', "회사채(3년,_BBB-)", inspect.currentframe().f_code.co_name)
 
     @property
     def KR_NSI(self) -> pd.Series:
@@ -290,8 +290,9 @@ if __name__ == "__main__":
     app = data()
     app.period = 15
 
-    # print(app.KR_IR)
-    # print(app.US_10Y_TY)
-    print(app.ecos('121Y002'))
-
-    # app.ecos('817Y002').to_csv(r'C:\Users\Administrator\Desktop\Temp\test.csv', encoding='euc-kr')
+    # df = app.KR_IR
+    # df = app.US_10Y_TY
+    df = app.ecos('722Y001')
+    print(df)
+    print(df.columns)
+    # df.to_csv(r'C:\Users\Administrator\Desktop\Temp\test.csv', encoding='euc-kr')
