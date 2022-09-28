@@ -86,7 +86,7 @@ class _fetch(object):
                 url = f'http://ecos.bok.or.kr/api/StatisticSearch/{self.KEY}/xml/kr/1/100000/{code}/{cyc}/{s}/{e}'
                 df = toolbox.xml_to_df(url=url)
                 if cyc == 'M':
-                    df['TIME'] = df['TIME'] + '30'
+                    df['TIME'] = df['TIME'] + '28'
 
                 _objs = list()
                 for item in df['ITEM_NAME1'].drop_duplicates(keep='first'):
