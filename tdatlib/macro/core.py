@@ -63,45 +63,43 @@ class _fetch(object):
         return pd.concat(objs=[self.__getattribute__(f'{symbol}{self.__period}') for symbol in symbols], axis=1)
 
 
-    def ecos(self, symbols:str or list) -> pd.DataFrame or pd.Series:
+    def ecos(self, symbol:str) -> pd.DataFrame or pd.Series:
         """
         Fetch src from Economic Statistics System | ECOS | Korea Bank
-        :param symbols : symbols
-        :param period  : period
+        :param symbol : symbol
+        :param period : period
         :return:
         """
-        if type(symbols) == str:
-            symbols = [symbols]
+        if hasattr(self, f'_{symbol}{self.__period}'):
+            return self.__getattribute__(f'_{symbol}{self.__period}')
 
         py = self.__today.year - self.__period
         cy, cm, cd = self.__today.year, self.__today.month, self.__today.day
         today = self.__today.strftime("%Y%m%d")
-        samples = self.ecos_symbols[self.ecos_symbols.코드.isin(symbols)]
+        symbol, label, cyc, _ = tuple(self.ecos_symbols[self.ecos_symbols.코드 == symbol].values[0])
 
-        objs = list()
-        for code, label, cyc in zip(samples.코드, samples.지표명, samples.주기):
-            if not hasattr(self, f'_{code}{self.__period}'):
-                s = f'{py}0101' if cyc == 'D' else f'{py}01S1' if cyc == 'SM' else f'{py}01' if cyc == 'M' else f'{py}{cyc}1'
-                e = today if cyc == 'D' else f'{cy}12S1' if cyc == 'SM' else f'{cy}12' if cyc == 'M' else f'{cy}{cyc}12'
-                url = f'http://ecos.bok.or.kr/api/StatisticSearch/{self.KEY}/xml/kr/1/100000/{code}/{cyc}/{s}/{e}'
-                df = toolbox.xml_to_df(url=url)
-                if cyc == 'M':
-                    df['TIME'] = df['TIME'] + '28'
+        s = f'{py}0101' if cyc == 'D' else f'{py}01S1' if cyc == 'SM' else f'{py}01' if cyc == 'M' else f'{py}{cyc}1'
+        e = today if cyc == 'D' else f'{cy}12S1' if cyc == 'SM' else f'{cy}12' if cyc == 'M' else f'{cy}{cyc}12'
+        url = f'http://ecos.bok.or.kr/api/StatisticSearch/{self.KEY}/xml/kr/1/100000/{symbol}/{cyc}/{s}/{e}'
+        df = toolbox.xml_to_df(url=url)
 
-                _objs = list()
-                for item in df['ITEM_NAME1'].drop_duplicates(keep='first'):
-                    name = item.replace('~', '-').replace(' ', '_')
-                    sr = df[df.ITEM_NAME1 == item].set_index(keys='TIME')['DATA_VALUE']
-                    if not sr.index.is_unique:
-                        continue
-                    sr.rename(index=name, inplace=True)
-                    _objs.append(sr)
-                df = pd.concat(objs=_objs, axis=1)
-                df.index = pd.to_datetime(df.index.to_list())
-                self.__setattr__(f'_{code}{self.__period}', df)
-
-            objs.append(self.__getattribute__(f'_{code}{self.__period}'))
-        return pd.concat(objs=objs, axis=1).sort_index()
+        if cyc == 'M':
+            df['TIME'] = df['TIME'] + '28'
+        print(df['ITEM_NAME1'].drop_duplicates(keep='first'))
+        _objs = list()
+        for item in df['ITEM_NAME1'].drop_duplicates(keep='first'):
+            print(item, end = ' ')
+            name = item.replace('~', '-').replace(' ', '_')
+            sr = df[df.ITEM_NAME1 == item].set_index(keys='TIME')['DATA_VALUE']
+            if not sr.index.is_unique:
+                continue
+            print('OK')
+            sr.rename(index=name, inplace=True)
+            _objs.append(sr)
+        df = pd.concat(objs=_objs, axis=1)
+        df.index = pd.to_datetime(df.index.to_list())
+        self.__setattr__(f'_{symbol}{self.__period}', df)
+        return df
 
 
 class data(_fetch):
@@ -141,12 +139,12 @@ class data(_fetch):
             {'label': 'blank#11', 'from': datetime(2011, 5, 2), 'to': datetime(2011, 9, 26)},
             {'label': 'blank#12', 'from': datetime(2018, 1, 29), 'to': datetime(2019, 1, 3)},
             {'label': 'blank#13', 'from': datetime(2020, 1, 22), 'to': datetime(2020, 3, 19)},
-            {'label': 'blank#14', 'from': datetime(2021, 7, 6), 'to': datetime(2022, 9, 27)},
+            {'label': 'blank#14', 'from': datetime(2021, 7, 6), 'to': datetime(2022, 10, 5)},
         ]
     
     @property
     def KRW_USD_exchange(self) -> pd.DataFrame:
-        raw = self.ecos(symbols=['731Y003'])
+        raw = self.ecos(symbol='731Y003')
         rev = raw[[col for col in raw.columns if '달러' in col]]
         rev = rev.rename(columns={col: col[col.find('(') + 1:col.find(')')] for col in rev.columns})
         rev.index = pd.to_datetime(rev.index)
@@ -154,7 +152,7 @@ class data(_fetch):
 
     @property
     def KRW_CHY_exchange(self) -> pd.DataFrame:
-        raw = self.ecos(symbols=['731Y003'])
+        raw = self.ecos(symbol='731Y003')
         rev = raw[[col for col in raw.columns if '위안' in col]]
         rev = rev.rename(columns={col: col[col.find('(') + 1:col.find(')')] for col in rev.columns})
         rev.index = pd.to_datetime(rev.index)
@@ -162,7 +160,7 @@ class data(_fetch):
 
     def __getter__(self, code:str, label:str, name:str) -> pd.Series:
         if label:
-            _ = self.ecos(symbols=code)[label]
+            _ = self.ecos(symbol=code)[label]
             _.name = name
             return _.astype(float)
         else:
@@ -292,7 +290,9 @@ if __name__ == "__main__":
 
     # df = app.KR_IR
     # df = app.US_10Y_TY
-    df = app.ecos('722Y001')
+    # df = app.KR_2Y_TY
+    df = app.ecos('817Y002')
     print(df)
-    print(df.columns)
+    # print(df.columns)
+
     # df.to_csv(r'C:\Users\Administrator\Desktop\Temp\test.csv', encoding='euc-kr')

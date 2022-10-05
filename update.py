@@ -24,3 +24,8 @@ if __name__ == "__main__":
         wics  = myMarket.wics
         theme = myMarket.theme
         print(theme[~theme.index.isin(wics.index)])
+
+    # from tdatlib import macro
+    # macro = macro()
+    # df = macro.data.ecos(symbol='817Y002')
+    # print(df)
