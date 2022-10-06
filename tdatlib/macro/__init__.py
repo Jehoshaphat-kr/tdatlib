@@ -1,1 +1,2 @@
-from tdatlib.macro.wrapper import macro
+from tdatlib.macro.ecos import ecos
+from tdatlib.macro.fred import fred
