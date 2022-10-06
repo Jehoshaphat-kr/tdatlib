@@ -56,7 +56,13 @@ class _fetch(object):
         curr = datetime.strptime(self.trading_date, '%Y%m%d') if self.trading_date else self.__today
         prev = curr - timedelta(self.period * 365)
         if ticker.isdigit():
-            return get_index_ohlcv_by_date(fromdate=prev.strftime("%Y%m%d"), todate=curr.strftime("%Y%m%d"), ticker=ticker)
+            _ohlcv = get_index_ohlcv_by_date(fromdate=prev.strftime("%Y%m%d"), todate=curr.strftime("%Y%m%d"), ticker=ticker)
+            return _ohlcv.apply(
+                lambda x: pd.Series(
+                    data=[x.종가, x.종가, x.종가, x.종가, 0, 0, 0], index=x.index
+                ) if x.시가 == 0 else x,
+                axis=1
+            )
         else:
             o_names = ['Open', 'High', 'Low', 'Close', 'Volume']
             c_names = ['시가', '고가', '저가', '종가', '거래량']
@@ -69,7 +75,7 @@ class _fetch(object):
         return get_index_portfolio_deposit_file(ticker, date=self.__trading_date)
 
 
-class data(_fetch):
+class index(_fetch):
 
     @property
     def kospi(self) -> pd.DataFrame:
@@ -129,5 +135,6 @@ if __name__ == "__main__":
     app.period = 20
 
     # print(app.kind)
+    print(app.bank)
     # print(len(app.deposit(ticker='5352')), app.deposit(ticker='5352'))
-    app.describe()
+    # app.describe()

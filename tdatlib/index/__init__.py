@@ -1,1 +1,0 @@
-from tdatlib.index.wrapper import index
