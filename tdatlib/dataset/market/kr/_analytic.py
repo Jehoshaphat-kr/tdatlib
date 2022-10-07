@@ -1,5 +1,5 @@
 from tdatlib.dataset.market.kr.api import KR as _market
-from tdatlib.viewer.stock import KR as _stock
+from tdatlib.archive.deprecated.viewer.stock import KR as _stock
 from scipy import stats
 from tqdm import tqdm
 import pandas as pd

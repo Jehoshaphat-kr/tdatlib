@@ -82,11 +82,12 @@ class _fetch(object):
         if not hasattr(self, f'__{symbol}_{label}_{self.__p}'):
             name, code, c, s, e, _ = tuple(key.values[0])
             url = f'http://ecos.bok.or.kr/api/StatisticSearch/{self.__k}/xml/kr/1/100000/{symbol}/{c}/{s}/{e}/{code}'
-            tseries = data.xml_to_df(url=url)[['TIME', 'DATA_VALUE']]
-            tseries['TIME'] = pd.to_datetime(tseries['TIME'] + ('01' if c == 'M' else '1231' if c == 'Y' else ''))
-            tseries['DATA_VALUE'] = tseries[['DATA_VALUE']].astype(float)
-            tseries.set_index(keys='TIME', inplace=True)
-            tseries.rename(columns=dict(DATA_VALUE=name), inplace=True)
+            fetch = data.xml_to_df(url=url)
+            tseries = pd.Series(
+                name=name, dtype=float,
+                index=pd.to_datetime(fetch.TIME + ('01' if c == 'M' else '1231' if c == 'Y' else '')),
+                data=fetch.DATA_VALUE.tolist()
+            )
             if c == 'M':
                 tseries.index = tseries.index.to_period('M').to_timestamp('M')
             self.__setattr__(
@@ -174,17 +175,17 @@ if __name__ == "__main__":
 
     print(app.props)
     # print(app.load('817Y002', '국고채(3년)'))
-    print(app.load('121Y013', '총수신(요구불예금 및 수시입출식 저축성예금 포함)'))
+    # print(app.load('121Y013', '총수신(요구불예금 및 수시입출식 저축성예금 포함)'))
     # print(app.contains('722Y001'))
     # print(app.기준금리)
     # print(app.원달러환율)
 
-    test = app.load('121Y013', '총수신(요구불예금 및 수시입출식 저축성예금 포함)')
-    import plotly.graph_objects as go
-    fig = go.Figure()
-    fig.add_trace(
-        go.Scatter(
-           x=test.index, y=test
-        )
-    )
-    fig.show()
+    # test = app.load('121Y013', '총수신(요구불예금 및 수시입출식 저축성예금 포함)')
+    # import plotly.graph_objects as go
+    # fig = go.Figure()
+    # fig.add_trace(
+    #     go.Scatter(
+    #        x=test.index, y=test
+    #     )
+    # )
+    # fig.show()

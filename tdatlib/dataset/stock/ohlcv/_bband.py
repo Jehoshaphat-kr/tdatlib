@@ -1,4 +1,3 @@
-from tdatlib.dataset.tools import intersect, normalize
 from scipy.stats import linregress
 import pandas as pd
 import numpy as np
@@ -133,12 +132,9 @@ class bband(object):
 if __name__ == "__main__":
     # pd.set_option('display.expand_frame_repr', False)
 
-    from tdatlib.dataset import market, stock, index
-    from tdatlib.viewer.tools import save
+    from tdatlib.dataset import market, stock
     from tqdm import tqdm
     from datetime import datetime
-    import plotly.graph_objects as go
-    from plotly.subplots import make_subplots
 
     # print(index.overall().kind)
 

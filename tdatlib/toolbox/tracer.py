@@ -36,7 +36,7 @@ class _settings(object):
         self.obj['yhoverformat'] = yformat
 
 
-class line(_settings):
+class draw_line(_settings):
     def __init__(self, data:pd.Series, name:str=str()):
         self.obj = go.Scatter(
             name=name if name else data.name,
@@ -49,7 +49,7 @@ class line(_settings):
         return self.obj
 
 
-class candle(_settings):
+class draw_candle(_settings):
     def __init__(self, data:pd.DataFrame, name:str=str()):
         self.obj = go.Candlestick(
             name=name if name else data.name,
@@ -70,7 +70,7 @@ class candle(_settings):
         return self.obj
 
 
-def add_recession(fig:go.Figure, market:str):
+def draw_recession(fig:go.Figure, market:str):
     recession = [
         {'label': 'blank#01', 'from': datetime(1994, 11, 8), 'to': datetime(1995, 5, 27)},
         {'label': 'blank#02', 'from': datetime(1996, 5, 7), 'to': datetime(1997, 1, 7)},
@@ -117,7 +117,7 @@ if __name__ == "__main__":
     from tdatlib.macro.ecos import ecos
 
     raw = ecos()
-    trace = line(raw.CD금리91D)
+    trace = draw_line(raw.CD금리91D)
 
     print(trace())
     trace.legendoff()

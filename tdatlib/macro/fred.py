@@ -27,11 +27,15 @@ class _fetch(object):
         """
         if not hasattr(self, f'__{symbol}{self.__period}'):
             start, end = self.__today - timedelta(self.__period * 365), self.__today
+            fetch = get_data_fred(symbols=symbol, start=start, end=end)
             self.__setattr__(
                 f'__{symbol}{self.__period}',
-                get_data_fred(symbols=symbol, start=start, end=end)
+                pd.Series(
+                    name=symbol, dtype=float,
+                    index=fetch.index, data=fetch[symbol]
+                )
             )
-        return self.__getattribute__(f'__{symbol}{self.__period}', )
+        return self.__getattribute__(f'__{symbol}{self.__period}')
 
 
 class fred(_fetch):
@@ -100,3 +104,4 @@ if __name__ == "__main__":
     app.period = 15
 
     print(app.props)
+    print(app.기준금리)

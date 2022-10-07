@@ -13,7 +13,6 @@ from tdatlib.market.wise import (
 #     treemap,
 #     treemap_deploy
 # )
-from tdatlib.market.index import index
 from pykrx.stock import (
     get_nearest_business_day_in_a_week,
     get_index_portfolio_deposit_file
@@ -34,7 +33,7 @@ CD_INDEX = {
 }
 
 
-class KR(object):
+class krse(object):
 
     def __init__(self, td:str=str()):
         _now = datetime.now(timezone('Asia/Seoul'))
@@ -44,7 +43,6 @@ class KR(object):
 
         self.__is_market_on = 859 < int(_now.strftime("%H%M")) < 1531 and _now.strftime("%Y%m%d") == self.trading_date
         self.__write_ok     = _lat == self.trading_date
-        self.index = index()
         return
 
     @property
