@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from pytz import timezone
-from tdatlib.toolbox import data
+from tdatlib.tools import etc
 import pandas as pd
 
 

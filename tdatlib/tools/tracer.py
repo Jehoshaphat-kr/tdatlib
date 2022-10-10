@@ -5,35 +5,54 @@ import pandas as pd
 
 class _settings(object):
     obj = None
-    def legendoff(self):
-        self.obj['showlegend'] = False
 
-    def legendon(self):
-        self.obj['showlegend'] = True
+    @property
+    def legend(self) -> bool:
+        return self.obj['showlegend']
 
-    def visible(self):
-        self.obj['visible'] = True
+    @legend.setter
+    def legend(self, on_off:bool):
+        self.obj['showlegend'] = on_off
 
-    def invisible(self):
-        self.obj['visible'] = False
+    @property
+    def visible(self) -> bool:
+        return self.obj['visible']
 
-    def legendonly(self):
-        self.obj['visible'] = 'legendonly'
+    @visible.setter
+    def visible(self, on_off_legendonly: bool or str):
+        self.obj['visible'] = on_off_legendonly
 
-    def lineconfig(self, config: dict):
-        self.obj['line'] = config
+    @property
+    def width(self) -> float or int:
+        return self.obj['line']['width']
 
-    def linewidth(self, width):
+    @width.setter
+    def width(self, width:float or int):
         self.obj['line'].update(dict(width=width))
 
-    def linecolor(self, color):
+    @property
+    def color(self) -> str:
+        return self.obj['line']['color']
+
+    @color.setter
+    def color(self, color:str):
         self.obj['line'].update(dict(color=color))
 
-    def linedash(self, dash):
+    @property
+    def dash(self) -> str:
+        return self.obj['line']['dash']
+
+    @dash.setter
+    def dash(self, dash:str):
         self.obj['line'].update(dict(dash=dash))
 
-    def yhoverformat(self, yformat):
-        self.obj['yhoverformat'] = yformat
+    @property
+    def hover(self) -> str:
+        return self.obj['hovertemplate']
+
+    @hover.setter
+    def hover(self, hover:str):
+        self.obj['hovertemplate'] = hover
 
 
 class draw_line(_settings):
@@ -41,7 +60,7 @@ class draw_line(_settings):
         self.obj = go.Scatter(
             name=name if name else data.name,
             x=data.index, y=data,
-            visible=True, showlegend=True,
+            visible=True, showlegend=True, line=dict(),
             yhoverformat='.2f', xhoverformat='%Y/%m/%d', hovertemplate='%{x}<br>%{y}'
         )
 
@@ -119,6 +138,4 @@ if __name__ == "__main__":
     raw = ecos()
     trace = draw_line(raw.CD금리91D)
 
-    print(trace())
-    trace.legendoff()
     print(trace())
