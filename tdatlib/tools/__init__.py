@@ -3,9 +3,9 @@ from tdatlib.tools.etc import (
 )
 from tdatlib.tools.tseries import(
     price_generalize,
-    r_square,
-    r_square_rolling,
-    coincidence
+    rsquared,
+    rsquared_rolling
+    # coincidence
 )
 from tdatlib.tools.tracer import (
     draw_line,

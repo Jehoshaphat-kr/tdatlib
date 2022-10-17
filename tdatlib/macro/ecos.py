@@ -67,7 +67,7 @@ class _fetch(object):
                 DATA_CNT='개수'
             )
             url = f"http://ecos.bok.or.kr/api/StatisticItemList/{self.__k}/xml/kr/1/10000/{symbol}"
-            self.__setattr__(f'__{symbol}_contains', data.xml_to_df(url=url)[columns.keys()].rename(columns=columns))
+            self.__setattr__(f'__{symbol}_contains', etc.xml_to_df(url=url)[columns.keys()].rename(columns=columns))
         return self.__getattribute__(f'__{symbol}_contains')
 
     def load(self, symbol:str, label:str) -> pd.Series:
@@ -82,7 +82,7 @@ class _fetch(object):
         if not hasattr(self, f'__{symbol}_{label}_{self.__p}'):
             name, code, c, s, e, _ = tuple(key.values[0])
             url = f'http://ecos.bok.or.kr/api/StatisticSearch/{self.__k}/xml/kr/1/100000/{symbol}/{c}/{s}/{e}/{code}'
-            fetch = data.xml_to_df(url=url)
+            fetch = etc.xml_to_df(url=url)
             tseries = pd.Series(
                 name=name, dtype=float,
                 index=pd.to_datetime(fetch.TIME + ('01' if c == 'M' else '1231' if c == 'Y' else '')),
