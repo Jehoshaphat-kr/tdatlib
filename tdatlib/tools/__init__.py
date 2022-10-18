@@ -3,8 +3,8 @@ from tdatlib.tools.etc import (
 )
 from tdatlib.tools.tseries import(
     price_generalize,
-    rsquared,
-    rsquared_rolling
+    corr,
+    corr_rolling
     # coincidence
 )
 from tdatlib.tools.tracer import (
