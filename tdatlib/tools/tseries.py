@@ -25,7 +25,7 @@ def corr(l:pd.Series, r:pd.Series) -> float:
 def corr_rolling(l:pd.Series, r:pd.Series, month:int) -> pd.DataFrame:
     prev_day = l.index[-1] - timedelta(days=int(month * 30.5))
     samples = len(r.index[r.index >= prev_day])
-    index = np.arange(start=-samples, stop=samples + 1, step=1)
+    index = np.arange(start=-samples, stop=samples + 1, step=5)
 
     dates = [r.index[-1] + timedelta(int(i)) for i in index]
     data = [[corr(l, r.shift(i)), i] for i in index]
