@@ -2,10 +2,13 @@ from tdatlib.tools.etc import (
     xml_to_df,
 )
 from tdatlib.tools.tseries import(
-    price_generalize,
-    corr,
-    corr_rolling
-    # coincidence
+    align,
+    normalize,
+    typify,
+    corrcoeff,
+    weighted_corrcoeff,
+    corr_rolling,
+    corr
 )
 from tdatlib.tools.tracer import (
     draw_line,
