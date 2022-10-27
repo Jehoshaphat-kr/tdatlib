@@ -74,27 +74,27 @@ def corr_rolling(l:pd.Series, r:pd.Series, month:int) -> pd.DataFrame:
     index = np.arange(start=-samples, stop=samples + 1, step=5)
 
     dates = [r.index[-1] + timedelta(int(i)) for i in index]
-    data = [[corr(l, r.shift(i)), i] for i in index]
+    data = [[corrcoeff(l, r.shift(i)), i] for i in index]
     return pd.DataFrame(data=data, index=dates, columns=['corrcoef', 'days'])
 
 
 class corr(object):
 
     def __init__(self, l:pd.Series, r:pd.Series, l_name:str=str(), r_name:str=str()):
-        self._l, self._r = align(l=l, r=r)
-        self._j = pd.concat(objs=[self._l, self._r], axis=1)
+        self.l, self.r = align(l=l, r=r)
+        self._j = pd.concat(objs=[self.l, self.r], axis=1)
         self._lname, self._rname = l_name if l_name else 'Left', r_name if r_name else 'Right'
         return
 
     def _coeffr(self) -> (float, int, int):
         if not hasattr(self, '__coeffr'):
-            rolling = corr_rolling(l=self._l, r=self._r, month=6)
+            rolling = corr_rolling(l=self.l, r=self.r, month=6)
             rolling['abs'] = rolling['corrcoef'].abs()
             fitted = rolling[rolling['abs'] == rolling['abs'].max()]
             coeff, step = fitted.iloc[0, 0], fitted.iloc[0, 1]
             self.__setattr__(
                 '__coeffr',
-                (coeff, self._r.index[-1 if step < 0 else 0] - self._r.index[step - 1 if step < 0 else step], step)
+                (coeff, self.r.index[-1 if step < 0 else 0] - self.r.index[step - 1 if step < 0 else step], step)
             )
         return self.__getattribute__('__coeffr')
 
@@ -125,9 +125,14 @@ class corr(object):
         return coeff
 
     @property
+    def coeffr_fb(self):
+        _, fb, __ = self._coeffr()
+        return fb
+
+    @property
     def trace_l(self) -> go.Scatter:
         return go.Scatter(
-            x=self._l.index, y=self._l, name=self._lname,
+            x=self.l.index, y=self.l, name=self._lname,
             visible=True, showlegend=True,
             xhoverformat='%Y/%m/%d', hovertemplate='%{x}<br>%{y}'
         )
@@ -135,7 +140,7 @@ class corr(object):
     @property
     def trace_r(self) -> go.Scatter:
         return go.Scatter(
-            x=self._r.index, y=self._r, name=self._rname,
+            x=self.r.index, y=self.r, name=self._rname,
             visible=True, showlegend=True,
             xhoverformat='%Y/%m/%d', hovertemplate='%{x}<br>%{y}'
         )
@@ -144,7 +149,7 @@ class corr(object):
     def trace_rshift(self) -> go.Scatter:
         _, _, step = self._coeffr()
         return go.Scatter(
-            x=self._r.shift(step).index, y=self._r.shift(step), name=f'{self._rname}<br>shifted',
+            x=self.r.shift(step).index, y=self.r.shift(step), name=f'{self._rname}<br>shifted',
             visible='legendonly', showlegend=True, mode='line', line=dict(dash='dot'),
             xhoverformat='%Y/%m/%d', hovertemplate='%{x}<br>%{y}'
         )
@@ -152,7 +157,7 @@ class corr(object):
     @property
     def trace_corr(self) -> go.Scatter:
         return go.Scatter(
-            x=self._l, y=self._r, name='산포도',
+            x=self.l, y=self.r, name='산포도',
             meta=self._j.index, mode='markers',
             hovertemplate='%{meta}<br>x = %{x}<br>y = %{y}<extra></extra>'
         )
