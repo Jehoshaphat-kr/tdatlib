@@ -33,7 +33,7 @@ CD_INDEX = {
 }
 
 
-class krse(object):
+class _krse(object):
 
     def __init__(self, td:str=str()):
         _now = datetime.now(timezone('Asia/Seoul'))
@@ -233,17 +233,20 @@ class krse(object):
         return isetfokay(curr=self.etf_list)
 
 
+# Alias
+krse = _krse()
+
 if __name__ == '__main__':
-    market = KR()
-    print(market.icm)
-    print(market.wi26)
-    print(market.wics)
-    print(market.theme)
-    print(market.etf_group)
-    print(market.etf_list)
+
+    print(krse.icm)
+    print(krse.wi26)
+    print(krse.wics)
+    print(krse.theme)
+    print(krse.etf_group)
+    print(krse.etf_list)
     # print(market.get_returns(tickers=market.theme.index))
-    print(market.treemap(category='WI26'))
-    print(market.sectors(category='WI26'))
+    # print(krse.treemap(category='WI26'))
+    # print(krse.sectors(category='WI26'))
 
     # market2 = KR(td='20210428')
     # print(market2.get_returns(tickers=market2.theme.index))

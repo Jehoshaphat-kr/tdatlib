@@ -75,7 +75,7 @@ class _fetch(object):
         return get_index_portfolio_deposit_file(ticker, date=self.__trading_date)
 
 
-class index(_fetch):
+class _index(_fetch):
 
     @property
     def kospi(self) -> pd.DataFrame:
@@ -126,15 +126,17 @@ class index(_fetch):
         return
 
 
+# Alias
+index = _index()
+
 if __name__ == "__main__":
     import plotly.graph_objects as go
 
     pd.set_option('display.expand_frame_repr', False)
 
-    app = data()
-    app.period = 20
+    index.period = 20
 
-    # print(app.kind)
-    print(app.bank)
-    # print(len(app.deposit(ticker='5352')), app.deposit(ticker='5352'))
-    # app.describe()
+    # print(index.kind)
+    print(index.bank)
+    # print(len(index.deposit(ticker='5352')), index.deposit(ticker='5352'))
+    # index.describe()

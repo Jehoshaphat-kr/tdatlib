@@ -97,7 +97,7 @@ class _fetch(object):
         return self.__getattribute__(f'__{symbol}_{label}_{self.__p}')
 
 
-class ecos(_fetch):
+class _ecos(_fetch):
 
     @property
     def props(self) -> list:
@@ -166,21 +166,23 @@ class ecos(_fetch):
         )
 
 
+# Alias
+ecos = _ecos()
+
 
 if __name__ == "__main__":
     pd.set_option('display.expand_frame_repr', False)
 
-    app = ecos()
-    app.period = 15
+    ecos.period = 15
 
-    print(app.props)
-    # print(app.load('817Y002', '국고채(3년)'))
-    # print(app.load('121Y013', '총수신(요구불예금 및 수시입출식 저축성예금 포함)'))
-    # print(app.contains('722Y001'))
-    # print(app.기준금리)
-    # print(app.원달러환율)
+    print(ecos.props)
+    print(ecos.load('817Y002', '국고채(3년)'))
+    print(ecos.load('121Y013', '총수신(요구불예금 및 수시입출식 저축성예금 포함)'))
+    print(ecos.contains('722Y001'))
+    print(ecos.기준금리)
+    print(ecos.원달러환율)
 
-    # test = app.load('121Y013', '총수신(요구불예금 및 수시입출식 저축성예금 포함)')
+    # test = ecos.load('121Y013', '총수신(요구불예금 및 수시입출식 저축성예금 포함)')
     # import plotly.graph_objects as go
     # fig = go.Figure()
     # fig.add_trace(

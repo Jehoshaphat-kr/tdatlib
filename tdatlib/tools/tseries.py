@@ -45,23 +45,6 @@ def corrcoeff(l:pd.Series, r:pd.Series) -> float:
     return pd.concat(objs=align(l, r), axis=1).corr(method='pearson', min_periods=1).iloc[0, 1]
 
 
-def weighted_corrcoeff(joined:pd.DataFrame) -> float:
-    """
-    가중 상관계수 (시간 구간 별)
-    :param joined: 정렬된 시계열데이터 (Left, Right)
-    """
-    days = (joined.index[-1] - joined.index[0]).days
-    gaps = [0, 92, 183, 365, 365 * 2, 365 * 3, 365 * 5, 365 * 10]
-    n = [i + 1 for i in range(len(gaps)-1) if gaps[0] < days <= gaps[i + 1]][0]
-
-    coeffs = list()
-    for g in gaps[1:n]:
-        coeff = joined[joined.index >= (joined.index[-1] - timedelta(g))].corr().iloc[0, 1]
-        coeffs.append(coeff)
-    coeffs.append(joined.corr().iloc[0, 1])
-    return np.array(coeffs).mean()
-
-
 def corr_rolling(l:pd.Series, r:pd.Series, month:int) -> pd.DataFrame:
     """
     이동 상관계수 데이터프레임
@@ -79,12 +62,53 @@ def corr_rolling(l:pd.Series, r:pd.Series, month:int) -> pd.DataFrame:
 
 
 class corr(object):
+    """
+    시계열 상관성 평가 모델
+    """
+    """
+    N       1      2      3      4      5      6      7      8
+    1   1.000  0.670  0.450  0.334  0.267  0.224  0.193  0.168
+    2          0.330  0.330  0.277  0.233  0.200  0.174  0.155
+    3                 0.220  0.222  0.200  0.177  0.158  0.143
+    4                        0.167  0.167  0.155  0.142  0.131
+    5                               0.133  0.133  0.127  0.118
+    6                                      0.111  0.111  0.107
+    7                                             0.095  0.095
+    8                                                    0.083
+    """
+    _w = [
+        [1], [1],
+        [0.670, 0.330],
+        [0.450, 0.330, 0.220],
+        [0.334, 0.277, 0.222, 0.167],
+        [0.267, 0.233, 0.200, 0.167, 0.113],
+        [0.224, 0.200, 0.177, 0.155, 0.133, 0.111],
+        [0.193, 0.174, 0.158, 0.142, 0.127, 0.111, 0.095],
+        [0.168, 0.155, 0.143, 0.131, 0.118, 0.107, 0.095, 0.083]
+    ]
 
-    def __init__(self, l:pd.Series, r:pd.Series, l_name:str=str(), r_name:str=str()):
-        self.l, self.r = align(l=l, r=r)
-        self._j = pd.concat(objs=[self.l, self.r], axis=1)
-        self._lname, self._rname = l_name if l_name else 'Left', r_name if r_name else 'Right'
+    def __init__(self, l:pd.Series, r:pd.Series, l_name:str='Left', r_name:str='Right'):
+        # Align
+        j = pd.concat(objs={'L': l, 'R': r}, axis=1).dropna()
+        self._j = j[j.index.isin(l.index)]
+        self.l, self.r = self._j.L, self._j.R
+        self._lname, self._rname = l_name, r_name
         return
+
+    @property
+    def by_period(self) -> pd.DataFrame:
+        """
+        기간 별 상관계수
+        """
+        length = (self._j.index[-1] - self._j.index[0]).days
+        gaps = [0, 92, 183, 365, 365 * 2, 365 * 3, 365 * 5, 365 * 10]
+        n = [i + 1 for i in range(len(gaps) - 1) if gaps[0] < length <= gaps[i + 1]]
+        loop = gaps[1:n[0]] if n else gaps[1:]
+
+        label = ['3개월', '6개월', '1년', '2년', '3년', '5년', '10년']
+        data = [self._j[self._j.index >= (self._j.index[-1] - timedelta(g))].corr().iloc[0, 1] for g in loop]
+        data.append(self._j.corr().iloc[0, 1])
+        return pd.DataFrame(data=[data], columns=label[:len(data)] + ['전체'], index=[0])
 
     def _coeffr(self) -> (float, int, int):
         if not hasattr(self, '__coeffr'):
@@ -113,7 +137,7 @@ class corr(object):
         기간 구별 가중 상관계수
         """
         if not hasattr(self, '_coeffw'):
-            self.__setattr__('_coeffw', self.coeff if len(self._j) < 93 else weighted_corrcoeff(self._j))
+            self.__setattr__('_coeffw', self.coeff if len(self._j) < 93 else weighted_corrcoeff(self._j).T.mean())
         return self.__getattribute__('_coeffw')
 
     @property
@@ -150,16 +174,16 @@ class corr(object):
         _, _, step = self._coeffr()
         return go.Scatter(
             x=self.r.shift(step).index, y=self.r.shift(step), name=f'{self._rname}<br>shifted',
-            visible='legendonly', showlegend=True, mode='line', line=dict(dash='dot'),
+            visible='legendonly', showlegend=True, mode='lines', line=dict(dash='dot'),
             xhoverformat='%Y/%m/%d', hovertemplate='%{x}<br>%{y}'
         )
 
     @property
     def trace_corr(self) -> go.Scatter:
         return go.Scatter(
-            x=self.l, y=self.r, name='산포도',
-            meta=self._j.index, mode='markers',
-            hovertemplate='%{meta}<br>x = %{x}<br>y = %{y}<extra></extra>'
+            x=normalize(self.l, -1, 1), y=normalize(self.r, -1, 1), name='산포도',
+            meta=self._j.index, text=self.l, customdata=self.r, mode='markers',
+            hovertemplate='%{meta}<br>x = %{x}(%{text})<br>y = %{y}(%{customdata})<extra></extra>'
         )
     
     
@@ -172,8 +196,8 @@ if __name__ == "__main__":
 
     period = 20
 
-    macro = macro.ecos()
-    index = market.index()
+    macro = macro.ecos
+    index = market.index
     stock = stock.kr(ticker='105560')
     # stock = stock.kr(ticker='005930')
     macro.period = index.period = stock.period = period
@@ -184,8 +208,8 @@ if __name__ == "__main__":
     exchange = macro.원달러환율.종가
     price = stock.ohlcv.종가
 
-    # relation = rel(price, kospi)
-    relation = rel(price, exchange)
-    print(relation.corr)
-    print(relation.rolling_corr)
+    relation = corr(price, exchange)
+    print(relation.by_period)
+    # print(relation.corr)
+    # print(relation.rolling_corr)
     # relation.display()

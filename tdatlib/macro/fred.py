@@ -38,7 +38,7 @@ class _fetch(object):
         return self.__getattribute__(f'__{symbol}{self.__period}')
 
 
-class fred(_fetch):
+class _fred(_fetch):
 
     @property
     def props(self) -> list:
@@ -97,11 +97,13 @@ class fred(_fetch):
         return self.load('DCOILWTICO')
 
 
+# Alias
+fred = _fred()
+
 if __name__ == "__main__":
     pd.set_option('display.expand_frame_repr', False)
 
-    app = fred()
-    app.period = 15
+    fred.period = 15
 
-    print(app.props)
-    print(app.기준금리)
+    print(fred.props)
+    print(fred.기준금리)
