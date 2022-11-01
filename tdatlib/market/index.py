@@ -79,33 +79,33 @@ class _index(_fetch):
 
     @property
     def kospi(self) -> pd.DataFrame:
-        if not hasattr(self, '__kospi'):
-            self.__setattr__('__kospi', self.ohlcv(ticker='1001'))
-        return self.__getattribute__('__kospi')
+        if not hasattr(self, f'__kospi_{self.period}'):
+            self.__setattr__(f'__kospi_{self.period}', self.ohlcv(ticker='1001'))
+        return self.__getattribute__(f'__kospi_{self.period}')
 
     @property
     def kosdaq(self) -> pd.DataFrame:
-        if not hasattr(self, '__kosdaq'):
-            self.__setattr__('__kosdaq', self.ohlcv(ticker='2001'))
-        return self.__getattribute__('__kosdaq')
+        if not hasattr(self, f'__kosdaq_{self.period}'):
+            self.__setattr__(f'__kosdaq_{self.period}', self.ohlcv(ticker='2001'))
+        return self.__getattribute__(f'__kosdaq_{self.period}')
 
     @property
     def bank(self) -> pd.DataFrame: # 은행 한정
-        if not hasattr(self, '__bank'):
-            self.__setattr__('__bank', self.ohlcv(ticker='5046'))
-        return self.__getattribute__('__bank')
+        if not hasattr(self, f'__bank_{self.period}'):
+            self.__setattr__(f'__bank_{self.period}', self.ohlcv(ticker='5046'))
+        return self.__getattribute__(f'__bank_{self.period}')
 
     @property
     def financial(self) -> pd.DataFrame: # 금융업(은행, 보험, 증권)
-        if not hasattr(self, '__financial'):
-            self.__setattr__('__financial', self.ohlcv(ticker='5352'))
-        return self.__getattribute__('__financial')
+        if not hasattr(self, f'__financial_{self.period}'):
+            self.__setattr__(f'__financial_{self.period}', self.ohlcv(ticker='5352'))
+        return self.__getattribute__(f'__financial_{self.period}')
 
     @property
     def snp500(self) -> pd.DataFrame:
-        if not hasattr(self, '__snp500'):
-            self.__setattr__('__snp500', self.ohlcv(ticker='^GSPC'))
-        return self.__getattribute__('__snp500')
+        if not hasattr(self, f'__snp500_{self.period}'):
+            self.__setattr__(f'__snp500_{self.period}', self.ohlcv(ticker='^GSPC'))
+        return self.__getattribute__(f'__snp500_{self.period}')
 
     @property
     def properties(self) -> list:
