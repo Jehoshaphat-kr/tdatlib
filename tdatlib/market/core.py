@@ -2,15 +2,19 @@ from pykrx.stock import (
     get_market_cap_by_ticker,
     get_market_fundamental,
     get_market_ohlcv_by_ticker,
-    get_market_ohlcv_by_date
+    get_market_ohlcv_by_date,
+    get_nearest_business_day_in_a_week,
+    get_etf_ohlcv_by_ticker
 )
 from tqdm import tqdm
 from datetime import datetime, timedelta
+from pytz import timezone
 import pandas as pd
 import requests, time, os
+import urllib.request as req
 
 
-class marketime(object):
+class _marketime(object):
     def __init__(self, td:str or datetime=None):
         clk = datetime.now(timezone('Asia/Seoul'))
         cur = get_nearest_business_day_in_a_week(date=clk.strftime("%Y%m%d"), prev=True)
@@ -48,7 +52,7 @@ class marketime(object):
 
 
 
-class _group(marketime):
+class _group(_marketime):
     _dir = os.path.join(os.path.dirname(__file__), rf'archive/category')
     _labels = {
         'WICS': {
@@ -160,7 +164,6 @@ class _group(marketime):
         return df
 
 
-
 class _basis(_group):
 
     def _get_marketcap(self) -> pd.DataFrame:
@@ -177,7 +180,7 @@ class _basis(_group):
         ipo.IPO = pd.to_datetime(ipo.IPO)
         return ipo[ipo.IPO <= datetime.strptime(self.recent, "%Y%m%d")]
 
-    def calc_performance(self, ticker: str) -> pd.DataFrame:
+    def _performance(self, ticker: str) -> pd.DataFrame:
         ohlcv = get_market_ohlcv_by_date(ticker=ticker, fromdate=self.dates['1Y'], todate=self.dates['0D'])
         data = {
             label: round(100 * ohlcv.pct_change(periods=dt)[-1], 2)
@@ -223,44 +226,82 @@ class _basis(_group):
         return self.__getattribute__('__static_performance')
 
 
+class _eft(object):
+
+    _dir = os.path.join(os.path.dirname(__file__), r'archive/category/etf.csv')
+    def __init__(self, dates:dict):
+        self.dates = dates
+        return
+
+    @property
+    def overview(self) -> pd.DataFrame:
+        if not hasattr(self, '__overview'):
+            url = 'https://finance.naver.com/api/sise/etfItemList.nhn'
+            key_prev = ['itemcode', 'itemname', 'nowVal', 'marketSum']
+            key_curr = ['종목코드', '종목명', '종가', '시가총액']
+            df = pd.DataFrame(json.loads(req.urlopen(url).read().decode('cp949'))['result']['etfItemList'])
+            df = df[key_prev].rename(columns=dict(zip(key_prev, key_curr)))
+            df['시가총액'] = df['시가총액'] * 100000000
+            self.__setattr__('__overview', df.set_index(keys='종목코드'))
+        return self.__getattribute__('__overview')
+
+    @property
+    def group(self) -> pd.DataFrame:
+        df = pd.read_csv(self._dir, index_col='종목코드')
+        df.index = df.index.astype(str).str.zfill(6)
+        return df
+
+    @property
+    def returns(self) -> pd.DataFrame:
+        if not hasattr(self, '__performance'):
+            prices = pd.concat({
+                f'TD{k}': get_etf_ohlcv_by_ticker(date=date)['종가']
+                for k, date in tqdm(self.dates.items(), desc='기간별 수익률 계산(ETF)')
+            }, axis=1)
+            rtrn = pd.concat({
+                f'R{k}': round(100 * (prices['TD0D'] / prices[f'TD{k}'] - 1), 2) for k in self.dates.keys()
+            }, axis=1)
+            rtrn.index.name = '종목코드'
+            self.__setattr__('__performance', rtrn[~rtrn['R1D'].isna()].drop(columns=['R0D']))
+        return self.__getattribute__('__performance')
+
+    def islatest(self) -> bool:
+        curr, prev = self.overview.copy(), self.group.copy()
+        to_be_delete = prev[~prev.index.isin(curr.index)]
+        to_be_update = curr[~curr.index.isin(prev.index)]
+        if to_be_delete.empty and to_be_update.empty:
+            return True
+
+        for kind, frm in [('삭제', to_be_delete), ('추가', to_be_update)]:
+            if not frm.empty:
+                print("-" * 70, f"\n▷ ETF 분류 {kind} 필요 항목: {'없음' if frm.empty else '있음'}\n{frm}")
+        return False
 
 
-# class _performance(object):
+# Alias
+
+
+# class treemap(_basis):
 #
-#     def __init__(self, td:str, tdset:dict, market_open:bool=False):
-#         self._td, self.dates, self._market_open = td, tdset, market_open
+#     def __init__(self, group:str, index:str=str()):
+#         super().__init__()
+#         self.grp, self.idx = group, index
+#
+#         if self.grp == 'WICS':
+#
+#             self.group = self.market.wics
+#         if self.grp == 'WI26':
+#             self.group = self.market.wi26
+#         if self.grp == 'ETF':
+#             self.group = self.market.etf_group
+#         if self.grp == 'THEME':
+#             self.group = self.market.theme
 #         return
-#
-
-#
-
-#
-#     def _stack_performance(self) -> pd.DataFrame:
-#
-#         return pd.DataFrame()
+#         return
 
 
-# ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-# DIR_PERF = f'{ROOT}/_archive/common/perf.csv'
-# PM_DATE = datetime.now(timezone('Asia/Seoul'))
-# C_MARKET_OPEN = 900 <= int(PM_DATE.strftime("%H%M")) <= 1530
 
 
-# def __fetch_trading_dates(td:str) -> dict:
-#     base = {'0D': td}
-#     td = datetime.strptime(td, "%Y%m%d")
-#     dm = lambda x: (td - timedelta(x)).strftime("%Y%m%d")
-#     loop = [('1D', 1), ('1W', 7), ('1M', 30), ('3M', 91), ('6M', 183), ('1Y', 365)]
-#     base.update({l: get_nearest_business_day_in_a_week(date=dm(d)) for l, d in loop})
-#     return base
-
-# def __fetch_etf_returns(tds:dict) -> pd.DataFrame:
-#     objs = {f'TD{k}': get_etf_ohlcv_by_ticker(date=date)['종가']
-#             for k, date in tqdm(tds.items(), desc='기간별 수익률 계산(ETF)')}
-#     p_s = pd.concat(objs=objs, axis=1)
-#     rtrn = pd.concat(objs={f'R{k}': round(100 * (p_s.TD0D / p_s[f'TD{k}'] - 1), 2) for k in tds.keys()}, axis=1)
-#     rtrn.index.name = '종목코드'
-#     return rtrn[~rtrn['R1D'].isna()].drop(columns=['R0D'])
 #
 #
 # def __fetch_raw_returns(td:str, is_market_open:bool, write_ok:bool) -> pd.DataFrame:
@@ -307,15 +348,12 @@ class _basis(_group):
 
 if __name__ == "__main__":
 
-    # group = _group()
-    # print(group.wics)
-    # print(group.wi26)
-    # print(group.theme)
-
-    from pykrx.stock import get_nearest_business_day_in_a_week
-    from pytz import timezone
-
     _now = datetime.now(timezone('Asia/Seoul'))
     _lat = get_nearest_business_day_in_a_week(date=_now.strftime("%Y%m%d"))
-    basis = _basis(td=_lat)
+
+    basis = _basis()
+    print(basis.wics)
+    print(basis.wi26)
+    print(basis.theme)
     print(basis.overview)
+    print(basis.static_performance)
