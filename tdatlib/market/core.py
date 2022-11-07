@@ -9,6 +9,7 @@ from pykrx.stock import (
 from tqdm import tqdm
 from datetime import datetime, timedelta
 from pytz import timezone
+import numpy as np
 import pandas as pd
 import requests, time, os
 import urllib.request as req
@@ -26,15 +27,15 @@ class _marketime(object):
         else:
             date = datetime.now(timezone('Asia/Seoul')).strftime("%Y%m%d")
 
-        self.recent = get_nearest_business_day_in_a_week(date=date, prev=True)
-        self.is_open = True if self.recent == cur and 900 <= int(clk.strftime("%H%M")) <= 1530 else False
+        self.rdate = get_nearest_business_day_in_a_week(date=date, prev=True)
+        self.is_open = True if self.rdate == cur and 900 <= int(clk.strftime("%H%M")) <= 1530 else False
         return
 
     @property
     def dates(self) -> dict:
         if not hasattr(self, '__dates'):
-            base = {'0D': self.recent}
-            td = datetime.strptime(self.recent, "%Y%m%d")
+            base = {'0D': self.rdate}
+            td = datetime.strptime(self.rdate, "%Y%m%d")
             dm = lambda x: (td - timedelta(x)).strftime("%Y%m%d")
             loop = [('1D', 1), ('1W', 7), ('1M', 30), ('3M', 91), ('6M', 183), ('1Y', 365)]
             base.update({l: get_nearest_business_day_in_a_week(date=dm(d)) for l, d in loop})
@@ -166,11 +167,12 @@ class _group(_marketime):
 
 class _basis(_group):
 
+    _pdir = os.path.join(os.path.dirname(__file__), rf'archive/common/perf.csv')
     def _get_marketcap(self) -> pd.DataFrame:
-        return get_market_cap_by_ticker(date=self.recent, market="ALL", alternative=True)
+        return get_market_cap_by_ticker(date=self.rdate, market="ALL", alternative=True)
 
     def _get_multiples(self) -> pd.DataFrame:
-        return get_market_fundamental(date=self.recent, market="ALL", alternative=True)
+        return get_market_fundamental(date=self.rdate, market="ALL", alternative=True)
 
     def _get_ipo(self) -> pd.DataFrame:
         io = 'http://kind.krx.co.kr/corpgeneral/corpList.do?method=download'
@@ -178,15 +180,59 @@ class _basis(_group):
         ipo = ipo.rename(columns={'회사명': '종목명', '상장일': 'IPO'}).set_index(keys='종목코드')
         ipo.index = ipo.index.astype(str).str.zfill(6)
         ipo.IPO = pd.to_datetime(ipo.IPO)
-        return ipo[ipo.IPO <= datetime.strptime(self.recent, "%Y%m%d")]
+        return ipo[ipo.IPO <= datetime.strptime(self.rdate, "%Y%m%d")]
 
-    def _performance(self, ticker: str) -> pd.DataFrame:
-        ohlcv = get_market_ohlcv_by_date(ticker=ticker, fromdate=self.dates['1Y'], todate=self.dates['0D'])
-        data = {
-            label: round(100 * ohlcv.pct_change(periods=dt)[-1], 2)
-            for label, dt in [('R1D', 1), ('R1W', 5), ('R1M', 21), ('R3M', 63), ('R6M', 126), ('R1Y', 252)]
-        }
-        return pd.DataFrame(data=data, index=[ticker])
+    def _init_p(self) -> pd.DataFrame:
+        if not hasattr(self, '__p'):
+            p = pd.read_csv(filepath_or_buffer=self._pdir, index_col='종목코드', encoding='utf-8')
+            p.index = p.index.astype(str).str.zfill(6)
+
+            shares = pd.concat(objs={
+                'prev': get_market_cap_by_ticker(date=self.dates['1Y'], market='ALL')['상장주식수'],
+                'curr': get_market_cap_by_ticker(date=self.dates['0D'], market='ALL')['상장주식수']
+            }, axis=1)
+            even = shares[shares.prev == shares.curr].index.tolist()
+
+            prc = pd.concat({
+                f'TD{k}': get_market_ohlcv_by_ticker(date=date, market='ALL', alternative=False)['종가']
+                for k, date, in tqdm(self.dates.items(), desc='기간별 수익률 계산(주식)')
+            }, axis=1)
+
+            _p = pd.concat(
+                objs={f'R{k}': round(100 * (prc['TD0D'] / prc[f'TD{k}'] - 1), 2) for k in self.dates.keys()},
+                axis=1
+            )
+            _p.index.name = '종목코드'
+            _p[_p.index.isin(even)].drop(columns=['R0D'])
+            _p['날짜'] = self.rdate
+            _p = _p.drop(columns=['R0D'])
+            self.__setattr__('__p', pd.concat(objs=[_p, p[~p.index.isin(_p.index)]], axis=0))
+        return self.__getattribute__('__p')
+
+    def _update_p(self, tickers: list) -> pd.DataFrame:
+        objs, proc = list(), tqdm(tickers)
+        for ticker in proc:
+            proc.set_description(f'Fetch Returns - {ticker}')
+            c = get_market_ohlcv_by_date(ticker=ticker, fromdate=self.dates['1Y'], todate=self.dates['0D'])['종가']
+            objs.append({
+                label: round(100 * c.pct_change(periods=dt)[-1], 2)
+                for label, dt in [('R1D', 1), ('R1W', 5), ('R1M', 21), ('R3M', 63), ('R6M', 126), ('R1Y', 252)]
+            })
+        return pd.DataFrame(data=objs, index=tickers)
+
+    def performance(self, tickers:list or pd.Series or np.array):
+        base = self._init_p()
+        print(base)
+        new = [t for t in tickers if not t in base.index]
+        print(len(new))
+        upd = base[base.index.isin(tickers)].copy()
+        upd = upd[upd['날짜'] != self.rdate].index.tolist()
+        print(len(upd))
+
+        p = self._update_p(tickers=new + upd)
+        rebase = pd.concat(objs=[base, p], axis=0).drop_duplicates(keep='last')
+        rebase.to_csv(self._pdir, index=True, encoding='utf-8')
+        return rebase
 
     @property
     def overview(self) -> pd.DataFrame:
@@ -195,38 +241,16 @@ class _basis(_group):
             _basis = pd.read_csv(path, index_col='종목코드', encoding='utf-8')
             _basis.index = _basis.index.astype(str).str.zfill(6)
             _basis.IPO = pd.to_datetime(_basis.IPO)
-            if not self.is_open and not str(_basis['날짜'][0]) == self.recent:
+            if not self.is_open and not str(_basis['날짜'][0]) == self.rdate:
                 _basis = pd.concat(objs = [self._get_ipo(), self._get_marketcap(), self._get_multiples()], axis=1)
-                _basis['날짜'] = self.recent
+                _basis['날짜'] = self.rdate
                 _basis.index.name = '종목코드'
                 _basis.to_csv(path, index=True, encoding='utf-8')
             self.__setattr__('__basis', _basis.drop(columns=['날짜']))
         return self.__getattribute__('__basis')
 
-    @property
-    def static_performance(self) -> pd.DataFrame:
-        if not hasattr(self, '__static_performance'):
-            shares = pd.concat(objs={
-                'prev': get_market_cap_by_ticker(date=self.dates['1Y'], market='ALL')['상장주식수'],
-                'curr': get_market_cap_by_ticker(date=self.dates['0D'], market='ALL')['상장주식수']
-            }, axis=1)
-            even = shares[shares.prev == shares.curr].index.tolist()
 
-            prices = pd.concat({
-                f'TD{k}': get_market_ohlcv_by_ticker(date=date, market='ALL', alternative=False)['종가']
-                for k, date, in tqdm(self.dates.items(), desc='기간별 수익률 계산(주식)')
-            }, axis=1)
-
-            rtrn = pd.concat(
-                objs={f'R{k}': round(100 * (prices['TD0D'] / prices[f'TD{k}'] - 1), 2) for k in self.dates.keys()},
-                axis=1
-            )
-            rtrn.index.name = '종목코드'
-            self.__setattr__('__static_performance', rtrn[rtrn.index.isin(even)].drop(columns=['R0D']))
-        return self.__getattribute__('__static_performance')
-
-
-class _eft(object):
+class _etf(object):
 
     _dir = os.path.join(os.path.dirname(__file__), r'archive/category/etf.csv')
     def __init__(self, dates:dict):
@@ -254,12 +278,12 @@ class _eft(object):
     @property
     def returns(self) -> pd.DataFrame:
         if not hasattr(self, '__performance'):
-            prices = pd.concat({
+            prc = pd.concat({
                 f'TD{k}': get_etf_ohlcv_by_ticker(date=date)['종가']
                 for k, date in tqdm(self.dates.items(), desc='기간별 수익률 계산(ETF)')
             }, axis=1)
             rtrn = pd.concat({
-                f'R{k}': round(100 * (prices['TD0D'] / prices[f'TD{k}'] - 1), 2) for k in self.dates.keys()
+                f'R{k}': round(100 * (prc['TD0D'] / prc[f'TD{k}'] - 1), 2) for k in self.dates.keys()
             }, axis=1)
             rtrn.index.name = '종목코드'
             self.__setattr__('__performance', rtrn[~rtrn['R1D'].isna()].drop(columns=['R0D']))
@@ -279,28 +303,8 @@ class _eft(object):
 
 
 # Alias
-
-
-# class treemap(_basis):
-#
-#     def __init__(self, group:str, index:str=str()):
-#         super().__init__()
-#         self.grp, self.idx = group, index
-#
-#         if self.grp == 'WICS':
-#
-#             self.group = self.market.wics
-#         if self.grp == 'WI26':
-#             self.group = self.market.wi26
-#         if self.grp == 'ETF':
-#             self.group = self.market.etf_group
-#         if self.grp == 'THEME':
-#             self.group = self.market.theme
-#         return
-#         return
-
-
-
+krse = _basis()
+etf = _etf(krse.dates)
 
 #
 #
@@ -348,12 +352,8 @@ class _eft(object):
 
 if __name__ == "__main__":
 
-    _now = datetime.now(timezone('Asia/Seoul'))
-    _lat = get_nearest_business_day_in_a_week(date=_now.strftime("%Y%m%d"))
-
-    basis = _basis()
-    print(basis.wics)
-    print(basis.wi26)
-    print(basis.theme)
-    print(basis.overview)
-    print(basis.static_performance)
+    # print(basis.wics)
+    # print(basis.wi26)
+    # print(basis.theme)
+    # print(basis.overview)
+    print(krse.performance(krse.wics.index))
