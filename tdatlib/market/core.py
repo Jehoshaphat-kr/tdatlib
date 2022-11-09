@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from pytz import timezone
 import numpy as np
 import pandas as pd
-import requests, time, os
+import requests, time, os, json
 import urllib.request as req
 
 
@@ -50,7 +50,6 @@ class _marketime(object):
             toc = tic + src[tic:].find("</p>")
             self.__setattr__(f'__wdate', src[tic + 6: toc].replace('.', ''))
         return self.__getattribute__(f'__wdate')
-
 
 
 class _group(_marketime):
@@ -133,17 +132,17 @@ class _group(_marketime):
                 )
                 if n < 5:
                     time.sleep(5)
-        return pd.DataFrame(data=data, columns=['종목코드', '종목명', '산업', '섹터', '날짜']).set_index(keys='종목코드')
+        return pd.DataFrame(data=data, columns=['종목코드', '종목명', '산업', '섹터', 'DT']).set_index(keys='종목코드')
 
     @property
     def wics(self) -> pd.DataFrame:
         if not hasattr(self, f'__wics'):
             fetch = pd.read_csv(os.path.join(self._dir, 'wics.csv'), index_col='종목코드', encoding='utf-8')
             fetch.index = fetch.index.astype(str).str.zfill(6)
-            if not str(fetch['날짜'][0]) == self.wdate:
+            if not str(fetch['DT'][0]) == self.wdate:
                 fetch = self._fetch(name='WICS')
                 fetch.to_csv(os.path.join(self._dir, 'wics.csv'), index=True, encoding='utf-8')
-            self.__setattr__(f'__wics', fetch.drop(columns=['날짜']))
+            self.__setattr__(f'__wics', fetch.drop(columns=['DT']))
         return self.__getattribute__(f'__wics')
 
     @property
@@ -151,11 +150,11 @@ class _group(_marketime):
         if not hasattr(self, f'__wi26'):
             fetch = pd.read_csv(os.path.join(self._dir, 'wi26.csv'), index_col='종목코드', encoding='utf-8')
             fetch.index = fetch.index.astype(str).str.zfill(6)
-            if not str(fetch['날짜'][0]) == self.wdate:
+            if not str(fetch['DT'][0]) == self.wdate:
                 fetch = self._fetch(name='WI26')
                 fetch.drop(columns=['산업'], inplace=True)
                 fetch.to_csv(os.path.join(self._dir, 'wi26.csv'), index=True, encoding='utf-8')
-            self.__setattr__(f'__wi26', fetch.drop(columns=['날짜']))
+            self.__setattr__(f'__wi26', fetch.drop(columns=['DT']))
             return self.__getattribute__(f'__wi26')
 
     @property
@@ -166,7 +165,6 @@ class _group(_marketime):
 
 
 class _basis(_group):
-
     _pdir = os.path.join(os.path.dirname(__file__), rf'archive/common/perf.csv')
     def _get_marketcap(self) -> pd.DataFrame:
         return get_market_cap_by_ticker(date=self.rdate, market="ALL", alternative=True)
@@ -184,9 +182,6 @@ class _basis(_group):
 
     def _init_p(self) -> pd.DataFrame:
         if not hasattr(self, '__p'):
-            p = pd.read_csv(filepath_or_buffer=self._pdir, index_col='종목코드', encoding='utf-8')
-            p.index = p.index.astype(str).str.zfill(6)
-
             shares = pd.concat(objs={
                 'prev': get_market_cap_by_ticker(date=self.dates['1Y'], market='ALL')['상장주식수'],
                 'curr': get_market_cap_by_ticker(date=self.dates['0D'], market='ALL')['상장주식수']
@@ -202,14 +197,15 @@ class _basis(_group):
                 objs={f'R{k}': round(100 * (prc['TD0D'] / prc[f'TD{k}'] - 1), 2) for k in self.dates.keys()},
                 axis=1
             )
-            _p.index.name = '종목코드'
-            _p[_p.index.isin(even)].drop(columns=['R0D'])
-            _p['날짜'] = self.rdate
-            _p = _p.drop(columns=['R0D'])
-            self.__setattr__('__p', pd.concat(objs=[_p, p[~p.index.isin(_p.index)]], axis=0))
+            _p = _p[_p.index.isin(even)].drop(columns=['R0D'])
+            _p['DT'] = self.rdate
+            self.__setattr__('__p',_p)
         return self.__getattribute__('__p')
 
     def _update_p(self, tickers: list) -> pd.DataFrame:
+        if not len(tickers):
+            return pd.DataFrame()
+
         objs, proc = list(), tqdm(tickers)
         for ticker in proc:
             proc.set_description(f'Fetch Returns - {ticker}')
@@ -218,21 +214,28 @@ class _basis(_group):
                 label: round(100 * c.pct_change(periods=dt)[-1], 2)
                 for label, dt in [('R1D', 1), ('R1W', 5), ('R1M', 21), ('R3M', 63), ('R6M', 126), ('R1Y', 252)]
             })
-        return pd.DataFrame(data=objs, index=tickers)
+        p = pd.DataFrame(data=objs, index=tickers)
+        p['DT'] = self.rdate
+        return p
 
     def performance(self, tickers:list or pd.Series or np.array):
-        base = self._init_p()
-        print(base)
-        new = [t for t in tickers if not t in base.index]
-        print(len(new))
-        upd = base[base.index.isin(tickers)].copy()
-        upd = upd[upd['날짜'] != self.rdate].index.tolist()
-        print(len(upd))
+        read = pd.read_csv(filepath_or_buffer=self._pdir, index_col='종목코드', encoding='utf-8')
+        read.index = read.index.astype(str).str.zfill(6)
+        if self.is_open:
+            return read[read.index.isin(tickers)].drop(columns=['DT'])
 
-        p = self._update_p(tickers=new + upd)
-        rebase = pd.concat(objs=[base, p], axis=0).drop_duplicates(keep='last')
-        rebase.to_csv(self._pdir, index=True, encoding='utf-8')
-        return rebase
+        init = self._init_p()
+        p = pd.concat(objs=[init, read[~read.index.isin(init.index)]], axis=0)
+        new = self._update_p(tickers=[t for t in tickers if not t in p.index])
+
+        pick = p[p.index.isin(tickers)]
+        upd = self._update_p(tickers=pick[pick['DT'].astype(str) != self.rdate].index)
+
+        push = pd.concat(objs=[init, new, upd], axis=0)
+        save = pd.concat(objs=[push, read[~read.index.isin(push.index)]], axis=0)
+        save.index.name = '종목코드'
+        save.to_csv(self._pdir, index=True, encoding='utf-8')
+        return save[save.index.isin(tickers)].drop(columns=['DT'])
 
     @property
     def overview(self) -> pd.DataFrame:
@@ -241,17 +244,16 @@ class _basis(_group):
             _basis = pd.read_csv(path, index_col='종목코드', encoding='utf-8')
             _basis.index = _basis.index.astype(str).str.zfill(6)
             _basis.IPO = pd.to_datetime(_basis.IPO)
-            if not self.is_open and not str(_basis['날짜'][0]) == self.rdate:
+            if not self.is_open and not str(_basis['DT'][0]) == self.rdate:
                 _basis = pd.concat(objs = [self._get_ipo(), self._get_marketcap(), self._get_multiples()], axis=1)
-                _basis['날짜'] = self.rdate
+                _basis['DT'] = self.rdate
                 _basis.index.name = '종목코드'
                 _basis.to_csv(path, index=True, encoding='utf-8')
-            self.__setattr__('__basis', _basis.drop(columns=['날짜']))
+            self.__setattr__('__basis', _basis.drop(columns=['DT']))
         return self.__getattribute__('__basis')
 
 
 class _etf(object):
-
     _dir = os.path.join(os.path.dirname(__file__), r'archive/category/etf.csv')
     def __init__(self, dates:dict):
         self.dates = dates
@@ -305,49 +307,6 @@ class _etf(object):
 # Alias
 krse = _basis()
 etf = _etf(krse.dates)
-
-#
-#
-# def __fetch_raw_returns(td:str, is_market_open:bool, write_ok:bool) -> pd.DataFrame:
-#     performance = pd.read_csv(DIR_PERF, encoding='utf-8', index_col='종목코드')
-#     performance.index = performance.index.astype(str).str.zfill(6)
-#     if str(performance['날짜'][0]) == td or is_market_open:
-#         return performance.drop(columns=['날짜'])
-#
-#     tds = __fetch_trading_dates(td=td)
-#     performance = pd.concat(objs=[__fetch_stock_returns(tds=tds), __fetch_etf_returns(tds=tds)], axis=0)
-#     performance['날짜'] = td
-#     if write_ok:
-#         performance.to_csv(DIR_PERF, encoding='utf-8', index=True)
-#     return performance.drop(columns=['날짜'])
-#
-#
-# def fetch_returns(td:str, tickers:list, is_market_open:bool, write_ok:bool) -> pd.DataFrame:
-#     raw = __fetch_raw_returns(td=td, is_market_open=is_market_open, write_ok=write_ok)
-#     add_tickers = [ticker for ticker in tickers if not ticker in raw.index]
-#     if not add_tickers:
-#         return raw[raw.index.isin(tickers)]
-#
-#     process = tqdm(add_tickers)
-#     for ticker in process:
-#         process.set_description(f'Fetch Returns - {ticker}')
-#         while True:
-#             # noinspection PyBroadException
-#             try:
-#                 raw = pd.concat(objs=[raw, technical(ticker=ticker, period=2).ohlcv_returns], axis=0, ignore_index=False)
-#                 break
-#             except ConnectionError as e:
-#                 time.sleep(0.5)
-#
-#     raw.index.name = '종목코드'
-#     if is_market_open:
-#         return raw[raw.index.isin(tickers)]
-#
-#     raw['날짜'] = td
-#     if write_ok:
-#         raw.to_csv(DIR_PERF, encoding='utf-8', index=True)
-#     return raw[raw.index.isin(tickers)].drop(columns=['날짜'])
-
 
 
 if __name__ == "__main__":
