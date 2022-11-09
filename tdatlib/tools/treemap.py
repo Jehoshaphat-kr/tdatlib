@@ -5,9 +5,8 @@ import numpy as np
 
 
 class treemap(object):
-
-    __n = str()
-    scale = ['#F63538', '#BF4045', '#8B444E', '#414554', '#35764E', '#2F9E4F', '#30CC5A']  # Low <---> High
+    mid = '#414554'
+    scale = ['#F63538', '#BF4045', '#8B444E', '#35764E', '#2F9E4F', '#30CC5A']  # Low <---> High
     bound = {
         'R1Y': [-30, -20, -10, 0, 10, 20, 30],
         'R6M': [-24, -16, -8, 0, 8, 16, 24],
@@ -25,7 +24,7 @@ class treemap(object):
         kosdaq:list or pd.Series or np.array=None,
     ):
         self.__b = baseline.copy()
-        self.__n, self.__tag = name, f'_{tag}' if tag else tag
+        self.name, self.tag = name, f'_{tag}' if tag else tag
         self.__kq = kosdaq if kosdaq else get_index_portfolio_deposit_file('2001')
         return
 
@@ -43,9 +42,9 @@ class treemap(object):
                 obj = obj.drop(columns=['산업'])
             if n:
                 layer = _b.groupby(by=lvl[n:]).sum().reset_index()
-                obj['종목코드'] = layer[l] + f'_{self.__n}{self.__tag}'
+                obj['종목코드'] = layer[l] + f'_{self.name}{self.tag}'
                 obj['종목명'] = layer[l]
-                obj['분류'] = layer[lvl[n + 1]] if n < len(lvl) - 1 else self.__n
+                obj['분류'] = layer[lvl[n + 1]] if n < len(lvl) - 1 else self.name
                 obj['크기'] = layer['크기']
                 for name in obj['종목명']:
                     df = _b[_b[l] == name]
@@ -57,7 +56,7 @@ class treemap(object):
                             obj.loc[obj['종목명'] == name, f] = (num[f] * num['크기'] / num['크기'].sum()).sum()
             objs.append(obj)
         objs.append(pd.DataFrame(
-            data=[[f'{self.__n}{self.__tag}', self.__n, '', _b['크기'].sum()]],
+            data=[[f'{self.name}{self.tag}', self.name, '', _b['크기'].sum()]],
             columns=['종목코드', '종목명', '분류', '크기'], index=['Cover']
         ))
         aligned = pd.concat(objs=objs, axis=0, ignore_index=True)
@@ -70,19 +69,19 @@ class treemap(object):
         return aligned
 
     def _coloring(self, aligned:pd.DataFrame) -> pd.DataFrame:
-        middle, colored = self.scale.pop(3), pd.DataFrame(index=aligned.index)
+        colored = pd.DataFrame(index=aligned.index)
         for c, bins in self.bound.items():
             mid = aligned[aligned[c] == 0]
             if mid.empty:
                 color = pd.cut(x=aligned[c], bins=bins, labels=self.scale, right=True)
             else:
                 x = aligned[~aligned.index.isin(mid.index)][c]
-                m = pd.Series(data=[middle] * len(mid), index=mid.index)
+                m = pd.Series(data=[self.mid] * len(mid), index=mid.index)
                 o = pd.Series(pd.cut(x=x, bins=bins, labels=self.scale, right=True))
                 color = pd.concat(objs=[m, o], axis=0)
             color.name = f'C{c}'
             colored = colored.join(color.astype(str), how='left')
-        colored.fillna(middle, inplace=True)
+        colored.fillna(self.mid, inplace=True)
         for col in colored.columns:
             colored.at[colored.index[-1], col] = '#C8C8C8'
         return aligned.join(colored, how='left')

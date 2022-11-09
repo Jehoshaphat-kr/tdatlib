@@ -159,6 +159,7 @@ class _group(_marketime):
 
     @property
     def theme(self) -> pd.DataFrame:
+        """ Deprecated """
         df = pd.read_csv(os.path.join(self._dir, 'theme.csv'), index_col='종목코드')
         df.index = df.index.astype(str).str.zfill(6)
         return df
@@ -241,15 +242,15 @@ class _basis(_group):
     def overview(self) -> pd.DataFrame:
         if not hasattr(self, '__basis'):
             path = os.path.join(os.path.dirname(__file__), rf'archive/common/basis.csv')
-            _basis = pd.read_csv(path, index_col='종목코드', encoding='utf-8')
-            _basis.index = _basis.index.astype(str).str.zfill(6)
-            _basis.IPO = pd.to_datetime(_basis.IPO)
-            if not self.is_open and not str(_basis['DT'][0]) == self.rdate:
-                _basis = pd.concat(objs = [self._get_ipo(), self._get_marketcap(), self._get_multiples()], axis=1)
-                _basis['DT'] = self.rdate
-                _basis.index.name = '종목코드'
-                _basis.to_csv(path, index=True, encoding='utf-8')
-            self.__setattr__('__basis', _basis.drop(columns=['DT']))
+            _base = pd.read_csv(path, index_col='종목코드', encoding='utf-8')
+            _base.index = _base.index.astype(str).str.zfill(6)
+            _base.IPO = pd.to_datetime(_base.IPO)
+            if not self.is_open and not str(_base['DT'][0]) == self.rdate:
+                _base = pd.concat(objs = [self._get_ipo(), self._get_marketcap(), self._get_multiples()], axis=1)
+                _base['DT'] = self.rdate
+                _base.index.name = '종목코드'
+                _base.to_csv(path, index=True, encoding='utf-8')
+            self.__setattr__('__basis', _base.drop(columns=['DT']))
         return self.__getattribute__('__basis')
 
 
