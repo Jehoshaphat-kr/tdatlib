@@ -100,35 +100,37 @@
     <!-- ======= Blog Single Section ======= -->
     <section id="market-map">
       <div class="map-ads">
-        <p style="text-align: center;">광고 영역</p>
+        <div class="map-ads-content">광고 영역(자동 높이)</div>
       </div>
         <div class="map-nav">
           <div class="map-nav-1">
-            <select class="map-select" name="">
-              <optgroup label="WICS">
-                <option value="">WICS 대형주</option>
-                <option value="">WICS 중형주</option>
-              </optgroup>
-              <optgroup label="WI26">
-                <option value="">WI26 대형주</option>
-                <option value="">WI26 중형주</option>
-              </optgroup>
-              <optgroup label="ETF">
-                <option value="">ETF</option>
-              </optgroup>
-            </select>
-            <select class="option-select" name="지표">
-              <option value="">1일 수익률</option>
-              <option value="">1주 수익률</option>
-              <option value="">1개월 수익률</option>
-              <option value="">3개월 수익률</option>
-              <option value="">6개월 수익률</option>
-              <option value="">1년 수익률</option>
-              <option value="">PER</option>
-              <option value="">PBR</option>
-              <option value="">배당 수익률</option>
-            </select>
-            <input id="map-reset" class="map-reset" type="button" value=" " />
+            <div class="map-nav-mobi">
+              <select class="map-select" name="">
+                <optgroup label="WICS">
+                  <option value="">WICS 대형주</option>
+                  <option value="">WICS 중형주</option>
+                </optgroup>
+                <optgroup label="WI26">
+                  <option value="">WI26 대형주</option>
+                  <option value="">WI26 중형주</option>
+                </optgroup>
+                <optgroup label="ETF">
+                  <option value="">ETF</option>
+                </optgroup>
+              </select>
+              <select class="option-select" name="지표">
+                <option value="">1일 수익률</option>
+                <option value="">1주 수익률</option>
+                <option value="">1개월 수익률</option>
+                <option value="">3개월 수익률</option>
+                <option value="">6개월 수익률</option>
+                <option value="">1년 수익률</option>
+                <option value="">PER</option>
+                <option value="">PBR</option>
+                <option value="">배당 수익률</option>
+              </select>
+            </div>
+            <input id="map-reset" class="map-reset" type="button" value="&nbsp;" />
           </div>
           <div class="map-nav-2">
             <select id="map-search" class="map-search"></select>
@@ -136,22 +138,19 @@
           <div style="clear: both;"></div>
         </div>
 
-        <div class="map-container">
-          <div id="myMap" style="font-size: xx-small;">&nbsp;</div>
-          <div class="map-guide">
-            <div class="map-guide-bar">
-              <div id="s_red" class="map-color-unit">하락</div>
-              <div id="m_red" class="map-color-unit">&nbsp;</div>
-              <div id="l_red" class="map-color-unit">&nbsp;</div>
-              <div id="navy" class="map-color-unit">보합</div>
-              <div id="l_grn" class="map-color-unit">&nbsp;</div>
-              <div id="m_grn" class="map-color-unit">&nbsp;</div>
-              <div id="s_grn" class="map-color-unit">상승</div>
-            </div>
-            <div class="map-guide-notice">본 자료는 투자 참고용입니다. 색상은 상대 지표로 표현하였습니다. PC에서 지도에 커서를 올리거나 모바일에서 꾸욱 누르면 정보가 나타납니다(일부 기기 제외). 해당 종목이나 분류를 클릭하면 확대/재편됩니다. *표시는 코스닥 종목입니다. 종목 구성이 많을수록 속도가 느려질 수 있습니다. 일부 지도에서는 가독성을 위해 소형주는 제외되었습니다.</div>
+        <div id="myMap">&nbsp;</div>
+        <div class="map-guide">
+          <div class="map-guide-bar">
+            <div id="s_red" class="map-color-unit">하락</div>
+            <div id="m_red" class="map-color-unit">&nbsp;</div>
+            <div id="l_red" class="map-color-unit">&nbsp;</div>
+            <div id="navy" class="map-color-unit">보합</div>
+            <div id="l_grn" class="map-color-unit">&nbsp;</div>
+            <div id="m_grn" class="map-color-unit">&nbsp;</div>
+            <div id="s_grn" class="map-color-unit">상승</div>
           </div>
+          <div class="map-notice">본 자료는 투자 참고용입니다. 색상은 상대 지표로 표현하였습니다. PC에서 지도에 커서를 올리거나 모바일에서 꾸욱 누르면 정보가 나타납니다(일부 기기 제외). 해당 종목이나 분류를 클릭하면 확대/재편됩니다. *표시는 코스닥 종목입니다. 종목 구성이 많을수록 속도가 느려질 수 있습니다. 일부 지도에서는 가독성을 위해 소형주는 제외되었습니다.</div>
         </div>
-        <div class="clear" style="font-size: xx-small;">&nbsp;</div>
       </section>
 
   </main><!-- End #main -->
