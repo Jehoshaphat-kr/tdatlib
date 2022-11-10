@@ -26,6 +26,7 @@
 
   <!-- Template Main CSS File -->
   <link href="assets/css/style.css" rel="stylesheet">
+  <link href="assets/css/map-style.css" rel="stylesheet">
 
   <!-- =======================================================
   * Template Name: FlexStart - v1.9.0
@@ -97,33 +98,43 @@
     </section><!-- End Breadcrumbs -->
 
     <!-- ======= Blog Single Section ======= -->
-    <section id="market-map" style="margin: 0 30px 60px 30px; border-style: dashed;">
-      <div class="map-ads" style="width: 100%; height: 240px; background-color: #f6f9ff; border-top: 1px solid #e1ecff;border-bottom: 1px solid #e1ecff;">
+    <section id="market-map">
+      <div class="map-ads">
         <p style="text-align: center;">광고 영역</p>
       </div>
-        <div class="map-nav" style="margin-top:60px; border-style:dotted; border-color:blue;">
+        <div class="map-nav">
           <div class="map-nav-1">
-            <select class="map-select" name="map-selection">
+            <select class="map-select" name="">
               <optgroup label="WICS">
-                <option value="">WICS대형주</option>
-                <option value="">WICS중형주</option>
+                <option value="">WICS 대형주</option>
+                <option value="">WICS 중형주</option>
               </optgroup>
               <optgroup label="WI26">
-                <option value="">WI26대형주</option>
-                <option value="">WI26중형주</option>
+                <option value="">WI26 대형주</option>
+                <option value="">WI26 중형주</option>
               </optgroup>
               <optgroup label="ETF">
                 <option value="">ETF</option>
               </optgroup>
             </select>
-            <select class="option-select" name="지표"></select>
+            <select class="option-select" name="지표">
+              <option value="">1일 수익률</option>
+              <option value="">1주 수익률</option>
+              <option value="">1개월 수익률</option>
+              <option value="">3개월 수익률</option>
+              <option value="">6개월 수익률</option>
+              <option value="">1년 수익률</option>
+              <option value="">PER</option>
+              <option value="">PBR</option>
+              <option value="">배당 수익률</option>
+            </select>
+            <input id="map-reset" class="map-reset" type="button" value=" " />
           </div>
           <div class="map-nav-2">
             <select id="map-search" class="map-search"></select>
-            <input id="map-reset" type="button" value=" " />
           </div>
+          <div style="clear: both;"></div>
         </div>
-        <div class="clear" style="font-size: xx-small;"> </div>
 
         <div class="map-container">
           <div id="myMap" style="font-size: xx-small;">&nbsp;</div>

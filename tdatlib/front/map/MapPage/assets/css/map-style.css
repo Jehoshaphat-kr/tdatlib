@@ -1,0 +1,68 @@
+#market-map {
+  margin: 0 30px 60px 30px;
+  border-style: dashed; /* Temporary */
+}
+
+.map-ads {
+  width: 100%;
+  height: 240px;
+  background-color: #f6f9ff;
+  border-top: 1px solid #e1ecff;
+  border-bottom: 1px solid #e1ecff;
+}
+
+.map-nav {
+  margin-top:60px;
+  width: 100%;
+  border-style:dotted; /* Temporary */
+  border-color:blue; /* Temporary */
+}
+
+.map-nav > .map-nav-1 {
+  float:left;
+  display:table;
+  min-width:48%;
+  background-color:orange; /* Temporary */
+}
+
+.map-nav > .map-nav-2 {
+  float:right;
+  display:table;
+  min-width:48%;
+  background-color:lightgreen; /* Temporary */
+}
+
+.map-select, .option-select {
+  height: 2em;
+  width: 150px;
+  color: #999;
+  margin-right: 6px;
+  padding-left: 8px;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  box-sizing: border-box;
+  cursor: pointer;
+  -webkit-appearance: none;
+  background-image: url('https://raw.githubusercontent.com/Jehoshaphat-kr/tdatlib/master/tdatlib/dataset/_archive/treemap/deploy/img/icon_arrow.png');
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  background-size: 8px;
+  background-color: #fff;
+  text-align: left;
+}
+
+.map-reset {
+  height: 2em;
+}
+
+.map-search {
+  float:right;
+  height: 2em;
+  width: 50%;
+  color: #999;
+  padding-left: 8px;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  background-color: #fff;
+  -webkit-appearance: none;
+}
