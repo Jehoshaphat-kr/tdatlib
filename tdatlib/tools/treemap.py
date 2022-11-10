@@ -82,6 +82,20 @@ class treemap(object):
             color.name = f'C{c}'
             colored = colored.join(color.astype(str), how='left')
         colored.fillna(self.mid, inplace=True)
+
+        if not self.name == 'ETF':
+            scale = self.scale[:3] + [self.mid] + self.scale[-3:]
+            for f in ['PBR', 'PER', 'DIV']:
+                re_scale = scale if f == 'DIV' else scale[::-1]
+                value = aligned[aligned[f] != 0][f].dropna().sort_values(ascending=False)
+
+                v = value.tolist()
+                limit = [v[int(len(value) / 7) * i] for i in range(len(re_scale))] + [v[-1]]
+                _color = pd.cut(value, bins=limit[::-1], labels=re_scale, right=True)
+                _color.name = f"C{f}"
+                colored = colored.join(_color.astype(str), how='left').fillna(re_scale[0 if f == 'DIV' else -1])
+                colored = colored.replace('nan', re_scale[0 if f == 'DIV' else -1])
+
         for col in colored.columns:
             colored.at[colored.index[-1], col] = '#C8C8C8'
         return aligned.join(colored, how='left')

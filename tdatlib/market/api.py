@@ -51,6 +51,10 @@ class market(object):
             proc.set_description(desc=f'{mm.name}{mm.tag}')
 
             mdata = mm.data.copy()
+            self._labels[var] = mdata['종목코드'].tolist()
+            self._covers[var] = mdata['분류'].tolist()
+            self._ids[var] = mdata['ID'].tolist()
+            # self._bars[var] = mdata
             self._datum = pd.concat(
                 objs=[self._datum, mdata[~mdata['종목코드'].isin(self._datum['종목코드'])]],
                 axis=0, ignore_index=True
@@ -69,7 +73,8 @@ class market(object):
             _ct += 1
             _js = os.path.join(os.path.dirname(__file__), f'archive/deploy/{td[2:]}MAP-r{_ct}.js')
 
-        proc = [('labels', self._labels), ('covers', self._covers), ('ids', self._ids), ('bar', self._bars)]
+        # proc = [('labels', self._labels), ('covers', self._covers), ('ids', self._ids), ('bar', self._bars)]
+        proc = [('labels', self._labels), ('covers', self._covers), ('ids', self._ids)]
         for name, data in proc:
             syntax += 'const %s = {\n' % name
             for var, val in data.items():
@@ -80,8 +85,9 @@ class market(object):
         _frm.fillna('-', inplace=True)
         js = _frm.to_json(orient='index', force_ascii=False)
 
+        group = self._datum[self._datum.index.isin([c for c in self._datum.index if '_' in c])]['종목명'].tolist()
         syntax += f"const frm = {js}\n"
-        syntax += f"const group_data = {str(self._cover)}\n"
+        syntax += f"const group_data = {str(group)}\n"
         with codecs.open(filename=_js, mode='w', encoding='utf-8') as file:
             file.write(jsmin.jsmin(syntax + suffix))
         return
@@ -90,3 +96,4 @@ class market(object):
 if __name__ == "__main__":
     m = market()
     m.collect()
+    m.pd2js()
