@@ -24,12 +24,12 @@ class market(object):
 
         wics_largecap = wics.head(500).copy()
         wics_largecap = wics_largecap.join(krse.performance(wics_largecap.index), how='left')
-        wics_midcap = wics[~wics.index.isin(wics_largecap.index)].head(400)
+        wics_midcap = wics[~wics.index.isin(wics_largecap.index)].head(300)
         wics_midcap = wics_midcap.join(krse.performance(wics_midcap.index), how='left')
 
         wi26_largecap = wi26.head(500).copy()
         wi26_largecap = wi26_largecap.join(krse.performance(wi26_largecap.index), how='left')
-        wi26_midcap = wi26[~wi26.index.isin(wi26_largecap.index)].head(400)
+        wi26_midcap = wi26[~wi26.index.isin(wi26_largecap.index)].head(300)
         wi26_midcap = wi26_midcap.join(krse.performance(wi26_midcap.index), how='left')
 
         self._kwargs = [
