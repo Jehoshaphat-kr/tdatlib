@@ -91,9 +91,12 @@ class market(object):
         with codecs.open(filename=_js, mode='w', encoding='utf-8') as file:
             # file.write(jsmin.jsmin(syntax + suffix))
             file.write(syntax + suffix)
+
         log = os.path.join(os.path.dirname(__file__), f'archive/deploy/log.csv')
         with codecs.open(filename=log, mode='w', encoding='utf-8') as file:
-            file.write(f'{td[2:]}MAP-r{_ct}.js')
+            file.write(
+                f'https://cdn.jsdelivr.net/gh/Jehoshaphat-kr/tdatlib/tdatlib/archive/deploy/{td[2:]}MAP-r{_ct}.js'
+            )
         return
 
 
