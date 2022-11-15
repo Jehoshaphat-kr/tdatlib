@@ -28,6 +28,9 @@
   <link href="assets/css/style.css" rel="stylesheet">
   <link href="assets/css/map-style.css" rel="stylesheet">
 
+  <!-- Market Map -->
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
   <!-- =======================================================
   * Template Name: FlexStart - v1.9.0
   * Template URL: https://bootstrapmade.com/flexstart-bootstrap-startup-template/
@@ -35,6 +38,7 @@
   * License: https://bootstrapmade.com/license/
   ======================================================== -->
   <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
+  <script src="https://cdn.plot.ly/plotly-2.16.1.min.js"></script>
 </head>
 
 <body>
@@ -108,7 +112,7 @@
             <div class="map-nav-mobi">
               <select class="map-select" name="">
                 <optgroup label="WICS">
-                  <option value="indful">WICS 대형주</option>
+                  <option value="indful" selected="selected">WICS 대형주</option>
                   <option value="indksm">WICS 중형주</option>
                 </optgroup>
                 <optgroup label="WI26">
@@ -134,7 +138,9 @@
             <input id="map-reset" class="map-reset" type="button" value="&nbsp;" />
           </div>
           <div class="map-nav-2">
-            <select id="map-search" class="map-search"></select>
+            <select class="map-search">
+              <option></option>
+            </select>
           </div>
           <div style="clear: both;"></div>
         </div>
@@ -240,15 +246,17 @@
 
   <!-- Template Main JS File -->
   <script src="assets/js/main.js"></script>
-  <script type="text/javascript">
+
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  <script src="./marketmap.js"></script>
+  <!-- <script type="text/javascript">
     var body = document.getElementsByTagName('body')[0];
     var scpt = document.createElement('script');
     $.get('https://raw.githubusercontent.com/Jehoshaphat-kr/tdatlib/master/tdatlib/market/archive/deploy/log.csv', function(data) {
   	  scpt.setAttribute('src', data);
   	  body.appendChild(scpt);
   	}, 'text');
-  </script>
-  <!-- <script src="https://cdn.jsdelivr.net/gh/Jehoshaphat-kr/tdatlib/tdatlib/dataset/_archive/treemap/deploy/js/221115MM-r1.js"></script> -->
+  </script> -->
 
 </body>
 
