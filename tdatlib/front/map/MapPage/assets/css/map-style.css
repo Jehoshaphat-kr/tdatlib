@@ -140,7 +140,7 @@
 
 .map-notice {
   display: table-cell;
-  vertical-align: middle;
+  vertical-align: bottom;
   min-height: 35px;
   padding: 0 8px;
   font-size: 12px;

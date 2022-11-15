@@ -24,12 +24,12 @@ class market(object):
 
         wics_largecap = wics.head(500).copy()
         wics_largecap = wics_largecap.join(krse.performance(wics_largecap.index), how='left')
-        wics_midcap = wics[~wics.index.isin(wics_largecap.index)].head(500)
+        wics_midcap = wics[~wics.index.isin(wics_largecap.index)].head(400)
         wics_midcap = wics_midcap.join(krse.performance(wics_midcap.index), how='left')
 
         wi26_largecap = wi26.head(500).copy()
         wi26_largecap = wi26_largecap.join(krse.performance(wi26_largecap.index), how='left')
-        wi26_midcap = wi26[~wi26.index.isin(wi26_largecap.index)].head(500)
+        wi26_midcap = wi26[~wi26.index.isin(wi26_largecap.index)].head(400)
         wi26_midcap = wi26_midcap.join(krse.performance(wi26_midcap.index), how='left')
 
         self._kwargs = [
@@ -89,8 +89,8 @@ class market(object):
         syntax += f"const frm = {js}\n"
         syntax += f"const group_data = {str(group)}\n"
         with codecs.open(filename=_js, mode='w', encoding='utf-8') as file:
-            # file.write(jsmin.jsmin(syntax + suffix))
-            file.write(syntax + suffix)
+            file.write(jsmin.jsmin(syntax + suffix))
+            # file.write(syntax + suffix)
 
         log = os.path.join(os.path.dirname(__file__), f'archive/deploy/log.csv')
         with codecs.open(filename=log, mode='w', encoding='utf-8') as file:
