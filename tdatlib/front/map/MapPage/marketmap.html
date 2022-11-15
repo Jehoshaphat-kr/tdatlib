@@ -34,6 +34,7 @@
   * Author: BootstrapMade.com
   * License: https://bootstrapmade.com/license/
   ======================================================== -->
+  <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
 </head>
 
 <body>
@@ -239,6 +240,15 @@
 
   <!-- Template Main JS File -->
   <script src="assets/js/main.js"></script>
+  <script type="text/javascript">
+    var body = document.getElementsByTagName('body')[0];
+    var scpt = document.createElement('script');
+    $.get('https://raw.githubusercontent.com/Jehoshaphat-kr/tdatlib/master/tdatlib/market/archive/deploy/log.csv', function(data) {
+  	  scpt.setAttribute('src', data);
+  	  body.appendChild(scpt);
+  	}, 'text');
+  </script>
+  <!-- <script src="https://cdn.jsdelivr.net/gh/Jehoshaphat-kr/tdatlib/tdatlib/dataset/_archive/treemap/deploy/js/221115MM-r1.js"></script> -->
 
 </body>
 
