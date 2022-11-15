@@ -19,6 +19,7 @@ class _marketime(object):
     def __init__(self, td:str or datetime=None):
         clk = datetime.now(timezone('Asia/Seoul'))
         cur = get_nearest_business_day_in_a_week(date=clk.strftime("%Y%m%d"), prev=True)
+        wkd = clk.weekday()
 
         if td and isinstance(td, str):
             date = td
@@ -28,7 +29,7 @@ class _marketime(object):
             date = datetime.now(timezone('Asia/Seoul')).strftime("%Y%m%d")
 
         self.rdate = get_nearest_business_day_in_a_week(date=date, prev=True)
-        self.is_open = True if self.rdate == cur and 900 <= int(clk.strftime("%H%M")) <= 1530 else False
+        self.is_open = self.rdate == cur and 900 <= int(clk.strftime("%H%M")) <= 1530 and not wkd in [5, 6]
         return
 
     @property

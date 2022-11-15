@@ -89,7 +89,8 @@ class market(object):
         syntax += f"const frm = {js}\n"
         syntax += f"const group_data = {str(group)}\n"
         with codecs.open(filename=_js, mode='w', encoding='utf-8') as file:
-            file.write(jsmin.jsmin(syntax + suffix))
+            # file.write(jsmin.jsmin(syntax + suffix))
+            file.write(syntax + suffix)
         return
 
 
