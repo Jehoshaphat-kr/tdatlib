@@ -133,7 +133,8 @@ function treemap(key){
     },
     pathbar: {'visible': true}
   }
-  Plotly.newPlot('myMap', [map_draw], map_layout, map_option);
+//  Plotly.newPlot('myMap', [map_draw], map_layout, map_option);
+  Plotly.newPlot('myMap', [map_draw], map_layout);
 }
 
 $(document).ready(function(){
@@ -143,8 +144,8 @@ $(document).ready(function(){
   $('.option-select').prop('selectedIndex',0);
   $('.map-search').select2({placeholder:"종목명 검색..", allowClear: true});
 
-  market_type = $('.map-select').val()
-  option_type = $('.option-select').val()
+  market_type = $('.map-select').val();
+  option_type = $('.option-select').val();
   map_key = market_type;
 
   treemap(map_key);
@@ -163,28 +164,27 @@ $(document).ready(function(){
       $('.option-select').append('<option value="DIV">배당수익률</option>');
     }
 
-    map_key = map_type
-		treemap(map_key)
+    map_key = map_type;
+    treemap(map_key);
     setSearch(map_key);
   })
 
 	// Option selection
   $(".option-select").on('change', function(){
-    option_type = $(".option-select").val()
-    if ($('#mapbar').is(":checked")) { barplot(map_key) }
-    else { treemap(map_key) }
+    option_type = $(".option-select").val();
+    treemap(map_key);
 	if ((option_type == 'PER') || (option_type == 'PBR')){
-	  $("#s_red").html('고평가')
-	  $("#navy").html('평균')
-	  $("#s_grn").html('저평가')
+	  $("#s_red").html('고평가');
+	  $("#navy").html('평균');
+	  $("#s_grn").html('저평가');
 	} else if (option_type == 'DIV'){
-	  $("#s_red").html('저배당')
-	  $("#navy").html('평균')
-	  $("#s_grn").html('고배당')
+	  $("#s_red").html('저배당');
+	  $("#navy").html('평균');
+	  $("#s_grn").html('고배당');
 	} else {
-    $("#s_red").html('하락')
-	  $("#navy").html('보합')
-	  $("#s_grn").html('상승')
+    $("#s_red").html('하락');
+	  $("#navy").html('보합');
+	  $("#s_grn").html('상승');
 	}
   })
 
@@ -193,7 +193,7 @@ $(document).ready(function(){
     var username = e.params.data.text;
     if (username == "") { return }
 
-    var i_start = username.indexOf('[')
+    var i_start = username.indexOf('[');
     if (i_start != -1){
       var group = username.slice(i_start + 1, username.length - 1);
       username = username.slice(0, i_start);
@@ -205,7 +205,7 @@ $(document).ready(function(){
     }
 
     search_top(group);
-    if (username == group){return;}
+    if (username == group){return}
     setTimeout(function(){
       search_asset(username);
     }, 1000)
