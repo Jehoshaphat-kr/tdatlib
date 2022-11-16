@@ -111,7 +111,7 @@ function treemap(key){
     values:tdat_scale,
 //	ids:tdat_ids[key],
 //    meta:tdat_caps,
-//    customdata:tdat_price,
+    customdata:tdat_price,
     text:tdat_perf,
 	textposition:'middle center',
     textfont:{
@@ -119,6 +119,7 @@ function treemap(key){
       color:'#ffffff'
     },
     texttemplate: '%{label}<br>%{text}' + _u + '<br>',
+    hoverinfo: 'none',
 //    hovertemplate: '%{label}<br>시총: %{meta}<br>종가: %{customdata}<br>' + _t + ': %{text}' + _u + '<extra></extra>',
 //	hoverlabel: {
 //      font: {
