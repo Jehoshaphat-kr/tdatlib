@@ -215,7 +215,4 @@ $(document).ready(function(){
   $('#map-reset').click(function(){
     treemap(map_key);
   })
-
-  console.log(d3_selectionPrototype);
-  console.log(d3_selectionPrototype.text);
 })
