@@ -5,15 +5,14 @@ import numpy as np
 
 
 class treemap(object):
-    mid = '#414554'
-    scale = ['#F63538', '#BF4045', '#8B444E', '#35764E', '#2F9E4F', '#30CC5A']  # Low <---> High
+    scale = ['#F63538', '#BF4045', '#8B444E', '#414554', '#35764E', '#2F9E4F', '#30CC5A']  # Low <---> High
     bound = {
-        'R1Y': [-30, -20, -10, 0, 10, 20, 30],
-        'R6M': [-24, -16, -8, 0, 8, 16, 24],
-        'R3M': [-18, -12, -6, 0, 6, 12, 18],
-        'R1M': [-10, -6.7, -3.3, 0, 3.3, 6.7, 10],
-        'R1W': [-6, -4, -2, 0, 2, 4, 6],
-        'R1D': [-3, -2, -1, 0, 1, 2, 3]
+        'R1Y': ([-30, -20, -10, 0, 10, 20, 30], [-25, -15, -5, 5, 15, 25]),
+        'R6M': ([-24, -16, -8, 0, 8, 16, 24], [-20, -12, -4, 4, 12, 20]),
+        'R3M': ([-18, -12, -6, 0, 6, 12, 18], [-15, -9, 3, 3, 9, 15]),
+        'R1M': ([-10, -6.7, -3.3, 0, 3.3, 6.7, 10], [-8.35, -5, -1.65, 1.65, 5, 8.35]),
+        'R1W': ([-6, -4, -2, 0, 2, 4, 6], [-5, -3, -1, 1, 3, 5]),
+        'R1D': ([-3, -2, -1, 0, 1, 2, 3], [-2.5, -1.5, -0.5, 0.5, 1.5, 2.5])
     }
 
     def __init__(
@@ -70,23 +69,24 @@ class treemap(object):
 
     def _coloring(self, aligned:pd.DataFrame) -> pd.DataFrame:
         colored = pd.DataFrame(index=aligned.index)
-        for c, bins in self.bound.items():
-            mid = aligned[aligned[c] == 0]
-            if mid.empty:
-                color = pd.cut(x=aligned[c], bins=bins, labels=self.scale, right=True)
-            else:
-                x = aligned[~aligned.index.isin(mid.index)][c]
-                m = pd.Series(data=[self.mid] * len(mid), index=mid.index)
-                o = pd.Series(pd.cut(x=x, bins=bins, labels=self.scale, right=True))
-                color = pd.concat(objs=[m, o], axis=0)
+        for c, (na, bins) in self.bound.items():
+            color = aligned[c].apply(
+                lambda n:
+                self.scale[0] if n <= bins[0] else \
+                self.scale[1] if bins[0] < n <= bins[1] else \
+                self.scale[2] if bins[1] < n <= bins[2] else \
+                self.scale[3] if bins[2] < n <= bins[3] else \
+                self.scale[4] if bins[3] < n <= bins[4] else \
+                self.scale[5] if bins[4] < n <= bins[5] else \
+                self.scale[6]
+            )
             color.name = f'C{c}'
             colored = colored.join(color.astype(str), how='left')
-        colored.fillna(self.mid, inplace=True)
 
         if not self.name == 'ETF':
-            scale = self.scale[:3] + [self.mid] + self.scale[-3:]
+            scale = self.scale[::-1].copy()
             for f in ['PBR', 'PER', 'DIV']:
-                re_scale = scale if f == 'DIV' else scale[::-1]
+                re_scale = scale if f == 'DIV' else self.scale
                 value = aligned[aligned[f] != 0][f].dropna().sort_values(ascending=False)
 
                 v = value.tolist()
@@ -164,17 +164,19 @@ if __name__ == "__main__":
     from tdatlib.market.core import *
 
 
-    # base = krse.wics.join(krse.overview.drop(columns=['종목명']), how='left')
-    # base = base[base.시가총액 >= 300000000000]
-    # base = pd.concat(objs=[base, krse.performance(base.index)], axis=1)
-    # tmap = treemap(baseline=base, name='WICS')
+    base = krse.wics.join(krse.overview.drop(columns=['종목명']), how='left')
+    base = base.sort_values(by='시가총액', ascending=False).head(500)
+    base = pd.concat(objs=[base, krse.performance(base.index)], axis=1)
+    tmap = treemap(baseline=base, name='WICS')
 
     # etf.islatest()
-    base = etf.group.join(etf.overview.drop(columns=['종목명']), how='left')
-    base = base.join(etf.returns, how='left')
-    tmap = treemap(baseline=base, name='ETF')
+    # base = etf.group.join(etf.overview.drop(columns=['종목명']), how='left')
+    # base = base.join(etf.returns, how='left')
+    # tmap = treemap(baseline=base, name='ETF')
+
+
 
     fig = go.Figure()
-    fig.add_trace(tmap.trace())
+    fig.add_trace(tmap.trace(key='R1M'))
     fig.show()
 

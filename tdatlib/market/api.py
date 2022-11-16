@@ -89,8 +89,8 @@ class market(object):
         syntax += f"const tdat_frm = {js}\n"
         syntax += f"const group_data = {str(group)}\n"
         with codecs.open(filename=_js, mode='w', encoding='utf-8') as file:
-            file.write(jsmin.jsmin(syntax + suffix))
-            # file.write(syntax + suffix)
+            # file.write(jsmin.jsmin(syntax + suffix))
+            file.write(syntax + suffix)
 
         log = os.path.join(os.path.dirname(__file__), f'archive/deploy/log.csv')
         with codecs.open(filename=log, mode='w', encoding='utf-8') as file:
