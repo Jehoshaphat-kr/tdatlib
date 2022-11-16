@@ -1,5 +1,5 @@
 const c_media = window.matchMedia('(max-width: 1023px)');
-var names = []; var scale = []; var caps = []; var price = []; var perf = []; var color = [];
+var tdat_name = []; var tdat_scale = []; var tdat_caps = []; var tdat_price = []; var tdat_perf = []; var tdat_color = [];
 var map_type; var market_type; var option_type; var map_key;
 
 const map_layout = {
@@ -79,23 +79,23 @@ function search_asset(__asset_name){
 }
 
 function reframe(code){
-  names.push(frm[code]['종목명'])
-  scale.push(frm[code]['크기'])
-  caps.push(frm[code]['시가총액'])
-  price.push(frm[code]['종가'])
-  perf.push(frm[code][option_type])
-  color.push(frm[code]['C' + option_type])
+  tdat_name.push(frm[code]['종목명'])
+  tdat_scale.push(frm[code]['크기'])
+  tdat_caps.push(frm[code]['시가총액'])
+  tdat_price.push(frm[code]['종가'])
+  tdat_perf.push(frm[code][option_type])
+  tdat_color.push(frm[code]['C' + option_type])
 }
 
 function treemap(key){
-  names = []; scale = []; caps = []; price = []; perf = []; color = []
+  tdat_name = []; tdat_scale = []; tdat_caps = []; tdat_price = []; tdat_perf = []; color = []
   labels[key].forEach(function(code){
-	  names.push(frm[code]['종목명'])
-	  scale.push(frm[code]['크기'])
-	  caps.push(frm[code]['시가총액'])
-	  price.push(frm[code]['종가'])
-	  perf.push(frm[code][option_type])
-	  color.push(frm[code]['C' + option_type])
+	  tdat_name.push(frm[code]['종목명'])
+	  tdat_scale.push(frm[code]['크기'])
+	  tdat_caps.push(frm[code]['시가총액'])
+	  tdat_price.push(frm[code]['종가'])
+	  tdat_perf.push(frm[code][option_type])
+	  tdat_color.push(frm[code]['C' + option_type])
 	})
   if (option_type == 'PER' || option_type == 'PBR') {
     var text = option_type
@@ -108,13 +108,13 @@ function treemap(key){
 	var map_draw={
     type:'treemap',
     branchvalues:'total',
-    labels:names,
+    labels:tdat_name,
     parents:covers[key],
 		ids:ids[key],
-		values:scale,
-    meta:caps,
-    customdata:price,
-    text:perf,
+		values:tdat_scale,
+    meta:tdat_caps,
+    customdata:tdat_price,
+    text:tdat_perf,
 		textposition:'middle center',
     textfont:{
       family:'NanumGothic, Nanum Gothic, monospace',
@@ -130,7 +130,7 @@ function treemap(key){
     },
 	opacity: 0.9,
     marker: {
-      colors: color,
+      colors: tdat_color,
       visible: true
     },
     pathbar: {'visible': true}
@@ -202,7 +202,7 @@ $(document).ready(function(){
     } else if (group_data.includes(username)) {
       var group = username;
     } else{
-      var idx = names.indexOf(username);
+      var idx = tdat_name.indexOf(username);
       var group = covers[map_key][idx];
     }
 

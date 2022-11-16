@@ -95,7 +95,7 @@ class market(object):
         log = os.path.join(os.path.dirname(__file__), f'archive/deploy/log.csv')
         with codecs.open(filename=log, mode='w', encoding='utf-8') as file:
             file.write(
-                f'https://cdn.jsdelivr.net/gh/Jehoshaphat-kr/tdatlib/tdatlib/market/archive/deploy/{td[2:]}MAP-r{_ct}.js'
+                f'https://cdn.jsdelivr.net/gh/Jehoshaphat-kr/tdatlib/tdatlib/market/archive/deploy/map-{td[2:]}r{_ct}.js'
             )
         return
 

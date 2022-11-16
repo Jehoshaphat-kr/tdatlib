@@ -22,7 +22,8 @@
 
   <!-- Template Market Map -->
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-	<link href="https://cdn.jsdelivr.net/gh/Jehoshaphat-kr/marketport/warehouse/deploy/marketmap/css/map-style-v2.min.css" rel="stylesheet" />
+  <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
+  <script src="https://cdn.plot.ly/plotly-2.16.1.min.js"></script>
 
   <script type="text/javascript">
     var _t_sbar_rct_obj = [];
@@ -772,13 +773,64 @@
             </div>
           </div>
         </section>
-        <script type="text/javascript">
-          if (window.location.href == 'https://jehoshaphat.tistory.com/16'){
-            let blog = document.getElementById("blog");
-            blog.getElementsByClassName('container')[0].remove();
-          }
 
-        </script>
+        <!-- ======= Market-Map ======= -->
+        <section id="market-map">
+          <div class="map-ads">
+            <!-- <div class="map-ads-content">광고 영역(자동 높이)</div> -->
+          </div>
+          <div class="map-nav">
+            <div class="map-nav-1">
+              <div class="map-nav-mobi">
+                <select class="map-select" name="">
+                  <optgroup label="WICS">
+                    <option value="indful" selected="selected">WICS 대형주</option>
+                    <option value="indksm">WICS 중형주</option>
+                  </optgroup>
+                  <optgroup label="WI26">
+                    <option value="secful">WI26 대형주</option>
+                    <option value="secksm">WI26 중형주</option>
+                  </optgroup>
+                  <optgroup label="ETF">
+                    <option value="etfful">ETF</option>
+                  </optgroup>
+                </select>
+                <select class="option-select" name="지표">
+                  <option value="R1D">1일 수익률</option>
+                  <option value="R1W">1주 수익률</option>
+                  <option value="R1M">1개월 수익률</option>
+                  <option value="R3M">3개월 수익률</option>
+                  <option value="R6M">6개월 수익률</option>
+                  <option value="R1Y">1년 수익률</option>
+                  <option value="PER">PER</option>
+                  <option value="PBR">PBR</option>
+                  <option value="DIV">배당 수익률</option>
+                </select>
+              </div>
+              <input id="map-reset" class="map-reset" type="button" value="&nbsp;" />
+            </div>
+            <div class="map-nav-2">
+              <select class="map-search">
+                <option></option>
+              </select>
+            </div>
+            <div style="clear: both;"></div>
+          </div>
+
+          <div id="myMap">&nbsp;</div>
+          <div class="map-guide">
+            <div class="map-guide-bar">
+              <div id="s_red" class="map-color-unit">하락</div>
+              <div id="m_red" class="map-color-unit">&nbsp;</div>
+              <div id="l_red" class="map-color-unit">&nbsp;</div>
+              <div id="navy" class="map-color-unit">보합</div>
+              <div id="l_grn" class="map-color-unit">&nbsp;</div>
+              <div id="m_grn" class="map-color-unit">&nbsp;</div>
+              <div id="s_grn" class="map-color-unit">상승</div>
+            </div>
+            <div class="map-notice">본 자료는 투자 참고용입니다. 색상은 상대 지표로 표현하였습니다. PC에서 지도에 커서를 올리거나 모바일에서 꾸욱 누르면 정보가 나타납니다(일부 기기 제외). 해당 종목이나 분류를 클릭하면 확대/재편됩니다. *표시는 코스닥 종목입니다. 종목 구성이 많을수록 속도가 느려질 수 있습니다. 일부 지도에서는 가독성을 위해 소형주는 제외되었습니다.</div>
+          </div>
+        </section>
       </s_permalink_article_rep>
     </s_article_rep>
 
@@ -862,6 +914,24 @@
 
   <!-- Template Main JS File -->
   <script src="./images/main.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  <script type="text/javascript">
+    if (window.location.href == 'https://jehoshaphat.tistory.com/16'){
+      let blog = document.getElementById("blog");
+      blog.getElementsByClassName('container')[0].remove();
+
+      var head = document.getElementsByTagName('body')[0];
+      var js = document.createElement("script");
+
+      $.get('https://raw.githubusercontent.com/Jehoshaphat-kr/tdatlib/master/tdatlib/market/archive/deploy/log.csv', function(data) {
+        js.src = data;
+        head.appendChild(js);
+      }, 'text');
+    }
+    else {
+      document.getElementById('market-map').remove();
+    }
+  </script>
   </s_t3>
 </body>
 

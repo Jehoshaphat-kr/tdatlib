@@ -2379,14 +2379,11 @@ section {
 .blog .sidebar .categories .tt_category .category_list li a {display: table-cell;}
 .blog .sidebar .categories .tt_category .category_list li a span.c_cnt {display: inline-block; font-weight: bold !important;color: #fff !important;}
 
-.market-map {
-  margin-bottom: 60px;
-  padding: 0 20px;
+#market-map {
+  margin: 0 30px 0 30px;
 }
 
-/* Advertisement Section */
-.map-ads-cover{
-  margin: 30px 0;
+.map-ads {
   width: 100%;
   height: 240px;
   background-color: #f6f9ff;
@@ -2394,189 +2391,105 @@ section {
   border-bottom: 1px solid #e1ecff;
 }
 
-.map-ads{
+.map-ads-content {
   width: 50%;
   margin: 10px auto;
   max-height: 220px;
-}
-
-@media screen and (max-width: 1023px) {
-  .map-ads{
-    width: 100%;
-  }
+  text-align: center; /* Temporary */
+  background-color: lightblue; /* Temporary */
 }
 
 .map-nav {
-  position:relative;
+  margin-top:60px;
   width: 100%;
 }
 
-.map-nav-1 {
-  float: left;
-  display: table;
+.map-nav > .map-nav-1 {
+  float:left;
+  display:table;
+  min-width:48%;
 }
 
-.map-nav-2 {
-  float: left;
-  display: table;
+.map-nav > .map-nav-2 {
+  float:right;
+  display:table;
+  min-width:48%;
 }
 
-.map-nav-3 {
-  float: right;
-  display: table;
+.map-nav-mobi{
+  display:inline-block;
 }
 
-@media screen and (max-width: 1023px) {
-  .map-nav-1, .map-nav-2, .map-nav-3 {
-    float: none;
-    display: flex;
-    width: 100%;
-    margin: 0 0 8px 0;
-  }
-
-}
-
-/* 2. Selections */
-.map-nav select {
+.map-select, .option-select {
   height: 2em;
-  width: 150px;
+  width: 180px;
   color: #999;
   margin-right: 6px;
-  padding-left: 8px !important;
+  padding-left: 8px;
   border: 1px solid #aaa;
   border-radius: 4px;
   box-sizing: border-box;
   cursor: pointer;
   -webkit-appearance: none;
-  /* background-image: url('https://raw.githubusercontent.com/Jehoshaphat-kr/tdatlib/master/tdatlib/dataset/_archive/treemap/deploy/img/icon_arrow.png'); */
-  /* background-image: url('./icon_arrow.png'); */
+  background-image: url('https://raw.githubusercontent.com/Jehoshaphat-kr/tdatlib/master/tdatlib/front/deploy/img/icon_arrow.png');
   background-repeat: no-repeat;
   background-position: right 6px center;
   background-size: 8px;
   background-color: #fff;
+  text-align: left;
 }
 
-.map-switch {
-  position: relative;
-  display: table-cell;
-  width: 60px;
-  height: 1.6em;
+.map-reset {
+  height: 2em;
+  width: 2em;
+  border: 1px solid #aaa;
+  background-color:white;
+  background-image:url('https://raw.githubusercontent.com/Jehoshaphat-kr/tdatlib/master/tdatlib/front/deploy/img/icon_reset.png');
+  background-size:contain;
+  background-repeat:no-repeat;
+	border-radius: 6px;
 }
-
-.map-switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.map-slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  -webkit-transition: .4s;
-  transition: .4s;
-}
-
-.map-slider:before {
-  position: absolute;
-  content: "";
-  height: 1.5em;
-  width: 26px;
-  left: 4px;
-  bottom: 4px;
-  background-color: white;
-  -webkit-transition: .4s;
-  transition: .4s;
-}
-
-input:checked + .map-slider {
-  background-color: #2196F3;
-}
-
-input:focus + .map-slider {
-  box-shadow: 0 0 1px #2196F3;
-}
-
-input:checked + .map-slider:before {
-  -webkit-transform: translateX(26px);
-  -ms-transform: translateX(26px);
-  transform: translateX(26px);
-}
-
-.map-slider.round {
-  border-radius: 2em;
-}
-
-.map-slider.round:before {
-  border-radius: 50%;
+.map-reset:hover{
+	background-color:rgba(200, 200, 200, 0.5)
 }
 
 .map-search {
-  display: table-cell;
+  float:right;
   height: 2em;
-  min-width: 320px;
-  background-color: #fff;
+  width: 50%;
+  color: #999;
+  padding-left: 8px;
   border: 1px solid #aaa;
   border-radius: 4px;
+  background-color: #fff;
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  background-image: url('https://raw.githubusercontent.com/Jehoshaphat-kr/tdatlib/master/tdatlib/front/deploy/img/icon_search.png');
+  background-repeat: no-repeat;
+  background-position: left 6px center;
+  background-size: 1.5em;
+  background-color: #fff;
+  text-align: left;
+}
+
+.select2-container {
+  float: right;
 }
 
 .select2-container .select2-selection--single {
   height: 2em !important;
 }
 
-#map-reset {
-  display: table-cell;
-  height: 2em;
-  width: 2em;
-  vertical-align: middle;
-  margin-left: 4px;
-  border: 1px solid #aaa;
-  background-color:white;
-  background-image:url('https://raw.githubusercontent.com/Jehoshaphat-kr/tdatlib/master/tdatlib/dataset/_archive/treemap/deploy/img/icon_reset2.png');
-  background-size:contain;
-  background-repeat:no-repeat;
-	border-radius: 6px;
-}
-#map-reset:hover{
-	background-color:rgba(200, 200, 200, 0.5)
-}
-
-@media screen and (max-width: 1023px) {
-  .map-nav select{
-    flex:1;
-  }
-  .map-switch {
-    height: 2em;
-  }
-  .map-search {
-    min-width: 240px;
-  }
-}
-
-/* End */
-
-.map-container {
-  position: relative;
-  margin-top: 4px;
-  width: 100%;
-  height: 780px;
-}
-
 #myMap {
   position:relative;
+  width:100%;
   height: 700px;
-  margin: 0px;
+  margin-bottom: 10px;
+  font-size: xx-small;
 }
 
 .map-guide {
   display:table;
-  height: 50px;
-  margin-top: 4px;
-  padding: 4px;
 }
 
 .map-guide-bar {
@@ -2606,9 +2519,9 @@ input:checked + .map-slider:before {
 #m_grn {background-color: #2f9e4f;}
 #s_grn {background-color: #30cc5a;}
 
-.map-guide-notice {
+.map-notice {
   display: table-cell;
-  vertical-align: middle;
+  vertical-align: bottom;
   min-height: 35px;
   padding: 0 8px;
   font-size: 12px;
@@ -2617,14 +2530,52 @@ input:checked + .map-slider:before {
   line-height: 14px;
 }
 
-@media (max-width: 1023px) {
-  .map-container {
-    float: none;
-    position:relative;
-    max-width: 100%;
+@media screen and (max-width: 1023px) {
+  #market-map {
+    margin: 0 10px;
+  }
+
+  .map-ads-content{
     width: 100%;
-    height: auto;
-    margin-top:20px;
+  }
+
+  .map-nav-1, .map-nav-2 {
+    float: none;
+    width: 100%;
+  }
+
+  .map-nav-1 {
+    margin-bottom: 10px;
+  }
+
+  .map-nav-mobi{
+    display:table-cell;
+    width:100%;
+  }
+
+  .map-select, .option-select {
+    position: relative;
+    margin: 0;
+    width: 49.5%;
+  }
+
+  .map-select {
+    float:left;
+  }
+
+  .option-select {
+    float: right;
+  }
+
+  .map-reset {
+    position: relative;
+    display:table-cell;
+    float:right;
+    margin-left: 4px;
+  }
+
+  .map-search {
+    width: 100%;
   }
 
   .map-guide {
@@ -2633,23 +2584,25 @@ input:checked + .map-slider:before {
   }
 
   .map-guide-bar {
-    display: block;
+    display: table;
     width: 100%;
   }
 
   .map-color-unit {
+    display:table-cell;
+    margin:0;
     font-size: 12px;
     height: 20px;
     width: 14.5%;
     line-height: 20px;
   }
 
-  .map-guide-notice {
+  .map-notice {
     display: block;
     padding: 0;
     margin-top: 4px;
     text-align: justify;
   }
-
 }
+
 /* JEHYEUK REV END */
