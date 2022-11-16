@@ -68,13 +68,13 @@ class market(object):
         syntax = str()
 
         _ct = 1
-        _js = os.path.join(os.path.dirname(__file__), f'archive/deploy/{td[2:]}MAP-r{_ct}.js')
+        _js = os.path.join(os.path.dirname(__file__), f'archive/deploy/map-{td[2:]}r{_ct}.js')
         while os.path.isfile(_js):
             _ct += 1
-            _js = os.path.join(os.path.dirname(__file__), f'archive/deploy/{td[2:]}MAP-r{_ct}.js')
+            _js = os.path.join(os.path.dirname(__file__), f'archive/deploy/map-{td[2:]}r{_ct}.js')
 
         # proc = [('labels', self._labels), ('covers', self._covers), ('ids', self._ids), ('bar', self._bars)]
-        proc = [('labels', self._labels), ('covers', self._covers), ('ids', self._ids)]
+        proc = [('tdat_labels', self._labels), ('tdat_covers', self._covers), ('tdat_ids', self._ids)]
         for name, data in proc:
             syntax += 'const %s = {\n' % name
             for var, val in data.items():
@@ -86,7 +86,7 @@ class market(object):
         js = _frm.to_json(orient='index', force_ascii=False)
 
         group = self._datum[self._datum.index.isin([c for c in self._datum.index if '_' in c])]['종목명'].tolist()
-        syntax += f"const frm = {js}\n"
+        syntax += f"const tdat_frm = {js}\n"
         syntax += f"const group_data = {str(group)}\n"
         with codecs.open(filename=_js, mode='w', encoding='utf-8') as file:
             file.write(jsmin.jsmin(syntax + suffix))

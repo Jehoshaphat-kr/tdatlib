@@ -12,15 +12,11 @@ const map_option = {
     showTips:false
 };
 
-const arrAbs = (array) => {
-    return array.map(Math.abs);
-}
-
 function setSearch(key){
 	$('.map-search').empty();
 	$('.map-search').append('<option></option>');
-	for (var n = 0; n < ids[key].length; n++){
-		$('.map-search').append('<option>' + ids[key][n] + '</option>');
+	for (var n = 0; n < tdat_ids[key].length; n++){
+		$('.map-search').append('<option>' + tdat_ids[key][n] + '</option>');
 	}
 }
 
@@ -79,50 +75,52 @@ function search_asset(__asset_name){
 }
 
 function reframe(code){
-  tdat_name.push(frm[code]['종목명'])
-  tdat_scale.push(frm[code]['크기'])
-  tdat_caps.push(frm[code]['시가총액'])
-  tdat_price.push(frm[code]['종가'])
-  tdat_perf.push(frm[code][option_type])
-  tdat_color.push(frm[code]['C' + option_type])
+  tdat_name.push(tdat_frm[code]['종목명'])
+  tdat_scale.push(tdat_frm[code]['크기'])
+  tdat_caps.push(tdat_frm[code]['시가총액'])
+  tdat_price.push(tdat_frm[code]['종가'])
+  tdat_perf.push(tdat_frm[code][option_type])
+  tdat_color.push(tdat_frm[code]['C' + option_type])
 }
 
 function treemap(key){
-  tdat_name = []; tdat_scale = []; tdat_caps = []; tdat_price = []; tdat_perf = []; color = []
-  labels[key].forEach(function(code){
-	  tdat_name.push(frm[code]['종목명'])
-	  tdat_scale.push(frm[code]['크기'])
-	  tdat_caps.push(frm[code]['시가총액'])
-	  tdat_price.push(frm[code]['종가'])
-	  tdat_perf.push(frm[code][option_type])
-	  tdat_color.push(frm[code]['C' + option_type])
-	})
+  tdat_name = []; tdat_scale = []; tdat_caps = []; tdat_price = []; tdat_perf = []; color = [];
+
+  tdat_labels[key].forEach(function(code){
+	  tdat_name.push(tdat_frm[code]['종목명']);
+	  tdat_scale.push(tdat_frm[code]['크기']);
+	  tdat_caps.push(tdat_frm[code]['시가총액']);
+	  tdat_price.push(tdat_frm[code]['종가']);
+	  tdat_perf.push(tdat_frm[code][option_type]);
+	  tdat_color.push(tdat_frm[code]['C' + option_type]);
+  })
+
   if (option_type == 'PER' || option_type == 'PBR') {
-    var text = option_type
-    var unit = ''
+    var _t = option_type;
+    var _u = '';
   } else {
-    var text = '수익률'
-    var unit = '%'
+    var _t = '수익률';
+    var _t = '%';
   }
 
-	var map_draw={
+  var map_draw={
     type:'treemap',
     branchvalues:'total',
     labels:tdat_name,
-    parents:covers[key],
-		ids:ids[key],
-		values:tdat_scale,
+    parents:tdat_covers[key],
+	ids:tdat_ids[key],
+	values:tdat_scale,
     meta:tdat_caps,
     customdata:tdat_price,
     text:tdat_perf,
-		textposition:'middle center',
+	textposition:'middle center',
     textfont:{
       family:'NanumGothic, Nanum Gothic, monospace',
       color:'#ffffff'
     },
-    texttemplate: '%{label}<br>%{text}' + unit + '<br>',
-    hovertemplate: '%{label}<br>시총: %{meta}<br>종가: %{customdata}<br>' + text + ': %{text}' + unit + '<extra></extra>',
-		hoverlabel: {
+    texttemplate: '%{label}<br>%{text}' + _u + '<br>',
+    hovertemplate: '%{label}<br>시총: %{meta}<br>종가: %{customdata}<br>' + _t + ': %{text}' + _u + '<extra></extra>',
+	hoverlabel: {
       font: {
         family: 'NanumGothic, Nanum Gothic, monospace',
         color: '#ffffff'
@@ -135,7 +133,7 @@ function treemap(key){
     },
     pathbar: {'visible': true}
   }
-	Plotly.newPlot('myMap', [map_draw], map_layout, map_option);
+  Plotly.newPlot('myMap', [map_draw], map_layout, map_option);
 }
 
 $(document).ready(function(){
@@ -203,7 +201,7 @@ $(document).ready(function(){
       var group = username;
     } else{
       var idx = tdat_name.indexOf(username);
-      var group = covers[map_key][idx];
+      var group = tdat_covers[map_key][idx];
     }
 
     search_top(group);
