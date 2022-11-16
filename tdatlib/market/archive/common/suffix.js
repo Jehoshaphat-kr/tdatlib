@@ -108,10 +108,10 @@ function treemap(key){
     branchvalues:'total',
     labels:tdat_name,
     parents:tdat_covers[key],
-	ids:tdat_ids[key],
-	values:tdat_scale,
-    meta:tdat_caps,
-    customdata:tdat_price,
+    values:tdat_scale,
+//	ids:tdat_ids[key],
+//    meta:tdat_caps,
+//    customdata:tdat_price,
     text:tdat_perf,
 	textposition:'middle center',
     textfont:{
@@ -119,13 +119,13 @@ function treemap(key){
       color:'#ffffff'
     },
     texttemplate: '%{label}<br>%{text}' + _u + '<br>',
-    hovertemplate: '%{label}<br>시총: %{meta}<br>종가: %{customdata}<br>' + _t + ': %{text}' + _u + '<extra></extra>',
-	hoverlabel: {
-      font: {
-        family: 'NanumGothic, Nanum Gothic, monospace',
-        color: '#ffffff'
-      }
-    },
+//    hovertemplate: '%{label}<br>시총: %{meta}<br>종가: %{customdata}<br>' + _t + ': %{text}' + _u + '<extra></extra>',
+//	hoverlabel: {
+//      font: {
+//        family: 'NanumGothic, Nanum Gothic, monospace',
+//        color: '#ffffff'
+//      }
+//    },
 	opacity: 0.9,
     marker: {
       colors: tdat_color,
