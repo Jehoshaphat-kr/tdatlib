@@ -100,7 +100,7 @@ function treemap(key){
     var _u = '';
   } else {
     var _t = '수익률';
-    var _t = '%';
+    var _u = '%';
   }
 
   var map_draw={
@@ -215,4 +215,7 @@ $(document).ready(function(){
   $('#map-reset').click(function(){
     treemap(map_key);
   })
+
+  console.log(d3_selectionPrototype);
+  console.log(d3_selectionPrototype.text);
 })
