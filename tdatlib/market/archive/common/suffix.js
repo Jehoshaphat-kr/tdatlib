@@ -1,12 +1,12 @@
-const c_media = window.matchMedia('(max-width: 1023px)');
+var c_media = window.matchMedia('(max-width: 1023px)');
 var tdat_name = []; var tdat_scale = []; var tdat_caps = []; var tdat_price = []; var tdat_perf = []; var tdat_color = [];
 var map_type; var market_type; var option_type; var map_key;
 
-let map_layout = {
+var map_layout = {
     height: 690,
     margin:{l:2,r:2,t:2,b:25}
 };
-let map_option = {
+var map_option = {
     displayModeBar:false,
     responsive:true,
     showTips:false
