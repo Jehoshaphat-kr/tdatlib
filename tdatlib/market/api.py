@@ -78,8 +78,8 @@ class market(object):
         for name, data in proc:
             syntax += 'var %s = {\n' % name
             for var, val in data.items():
-                syntax += f'\t{var}: {str(val)},\n'
-            syntax += '}\n'
+                syntax += f'  {var}:{str(val)},\n'
+            syntax += '};\n'
 
         _frm = self._datum[self._tag].copy()
         _frm.fillna('-', inplace=True)
