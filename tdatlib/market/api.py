@@ -50,7 +50,7 @@ class market(object):
             mm = treemap(**kwarg)
             proc.set_description(desc=f'{mm.name}{mm.tag}')
 
-            mdata = mm.data.copy()
+            mdata = mm.mapdata.copy()
             self._labels[var] = mdata['종목코드'].tolist()
             self._covers[var] = mdata['분류'].tolist()
             self._ids[var] = mdata['ID'].tolist()

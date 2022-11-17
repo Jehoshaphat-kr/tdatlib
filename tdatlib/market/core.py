@@ -136,6 +136,10 @@ class _group(_marketime):
         return pd.DataFrame(data=data, columns=['종목코드', '종목명', '산업', '섹터', 'DT']).set_index(keys='종목코드')
 
     @property
+    def wiselabel(self) -> dict:
+        return self._labels
+
+    @property
     def wics(self) -> pd.DataFrame:
         if not hasattr(self, f'__wics'):
             fetch = pd.read_csv(os.path.join(self._dir, 'wics.csv'), index_col='종목코드', encoding='utf-8')

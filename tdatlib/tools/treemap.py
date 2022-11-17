@@ -130,14 +130,33 @@ class treemap(object):
         return tree
 
     @property
-    def data(self) -> pd.DataFrame:
+    def mapdata(self) -> pd.DataFrame:
         aligned = self._align(baseline=self.__b)
         colored = self._coloring(aligned=aligned)
         mapdata = self._post(colored=colored)
         return mapdata
 
-    def trace(self, key:str='R1D') -> go.Treemap:
-        data = self.data
+    @property
+    def bardata(self) -> pd.DataFrame:
+        columns = [
+            '종목코드', '종목명', '분류', 'PER', 'PBR', 'DIV', 'R1D', 'R1W', 'R1M', 'R3M', 'R6M', 'R1Y', 'R2Y',
+            'CPBR', 'CPER', 'CDIV', 'CR1Y', 'CR6M', 'CR3M', 'CR1M', 'CR1W', 'CR1D'
+        ]
+        if not self.name in ['WICS', 'WI26']:
+            return pd.DataFrame(columns=columns)
+
+        data = self.mapdata.copy()
+        data = data[data['종목코드'].str.contains('_')]
+        data = data[columns]
+        if self.name == 'WICS':
+            data = data[data['종목명'].isin([
+                'IT', '건강관리', '경기관련소비재', '금융', '산업재', '소재', '에너지', '유틸리티',
+                '커뮤니케이션서비스', '필수소비재'
+            ])]
+        return data
+
+    def maptrace(self, key:str='R1D') -> go.Treemap:
+        data = self.mapdata
         unit = '' if key.startswith('P') else '%'
         return go.Treemap(
             ids=data.ID,
@@ -165,18 +184,18 @@ if __name__ == "__main__":
     from tdatlib.market.core import *
     # krse.insist = True
 
-    base = krse.wics.join(krse.overview.drop(columns=['종목명']), how='left')
-    base = base.sort_values(by='시가총액', ascending=False).head(500)
-    base = pd.concat(objs=[base, krse.performance(base.index)], axis=1)
-    tmap = treemap(baseline=base, name='WICS')
+    # base = krse.wi26.join(krse.overview.drop(columns=['종목명']), how='left')
+    # base = base.sort_values(by='시가총액', ascending=False).head(500)
+    # base = pd.concat(objs=[base, krse.performance(base.index)], axis=1)
+    # tmap = treemap(baseline=base, name='WI26')
 
     # etf.islatest()
-    # base = etf.group.join(etf.overview.drop(columns=['종목명']), how='left')
-    # base = base.join(etf.returns, how='left')
-    # tmap = treemap(baseline=base, name='ETF')
+    base = etf.group.join(etf.overview.drop(columns=['종목명']), how='left')
+    base = base.join(etf.returns, how='left')
+    tmap = treemap(baseline=base, name='ETF')
 
-
-    fig = go.Figure()
-    fig.add_trace(tmap.trace(key='PER'))
-    fig.show()
+    print(tmap.bardata)
+    # fig = go.Figure()
+    # fig.add_trace(tmap.maptrace(key='PER'))
+    # fig.show()
 
