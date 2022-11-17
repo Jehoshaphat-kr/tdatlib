@@ -2,11 +2,11 @@ const c_media = window.matchMedia('(max-width: 1023px)');
 var tdat_name = []; var tdat_scale = []; var tdat_caps = []; var tdat_price = []; var tdat_perf = []; var tdat_color = [];
 var map_type; var market_type; var option_type; var map_key;
 
-const map_layout = {
+let map_layout = {
     height: 690,
     margin:{l:2,r:2,t:2,b:25}
 };
-const map_option = {
+let map_option = {
     displayModeBar:false,
     responsive:true,
     showTips:false
@@ -95,7 +95,6 @@ function treemap(key){
     labels:tdat_name,
     parents:tdat_covers[key],
     values:tdat_scale,
-//	ids:tdat_ids[key],
     ids:tdat_name,
     meta:tdat_caps,
     customdata:tdat_price,

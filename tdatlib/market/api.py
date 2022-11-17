@@ -76,7 +76,7 @@ class market(object):
         # proc = [('labels', self._labels), ('covers', self._covers), ('ids', self._ids), ('bar', self._bars)]
         proc = [('tdat_labels', self._labels), ('tdat_covers', self._covers), ('tdat_ids', self._ids)]
         for name, data in proc:
-            syntax += 'const %s = {\n' % name
+            syntax += 'let %s = {\n' % name
             for var, val in data.items():
                 syntax += f'\t{var}: {str(val)},\n'
             syntax += '}\n'
@@ -86,8 +86,8 @@ class market(object):
         js = _frm.to_json(orient='index', force_ascii=False)
 
         group = self._datum[self._datum.index.isin([c for c in self._datum.index if '_' in c])]['종목명'].tolist()
-        syntax += f"const tdat_frm = {js}\n"
-        syntax += f"const group_data = {str(group)}\n"
+        syntax += f"let tdat_frm = {js}\n"
+        syntax += f"let group_data = {str(group)}\n"
         with codecs.open(filename=_js, mode='w', encoding='utf-8') as file:
             # file.write(jsmin.jsmin(syntax + suffix))
             file.write(syntax + suffix)
