@@ -72,6 +72,7 @@ class treemap(object):
         for c, (na, bins) in self.bound.items():
             color = aligned[c].apply(
                 lambda n:
+                self.scale[3] if str(n) == 'nan' else \
                 self.scale[0] if n <= bins[0] else \
                 self.scale[1] if bins[0] < n <= bins[1] else \
                 self.scale[2] if bins[1] < n <= bins[2] else \
@@ -84,9 +85,8 @@ class treemap(object):
             colored = colored.join(color.astype(str), how='left')
 
         if not self.name == 'ETF':
-            scale = self.scale[::-1].copy()
             for f in ['PBR', 'PER', 'DIV']:
-                re_scale = scale if f == 'DIV' else self.scale
+                re_scale = self.scale if f == 'DIV' else self.scale[::-1].copy()
                 value = aligned[aligned[f] != 0][f].dropna().sort_values(ascending=False)
 
                 v = value.tolist()
@@ -96,6 +96,7 @@ class treemap(object):
                 colored = colored.join(_color.astype(str), how='left').fillna(re_scale[0 if f == 'DIV' else -1])
                 colored = colored.replace('nan', re_scale[0 if f == 'DIV' else -1])
 
+        colored = colored.fillna(self.scale[3])
         for col in colored.columns:
             colored.at[colored.index[-1], col] = '#C8C8C8'
         return aligned.join(colored, how='left')
@@ -162,7 +163,7 @@ class treemap(object):
 
 if __name__ == "__main__":
     from tdatlib.market.core import *
-
+    # krse.insist = True
 
     base = krse.wics.join(krse.overview.drop(columns=['종목명']), how='left')
     base = base.sort_values(by='시가총액', ascending=False).head(500)
@@ -175,8 +176,7 @@ if __name__ == "__main__":
     # tmap = treemap(baseline=base, name='ETF')
 
 
-
     fig = go.Figure()
-    fig.add_trace(tmap.trace(key='R1M'))
+    fig.add_trace(tmap.trace(key='PER'))
     fig.show()
 

@@ -38,7 +38,7 @@ class _marketime(object):
             base = {'0D': self.rdate}
             td = datetime.strptime(self.rdate, "%Y%m%d")
             dm = lambda x: (td - timedelta(x)).strftime("%Y%m%d")
-            loop = [('1D', 1), ('1W', 7), ('1M', 30), ('3M', 91), ('6M', 183), ('1Y', 365)]
+            loop = [('1D', 1), ('1W', 7), ('1M', 30), ('3M', 91), ('6M', 183), ('1Y', 365), ('2Y', 730)]
             base.update({l: get_nearest_business_day_in_a_week(date=dm(d)) for l, d in loop})
             self.__setattr__('__dates', base)
         return self.__getattribute__('__dates')
@@ -167,6 +167,7 @@ class _group(_marketime):
 
 
 class _basis(_group):
+    _insi = False
     _pdir = os.path.join(os.path.dirname(__file__), rf'archive/common/perf.csv')
     def _get_marketcap(self) -> pd.DataFrame:
         return get_market_cap_by_ticker(date=self.rdate, market="ALL", alternative=True)
@@ -211,7 +212,7 @@ class _basis(_group):
         objs, proc = list(), tqdm(tickers)
         for ticker in proc:
             proc.set_description(f'Fetch Returns - {ticker}')
-            c = get_market_ohlcv_by_date(ticker=ticker, fromdate=self.dates['1Y'], todate=self.dates['0D'])['종가']
+            c = get_market_ohlcv_by_date(ticker=ticker, fromdate=self.dates['2Y'], todate=self.dates['0D'])['종가']
             objs.append({
                 label: round(100 * c.pct_change(periods=dt)[-1], 2)
                 for label, dt in [('R1D', 1), ('R1W', 5), ('R1M', 21), ('R3M', 63), ('R6M', 126), ('R1Y', 252)]
@@ -223,7 +224,7 @@ class _basis(_group):
     def performance(self, tickers:list or pd.Series or np.array):
         read = pd.read_csv(filepath_or_buffer=self._pdir, index_col='종목코드', encoding='utf-8')
         read.index = read.index.astype(str).str.zfill(6)
-        if self.is_open:
+        if self.is_open and not self._insi:
             return read[read.index.isin(tickers)].drop(columns=['DT'])
 
         init = self._init_p()
@@ -238,6 +239,14 @@ class _basis(_group):
         save.index.name = '종목코드'
         save.to_csv(self._pdir, index=True, encoding='utf-8')
         return save[save.index.isin(tickers)].drop(columns=['DT'])
+
+    @property
+    def insist(self) -> bool:
+        return self._insi
+
+    @insist.setter
+    def insist(self, insist):
+        self._insi = insist
 
     @property
     def overview(self) -> pd.DataFrame:
