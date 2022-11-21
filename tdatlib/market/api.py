@@ -99,6 +99,19 @@ class market(object):
             )
         return
 
+    def pd2json(self):
+        td = krse.rdate
+        ct = 1
+        json = os.path.join(os.path.dirname(__file__), f'archive/deploy/map{td[2:]}r{ct}.json')
+        while os.path.isfile(json):
+            ct += 1
+            json = os.path.join(os.path.dirname(__file__), f'archive/deploy/map{td[2:]}r{ct}.json')
+
+        frm = self._datum[self._tag].fillna('-').copy()
+        with codecs.open(filename=json, mode='w', encoding='utf-8') as f:
+            f.write(
+                frm.to_json(orient='index', force_ascii=False)
+            )
 
 if __name__ == "__main__":
     m = market()
