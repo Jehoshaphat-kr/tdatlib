@@ -575,14 +575,12 @@
       </s_permalink_article_rep>
     </s_article_rep>
 
-
-
     <s_cover_group>
     <p>&nbsp;&nbsp;&nbsp;</p>
 
     <!-- ======= Dashboard Section ======= -->
     <!--
-	<section id="counts" class="counts">
+    <section id="counts" class="counts">
       <div class="container" data-aos="fade-up">
         <header class="section-header">
           <h2>Dash Board</h2>
@@ -630,7 +628,7 @@
 
       </div>
     </section>
-	-->
+    -->
     <!-- End Counts Section -->
 
     <!-- ======= Services Section ======= -->
@@ -905,6 +903,8 @@
 
   <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 
+  <!-- Tistory Compatible -->
+
   <!-- Vendor JS Files -->
   <script src="./images/bootstrap.bundle.js"></script>
   <script src="./images/aos.js"></script>
@@ -917,13 +917,10 @@
   <script src="./images/main.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.8.3/angular.min.js"></script>
   <script type="text/javascript" src="https://cdn.plot.ly/plotly-latest.js"></script>
-
-
   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
   <script type="text/javascript">
     if (window.location.href == 'https://snowball-ing.com/16'){
-      let blog = document.getElementById("blog");
-      blog.getElementsByClassName('container')[0].remove();
+      document.getElementById("blog").remove();
 
       var head = document.getElementsByTagName('body')[0];
       var js = document.createElement("script");
