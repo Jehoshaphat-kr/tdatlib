@@ -159,24 +159,35 @@
       </a>
 
       <nav id="navbar" class="navbar">
+        <ul>
+          <li><a class="nav-link active" href="https://snowball-ing.com/">홈</a></li>
+          <!-- <li><a href="blog.html">Blog</a></li> -->
+          <li class="dropdown"><a href="#"><span>시장 보기</span> <i class="bi bi-chevron-down"></i></a>
+            <ul>
+              <li><a href="#">시장 지도</a></li>
+              <li><a href="#">버블 차트</a></li>
+              <li><a href="#">업종별 등락률</a></li>
+            </ul>
+          </li>
+          <li class="dropdown"><a href="#"><span>기술 분석</span> <i class="bi bi-chevron-down"></i></a>
+            <ul>
+              <li class="dropdown"><a href="#"><span>투자 지표</span> <i class="bi bi-chevron-right"></i></a>
+                <ul>
+                  <li><a href="#">볼린저밴드</a></li>
+                  <li><a href="#">RSI</a></li>
+                  <li><a href="#">MACD</a></li>
+                  <li><a href="#">CCI</a></li>
+                  <li><a href="#">OCV</a></li>
+                </ul>
+              </li>
+              <li><a href="#">백 테스트</a></li>
+            </ul>
+          </li>
+          <li><a class="nav-link" href="https://snowball-ing.com/">기본 분석</a></li>
+          <li><a class="nav-link" href="https://snowball-ing.com/">투자 노트</a></li>
+        </ul>
         <i class="bi bi-list mobile-nav-toggle"></i>
       </nav>
-      <script type="text/javascript">
-        var _list = cate.getElementsByClassName('category_list')[0];
-        var _upper = _list.getElementsByTagName('li');
-        for (var i = 0; i < _upper.length; i++) {
-          _upper[i].setAttribute('class', "dropdown");
-        }
-
-        var _link = _list.getElementsByClassName('link_item');
-        for (var i = 0; i < _link.length; i++) {
-          var _li = document.createElement('i');
-          _li.setAttribute('class', 'bi bi-chevron-down');
-          _link[i].appendChild(_li);
-        }
-        document.getElementById('navbar').appendChild(_list);
-      </script>
-
     </div>
   </header>
   <!-- End Header -->
