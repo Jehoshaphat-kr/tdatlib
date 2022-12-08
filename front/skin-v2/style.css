@@ -2372,13 +2372,6 @@ section {
 }
 
 /* JEHYEUK REV */
-.navbar .category_list a span.c_cnt{display:none;}
-.blog .sidebar .categories span.c_cnt {}
-.blog .sidebar .categories .tt_category .link_tit {display: none;}
-.blog .sidebar .categories .tt_category .category_list li ul {display: none;}
-.blog .sidebar .categories .tt_category .category_list li a {display: table-cell;}
-.blog .sidebar .categories .tt_category .category_list li a span.c_cnt {display: inline-block; font-weight: bold !important;color: #fff !important;}
-
 #market-map {
   margin: 0 30px 0 30px;
 }
@@ -2394,7 +2387,7 @@ section {
 .map-ads-content {
   width: 50%;
   margin: 10px auto;
-  max-height: 220px;
+  height: 220px; /* Temporary - Originally, max-height: 220px */
   text-align: center; /* Temporary */
   background-color: lightblue; /* Temporary */
 }
@@ -2523,7 +2516,7 @@ section {
   display: table-cell;
   vertical-align: bottom;
   min-height: 35px;
-  padding: 0 8px;
+  padding: 8px;
   font-size: 12px;
   text-align:left;
   overflow:hidden;

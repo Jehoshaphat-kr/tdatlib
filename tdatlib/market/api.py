@@ -65,7 +65,7 @@ class market(object):
     def pd2js(self):
         td = krse.rdate
         suffix = codecs.open(self._dir, mode='r', encoding='utf-8').read()
-        syntax = str()
+        syntax = f'let trading_date = "({td[2:4]}.{td[4:6]}.{td[6:]} 종가 기준)";\n'
 
         _ct = 1
         _js = os.path.join(os.path.dirname(__file__), f'archive/deploy/map-{td[2:]}r{_ct}.js')
@@ -89,8 +89,8 @@ class market(object):
         syntax += f"var tdat_frm = {js}\n"
         syntax += f"var group_data = {str(group)}\n"
         with codecs.open(filename=_js, mode='w', encoding='utf-8') as file:
-            # file.write(jsmin.jsmin(syntax + suffix))
-            file.write(syntax + suffix)
+            file.write(jsmin.jsmin(syntax + suffix))
+            # file.write(syntax + suffix)
 
         log = os.path.join(os.path.dirname(__file__), f'archive/deploy/log.csv')
         with codecs.open(filename=log, mode='w', encoding='utf-8') as file:
@@ -99,19 +99,6 @@ class market(object):
             )
         return
 
-    def pd2json(self):
-        td = krse.rdate
-        ct = 1
-        json = os.path.join(os.path.dirname(__file__), f'archive/deploy/map{td[2:]}r{ct}.json')
-        while os.path.isfile(json):
-            ct += 1
-            json = os.path.join(os.path.dirname(__file__), f'archive/deploy/map{td[2:]}r{ct}.json')
-
-        frm = self._datum[self._tag].fillna('-').copy()
-        with codecs.open(filename=json, mode='w', encoding='utf-8') as f:
-            f.write(
-                frm.to_json(orient='index', force_ascii=False)
-            )
 
 if __name__ == "__main__":
     m = market()

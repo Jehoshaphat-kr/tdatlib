@@ -64,15 +64,6 @@
     <!-- 티스토리 제공 치환자 데이터 사전 변수화 작업                    -->
     <!-- ************************************************************ -->
 
-    <!-- Category Ojbects -->
-    <div style="display:none !important;">
-      [##_category_list_##]
-    </div>
-    <script type="text/javascript">
-      setTimeout(() => {  }, 5000);
-      var cate = document.getElementsByClassName('tt_category')[0];
-    </script>
-
     <!-- Sidebar :: Recent Post Ojbects -->
     <s_sidebar_element>
       <s_rctps_rep>
@@ -161,30 +152,32 @@
       <nav id="navbar" class="navbar">
         <ul>
           <li><a class="nav-link active" href="https://snowball-ing.com/">홈</a></li>
-          <!-- <li><a href="blog.html">Blog</a></li> -->
-          <li class="dropdown"><a href="#"><span>시장 보기</span> <i class="bi bi-chevron-down"></i></a>
+          <li class="dropdown"><a href="./images/_maps.html"><span>시장 보기</span> <i class="bi bi-chevron-down"></i></a>
             <ul>
-              <li><a href="#">시장 지도</a></li>
+              <li><a href="./images/_maps.html">시장 지도</a></li>
               <li><a href="#">버블 차트</a></li>
               <li><a href="#">업종별 등락률</a></li>
             </ul>
           </li>
-          <li class="dropdown"><a href="#"><span>기술 분석</span> <i class="bi bi-chevron-down"></i></a>
+          <li class="dropdown"><a href="https://snowball-ing.com/category/%EA%B8%B0%EC%88%A0%20%EB%B6%84%EC%84%9D/"><span>기술 분석</span> <i class="bi bi-chevron-down"></i></a>
             <ul>
-              <li class="dropdown"><a href="#"><span>투자 지표</span> <i class="bi bi-chevron-right"></i></a>
-                <ul>
-                  <li><a href="#">볼린저밴드</a></li>
-                  <li><a href="#">RSI</a></li>
-                  <li><a href="#">MACD</a></li>
-                  <li><a href="#">CCI</a></li>
-                  <li><a href="#">OCV</a></li>
-                </ul>
-              </li>
-              <li><a href="#">백 테스트</a></li>
+              <li><a href="https://snowball-ing.com/category/%ED%88%AC%EC%9E%90%20%EC%A7%80%ED%91%9C/">투자 지표</a></li>
+              <li><a href="https://snowball-ing.com/category/%EB%B0%B1%20%ED%85%8C%EC%8A%A4%ED%8A%B8/">백 테스트</a></li>
             </ul>
           </li>
-          <li><a class="nav-link" href="https://snowball-ing.com/">기본 분석</a></li>
-          <li><a class="nav-link" href="https://snowball-ing.com/">투자 노트</a></li>
+          <li class="dropdown"><a href="https://snowball-ing.com/category/%EA%B8%B0%EB%B3%B8%20%EB%B6%84%EC%84%9D/"><span>기본 분석</span> <i class="bi bi-chevron-down"></i></a>
+            <ul>
+              <li><a href="https://snowball-ing.com/category/%EC%82%B0%EC%97%85%20%EB%B6%84%EC%84%9D/">산업 분석</a></li>
+              <li><a href="https://snowball-ing.com/category/%EA%B8%B0%EC%97%85%20%EC%A1%B0%EC%82%AC/">기업 조사</a></li>
+            </ul>
+          </li>
+          <li class="dropdown"><a href="https://snowball-ing.com/category/%EA%B8%B0%EB%B3%B8%20%EB%B6%84%EC%84%9D/"><span>투자 노트</span> <i class="bi bi-chevron-down"></i></a>
+            <ul>
+              <li><a href="https://snowball-ing.com/category/%EA%B2%BD%EC%A0%9C%20%EC%97%AD%EC%82%AC/">경제 역사</a></li>
+              <li><a href="https://snowball-ing.com/category/%EC%8B%A4%EC%A0%84%20%ED%88%AC%EC%9E%90/">실전 투자</a></li>
+              <li><a href="https://snowball-ing.com/category/%EA%B0%80%EC%9D%B4%EB%93%9C/">가이드</a></li>
+            </ul>
+          </li>
         </ul>
         <i class="bi bi-list mobile-nav-toggle"></i>
       </nav>
@@ -193,13 +186,14 @@
   <!-- End Header -->
 
   <main id="main">
+
     <s_list>
     <!-- ======= Breadcrumbs ======= -->
     <section class="breadcrumbs">
       <div id="tdat-breadcrumbs" class="container">
         <ol id="tdat-breadcrumbs-category">
           <li><a href="https://snowball-ing.com">홈</a></li>
-          <li><a href="https://snowball-ing.com/category">카테고리</a></li>
+          <li><a href="https://snowball-ing.com/category">분류</a></li>
         </ol>
       </div>
     </section>
@@ -526,63 +520,6 @@
           </div>
         </section>
 
-        <!-- ======= Market-Map ======= -->
-        <section id="market-map">
-          <div class="map-ads">
-            <!-- <div class="map-ads-content">광고 영역(자동 높이)</div> -->
-          </div>
-          <div class="map-nav">
-            <div class="map-nav-1">
-              <div class="map-nav-mobi">
-                <select class="map-select" name="">
-                  <optgroup label="WICS">
-                    <option value="indful" selected="selected">WICS 대형주</option>
-                    <option value="indksm">WICS 중형주</option>
-                  </optgroup>
-                  <optgroup label="WI26">
-                    <option value="secful">WI26 대형주</option>
-                    <option value="secksm">WI26 중형주</option>
-                  </optgroup>
-                  <optgroup label="ETF">
-                    <option value="etfful">ETF</option>
-                  </optgroup>
-                </select>
-                <select class="option-select" name="지표">
-                  <option value="R1D">1일 수익률</option>
-                  <option value="R1W">1주 수익률</option>
-                  <option value="R1M">1개월 수익률</option>
-                  <option value="R3M">3개월 수익률</option>
-                  <option value="R6M">6개월 수익률</option>
-                  <option value="R1Y">1년 수익률</option>
-                  <option value="PER">PER</option>
-                  <option value="PBR">PBR</option>
-                  <option value="DIV">배당 수익률</option>
-                </select>
-              </div>
-              <input id="map-reset" class="map-reset" type="button" value="&nbsp;" />
-            </div>
-            <div class="map-nav-2">
-              <select class="map-search">
-                <option></option>
-              </select>
-            </div>
-            <div style="clear: both;"></div>
-          </div>
-
-          <div id="myMap">&nbsp;</div>
-          <div class="map-guide">
-            <div class="map-guide-bar">
-              <div id="s_red" class="map-color-unit">하락</div>
-              <div id="m_red" class="map-color-unit">&nbsp;</div>
-              <div id="l_red" class="map-color-unit">&nbsp;</div>
-              <div id="navy" class="map-color-unit">보합</div>
-              <div id="l_grn" class="map-color-unit">&nbsp;</div>
-              <div id="m_grn" class="map-color-unit">&nbsp;</div>
-              <div id="s_grn" class="map-color-unit">상승</div>
-            </div>
-            <div class="map-notice">본 자료는 투자 참고용입니다. 색상은 상대 지표로 표현하였습니다. PC에서 지도에 커서를 올리거나 모바일에서 꾸욱 누르면 정보가 나타납니다(일부 기기 제외). 해당 종목이나 분류를 클릭하면 확대/재편됩니다. *표시는 코스닥 종목입니다. 종목 구성이 많을수록 속도가 느려질 수 있습니다. 일부 지도에서는 가독성을 위해 소형주는 제외되었습니다.</div>
-          </div>
-        </section>
       </s_permalink_article_rep>
     </s_article_rep>
 
@@ -658,7 +595,7 @@
               <i class="ri-road-map-line icon"></i>
               <h3>시장 지도 Maps</h3>
               <p>경제적 자유를 찾아떠나는 여행길,<br>지도는 필수겠죠?</p>
-              <a href="./images/maps.html" class="read-more"><span>Read More</span> <i class="bi bi-arrow-right"></i></a>
+              <a href="./images/_maps.html" class="read-more"><span>Read More</span> <i class="bi bi-arrow-right"></i></a>
             </div>
           </div>
 
@@ -811,7 +748,7 @@
             <div class="count-box">
               <i class="bi bi-person-check" style="color: #ee6c20;"></i>
               <div>
-                <span data-purecounter-start="0" data-purecounter-end="[##_count_today_##]" data-purecounter-duration="1" class="purecounter"></span>
+                <span data-purecounter-start="0" data-purecounter-end="[##_count_yesterday_##]" data-purecounter-duration="1" class="purecounter"></span>
                 <p>어제</p>
               </div>
             </div>
@@ -821,7 +758,7 @@
             <div class="count-box">
               <i class="bi bi-person-plus" style="color: #15be56;"></i>
               <div>
-                <span data-purecounter-start="0" data-purecounter-end="[##_count_yesterday_##]" data-purecounter-duration="1" class="purecounter"></span>
+                <span data-purecounter-start="0" data-purecounter-end="[##_count_today_##]" data-purecounter-duration="1" class="purecounter"></span>
                 <p>오늘</p>
               </div>
             </div>
@@ -881,7 +818,7 @@
           <div class="col-lg-2 col-6 footer-links">
             <h4>주요 서비스</h4>
             <ul>
-              <li><i class="bi bi-chevron-right"></i> <a href="#">시장 지도</a></li>
+              <li><i class="bi bi-chevron-right"></i> <a href="./images/_maps.html">시장 지도</a></li>
               <li><i class="bi bi-chevron-right"></i> <a href="#">버블 지도</a></li>
               <li><i class="bi bi-chevron-right"></i> <a href="#">산업 차트</a></li>
               <li><i class="bi bi-chevron-right"></i> <a href="#">기업 분석</a></li>
@@ -892,7 +829,7 @@
           <div class="col-lg-3 col-md-12 footer-contact text-center text-md-start">
             <h4>Contact</h4>
             <p>
-              <strong>Email:</strong> info@example.com<br>
+              <strong>Email:</strong> tdat.tistory@gmail.com <br>
               <strong>Open Kakao:</strong> 준비 중 <br>
             </p>
 
@@ -917,7 +854,7 @@
   <!-- Tistory Compatible -->
 
   <!-- Vendor JS Files -->
-  <script src="./images/bootstrap.bundle.js"></script>
+  <script src="./images/bootstrap.bundle.min.js"></script>
   <script src="./images/aos.js"></script>
   <script src="./images/swiper-bundle.min.js"></script>
   <script src="./images/purecounter.js"></script>
@@ -929,21 +866,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.8.3/angular.min.js"></script>
   <script type="text/javascript" src="https://cdn.plot.ly/plotly-latest.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-  <script type="text/javascript">
-    if (window.location.href == 'https://snowball-ing.com/16'){
-      document.getElementById("blog").remove();
-
-      var head = document.getElementsByTagName('body')[0];
-      var js = document.createElement("script");
-      $.get('https://raw.githubusercontent.com/Jehoshaphat-kr/tdatlib/master/tdatlib/market/archive/deploy/log.csv', function(data) {
-        js.src = data;
-        head.appendChild(js);
-      }, 'text');
-    }
-    else {
-      document.getElementById('market-map').remove();
-    }
-  </script>
   </s_t3>
 </body>
 
