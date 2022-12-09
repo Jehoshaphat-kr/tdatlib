@@ -27,12 +27,24 @@
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
   <!-- =======================================================
-  * Template Name: FlexStart - v1.9.0
-  * Template URL: https://bootstrapmade.com/flexstart-bootstrap-startup-template/
-  * Author: BootstrapMade.com
-  * License: https://bootstrapmade.com/license/
+  * Template Name: TDAT
+  * Author: Je Hyeuk LEE
+  * Contact: tdat.tistory@gmail.com
+  * License: MIT
   ======================================================== -->
-
+  <!-- <script src="file://localhost/D:/J.H.LEE/05. CODING/Python/Project/tdatlib/tdatlib/market/archive/deploy/map-221116r9.js"></script> -->
+  <script src="file://localhost/C:\Users\wpgur\OneDrive\프로그래밍\Back-End\tdatlib\tdatlib\market\archive\deploy\map-221208r1.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
+  <script src="https://cdn.plot.ly/plotly-2.16.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  <!-- <script type="text/javascript">
+    var body = document.getElementsByTagName('head')[0];
+    var scpt = document.createElement('script');
+    var load = $.get('https://raw.githubusercontent.com/Jehoshaphat-kr/tdatlib/master/tdatlib/market/archive/deploy/log.csv', function(data) {
+  	  scpt.setAttribute('src', data);
+  	  body.appendChild(scpt);
+  	}, 'text');
+  </script> -->
 </head>
 
 <body>
@@ -234,23 +246,10 @@
 
   <!-- Template Main JS File -->
   <script src="./main.js"></script>
-
-  <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
-  <script src="https://cdn.plot.ly/plotly-2.16.1.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-  <!-- <script src="file://localhost/D:/J.H.LEE/05. CODING/Python/Project/tdatlib/tdatlib/market/archive/deploy/map-221116r9.js"></script> -->
-  <script src="file://localhost/C:\Users\wpgur\OneDrive\프로그래밍\Back-End\tdatlib\tdatlib\market\archive\deploy\map-221208r3.js"></script>
-  <!-- <script type="text/javascript">
-    var body = document.getElementsByTagName('body')[0];
-    var scpt = document.createElement('script');
-    $.get('https://raw.githubusercontent.com/Jehoshaphat-kr/tdatlib/master/tdatlib/market/archive/deploy/log.csv', function(data) {
-  	  scpt.setAttribute('src', data);
-  	  body.appendChild(scpt);
-  	}, 'text');
-  </script> -->
-
   <script type="text/javascript">
+
     $(document).ready(function(){
+
       /* Initialize */
       $('#market-date').html(trading_date);
       $('.map-select').prop('selectedIndex',0);
