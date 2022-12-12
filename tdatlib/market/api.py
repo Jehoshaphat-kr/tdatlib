@@ -89,8 +89,9 @@ class market(object):
         syntax += f"var tdat_frm = {js}\n"
         syntax += f"var group_data = {str(group)}\n"
         with codecs.open(filename=_js, mode='w', encoding='utf-8') as file:
-            file.write(jsmin.jsmin(syntax + suffix))
+            # file.write(jsmin.jsmin(syntax + suffix))
             # file.write(syntax + suffix)
+            file.write(syntax)
 
         log = os.path.join(os.path.dirname(__file__), f'archive/deploy/log.csv')
         with codecs.open(filename=log, mode='w', encoding='utf-8') as file:
@@ -127,5 +128,5 @@ class market(object):
 if __name__ == "__main__":
     m = market()
     m.collect()
-    # m.pd2js()
-    m.pd2json()
+    m.pd2js()
+    # m.pd2json()

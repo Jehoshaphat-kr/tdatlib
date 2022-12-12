@@ -37,11 +37,7 @@
   <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
   <script src="https://cdn.plot.ly/plotly-2.16.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-  <script type="text/javascript">
-    fetch("https://raw.githubusercontent.com/Jehoshaphat-kr/tdatlib/master/tdatlib/market/archive/deploy/marketmap.json")
-      .then(response => response.json())
-      .then(json => console.log(json))
-  </script>
+
   <!-- <script type="text/javascript">
     // $.getJSON("https://raw.githubusercontent.com/Jehoshaphat-kr/tdatlib/master/tdatlib/market/archive/deploy/map-221212r2.json", function(data) {
     var rd = JSON.parse("https://raw.githubusercontent.com/Jehoshaphat-kr/tdatlib/master/tdatlib/market/archive/deploy/map-221212r2.json");
@@ -257,12 +253,20 @@
 
   <!-- Template Main JS File -->
   <script src="./main.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/Jehoshaphat-kr/tdatlib/tdatlib/market/archive/common/suffix.js"></script>
   <script type="text/javascript">
+    // var tdat = null;
+    // function tdat_rd(j){tdat = JSON.parse(j);}
+    fetch("https://raw.githubusercontent.com/Jehoshaphat-kr/tdatlib/master/tdatlib/market/archive/deploy/marketmap.json")
+      .then(response => response.json())
+      .then(
+        json => $('#market-date').html(json.trading_date)
+      )
 
     $(document).ready(function(){
 
       /* Initialize */
-      $('#market-date').html(trading_date);
+      // $('#market-date').html(tdat.trading_date);
       $('.map-select').prop('selectedIndex',0);
       $('.option-select').prop('selectedIndex',0);
       $('.map-search').select2({placeholder:"종목명 검색..", allowClear: true});
