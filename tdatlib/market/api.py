@@ -107,8 +107,8 @@ class market(object):
         proc = [('tdat_labels', self._labels), ('tdat_covers', self._covers), ('tdat_ids', self._ids)]
         for name, data in proc:
             syntax += '  "%s":{\n' % name
-            for var, val in data.items():
-                syntax += f'    "{var}":{str(val)},\n'
+            for n, (var, val) in enumerate(data.items()):
+                syntax += f'    "{var}":{str(val)}' + ('\n' if n == len(data) - 1 else ',\n')
             syntax += '  },\n'
 
         _frm = self._datum[self._tag].copy().fillna('-')
@@ -116,7 +116,7 @@ class market(object):
 
         group = self._datum[self._datum.index.isin([c for c in self._datum.index if '_' in c])]['종목명'].tolist()
         syntax += f'  "tdat_frm":{js},\n'
-        syntax += f'  "group_data":{str(group)},\n'
+        syntax += f'  "group_data":{str(group)}\n'
         syntax += '}'
         syntax = syntax.replace("'", '"')
         with codecs.open(filename=json, mode='w', encoding='utf-8') as file:
