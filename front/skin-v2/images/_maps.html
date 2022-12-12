@@ -39,7 +39,8 @@
   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
   <script type="text/javascript">
     $.getJSON("https://raw.githubusercontent.com/Jehoshaphat-kr/tdatlib/master/tdatlib/market/archive/deploy/map-221209r1.json", function(data) {
-      console.log(data);
+      var rd = JSON.parse(data);
+      console.log(rd);
     })
   </script>
   <!-- <script type="text/javascript">
