@@ -118,6 +118,7 @@ class market(object):
         syntax += f'  "tdat_frm":{js},\n'
         syntax += f'  "group_data":{str(group)},\n'
         syntax += '}'
+        syntax = syntax.replace("'", '"')
         with codecs.open(filename=json, mode='w', encoding='utf-8') as file:
             # file.write(jsmin.jsmin(syntax))
             file.write(syntax)
