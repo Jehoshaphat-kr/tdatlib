@@ -101,28 +101,24 @@ class market(object):
 
     def pd2json(self):
         td = krse.rdate
-        _ct = 1
-        _js = os.path.join(os.path.dirname(__file__), f'archive/deploy/map-{td[2:]}r{_ct}.json')
-        while os.path.isfile(_js):
-            _ct += 1
-            _js = os.path.join(os.path.dirname(__file__), f'archive/deploy/map-{td[2:]}r{_ct}.json')
+        json = os.path.join(os.path.dirname(__file__), f'archive/deploy/marketmap.json')
 
-        syntax = "{\n" + f'  tdat_td:"({td[2:4]}.{td[4:6]}.{td[6:]} 종가 기준)",\n'
+        syntax = "{\n" + f'  "tdat_td":"({td[2:4]}.{td[4:6]}.{td[6:]} 종가 기준)",\n'
         proc = [('tdat_labels', self._labels), ('tdat_covers', self._covers), ('tdat_ids', self._ids)]
         for name, data in proc:
-            syntax += '  %s:{\n' % name
+            syntax += '  "%s":{\n' % name
             for var, val in data.items():
-                syntax += f'    {var}:{str(val)},\n'
+                syntax += f'    "{var}":{str(val)},\n'
             syntax += '  },\n'
 
         _frm = self._datum[self._tag].copy().fillna('-')
         js = _frm.to_json(orient='index', force_ascii=False)
 
         group = self._datum[self._datum.index.isin([c for c in self._datum.index if '_' in c])]['종목명'].tolist()
-        syntax += f"  tdat_frm:{js},\n"
-        syntax += f"  group_data:{str(group)},\n"
-        syntax += "}"
-        with codecs.open(filename=_js, mode='w', encoding='utf-8') as file:
+        syntax += f'  "tdat_frm":{js},\n'
+        syntax += f'  "group_data":{str(group)},\n'
+        syntax += '}'
+        with codecs.open(filename=json, mode='w', encoding='utf-8') as file:
             # file.write(jsmin.jsmin(syntax))
             file.write(syntax)
 
