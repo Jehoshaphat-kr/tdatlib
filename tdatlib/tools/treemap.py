@@ -139,11 +139,14 @@ class treemap(object):
     @property
     def bardata(self) -> pd.DataFrame:
         columns = [
-            '종목코드', '종목명', '분류', 'PER', 'PBR', 'DIV', 'R1D', 'R1W', 'R1M', 'R3M', 'R6M', 'R1Y', 'R2Y',
+            '종목코드', '종목명', '분류',
+            'PER', 'PBR', 'DIV', 'R1D', 'R1W', 'R1M', 'R3M', 'R6M', 'R1Y', 'R2Y',
             'CPBR', 'CPER', 'CDIV', 'CR1Y', 'CR6M', 'CR3M', 'CR1M', 'CR1W', 'CR1D'
+        ] if not self.name == 'ETF' else [
+            '종목코드', '종목명', '분류',
+            'R1D', 'R1W', 'R1M', 'R3M', 'R6M', 'R1Y', 'R2Y',
+            'CR1Y', 'CR6M', 'CR3M', 'CR1M', 'CR1W', 'CR1D'
         ]
-        if not self.name in ['WICS', 'WI26']:
-            return pd.DataFrame(columns=columns)
 
         data = self.mapdata.copy()
         data = data[data['종목코드'].str.contains('_')]
@@ -153,6 +156,12 @@ class treemap(object):
                 'IT', '건강관리', '경기관련소비재', '금융', '산업재', '소재', '에너지', '유틸리티',
                 '커뮤니케이션서비스', '필수소비재'
             ])]
+        elif self.name == 'ETF':
+            data = data[data['종목명'].isin([
+                '국고채', '회사채', '귀금속', '원자재',
+                '독일', '미국', '선진국', '신흥국', '원유', '일본', '중국'
+            ])]
+        else: pass
         return data
 
     def maptrace(self, key:str='R1D') -> go.Treemap:
