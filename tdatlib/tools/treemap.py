@@ -188,10 +188,32 @@ class treemap(object):
             opacity=0.9,
         )
 
+    def bartrace(self, key:str='R1D') -> go.Bar or list:
+        data = self.bardata.copy()
+        data = data.sort_values(by=key, ascending=True)
+        unit = '' if key.startswith('P') else '%'
+        return go.Bar(
+            name=key,
+            x=data[key].abs(),
+            y=data.종목명,
+            orientation='h',
+            marker=dict(color=data[f'C{key}']),
+            text=data[key],
+            texttemplate='%{text}' + unit,
+            textposition='outside',
+            hovertemplate='분류: %{y}<br>' + key + ': %{x}' + unit + '<extra></extra>',
+            opacity=0.9
+        )
+
 
 if __name__ == "__main__":
     from tdatlib.market.core import *
     # krse.insist = True
+
+    base = krse.wics.join(krse.overview.drop(columns=['종목명']), how='left')
+    base = base.sort_values(by='시가총액', ascending=False).head(500)
+    base = pd.concat(objs=[base, krse.performance(base.index)], axis=1)
+    tmap = treemap(baseline=base, name='WICS')
 
     # base = krse.wi26.join(krse.overview.drop(columns=['종목명']), how='left')
     # base = base.sort_values(by='시가총액', ascending=False).head(500)
@@ -199,12 +221,14 @@ if __name__ == "__main__":
     # tmap = treemap(baseline=base, name='WI26')
 
     # etf.islatest()
-    base = etf.group.join(etf.overview.drop(columns=['종목명']), how='left')
-    base = base.join(etf.returns, how='left')
-    tmap = treemap(baseline=base, name='ETF')
+    # base = etf.group.join(etf.overview.drop(columns=['종목명']), how='left')
+    # base = base.join(etf.returns, how='left')
+    # tmap = treemap(baseline=base, name='ETF')
 
-    print(tmap.bardata)
-    # fig = go.Figure()
+    # print(tmap.bardata)
+
+    fig = go.Figure()
     # fig.add_trace(tmap.maptrace(key='PER'))
-    # fig.show()
+    fig.add_trace(tmap.bartrace(key='R1D'))
+    fig.show()
 
