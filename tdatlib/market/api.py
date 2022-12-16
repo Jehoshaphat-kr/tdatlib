@@ -6,7 +6,7 @@ import pandas as pd
 import codecs, os, jsmin
 
 
-class market(object):
+class _market(object):
     _dir = os.path.join(os.path.dirname(__file__), f'archive/common/suffix.js')
     _tag = [
         '종목명', '종가', '시가총액', '크기',
@@ -111,8 +111,10 @@ class market(object):
             file.write(syntax)
 
 
+# Alias
+marketmap = _market()
+
 if __name__ == "__main__":
-    m = market()
-    m.collect()
-    m.pd2js()
-    m.pd2json()
+    marketmap.collect()
+    marketmap.pd2js()
+    marketmap.pd2json()
