@@ -37,10 +37,12 @@
   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/Jehoshaphat-kr/tdatlib/tdatlib/market/archive/common/suffix.js"></script>
   <script type="text/javascript">
+    var datahead = document.getElementsByTagName('head')[0]
     var datascript = document.createElement('script');
     $.get("https://raw.githubusercontent.com/Jehoshaphat-kr/tdatlib/master/tdatlib/market/archive/deploy/marketdatav.csv", function(data) {
+      console.log(data);
       datascript.setAttribute('src', data);
-      document.getElementsByTagName('head')[0].appendChild(datascript);
+      datahead.appendChild(datascript);
     }, 'text');
   </script>
 </head>
