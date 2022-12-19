@@ -7,7 +7,6 @@ import codecs, os, jsmin
 
 
 class _market(object):
-    _dir = os.path.join(os.path.dirname(__file__), f'archive/common/suffix.js')
     _tag = [
         '종목명', '종가', '시가총액', '크기',
         'R1D', 'R1W', 'R1M', 'R3M', 'R6M', 'R1Y',
@@ -17,9 +16,9 @@ class _market(object):
     ]
     def __init__(self):
         kq = index.deposit('2001')
-
-        wics = krse.wics.join(krse.overview.drop(columns=['종목명']), how='left').sort_values(by='시가총액', ascending=False)
-        wi26 = krse.wi26.join(krse.overview.drop(columns=['종목명']), how='left').sort_values(by='시가총액', ascending=False)
+        overview = krse.overview.drop(columns=['종목명', 'IPO', '거래량']).copy()
+        wics = krse.wics.join(overview, how='left').sort_values(by='시가총액', ascending=False)
+        wi26 = krse.wi26.join(overview, how='left').sort_values(by='시가총액', ascending=False)
         etfs = etf.group.join(etf.overview.drop(columns=['종목명']), how='left').join(etf.returns, how='left')
 
         wics_largecap = wics.head(500).copy()
@@ -63,10 +62,15 @@ class _market(object):
         return
 
     def pd2js(self):
-        td = krse.rdate
-        js = os.path.join(os.path.dirname(__file__), f'archive/deploy/marketdata.js')
+        td, ct = krse.rdate, 1
+        vs = f"{td[2:4]}.{td[4:6]}.{td[6:]}"
+        js = os.path.join(os.path.dirname(__file__), f'archive/deploy/marketdata@{vs}r{ct}.js')
+        cv = os.path.join(os.path.dirname(__file__), f'archive/deploy/marketdatav.csv')
+        while os.path.isfile(js):
+            ct += 1
+            js = os.path.join(os.path.dirname(__file__), f'archive/deploy/marketdata@{vs}r{ct}.js')
 
-        syntax = f'var trading_date = "({td[2:4]}.{td[4:6]}.{td[6:]} 종가 기준)";\n'
+        syntax = f'var trading_date = "(vs 종가 기준)";\n'
 
         # proc = [('labels', self._labels), ('covers', self._covers), ('ids', self._ids), ('bar', self._bars)]
         proc = [('tdat_labels', self._labels), ('tdat_covers', self._covers), ('tdat_ids', self._ids)]
@@ -80,10 +84,14 @@ class _market(object):
         _js = _frm.to_json(orient='index', force_ascii=False)
 
         group = self._datum[self._datum.index.isin([c for c in self._datum.index if '_' in c])]['종목명'].tolist()
-        syntax += f"var tdat_frm = {_js}\n"
-        syntax += f"var group_data = {str(group)}\n"
+        syntax += f'var tdat_frm = {_js}\n'
+        syntax += f'var group_data = {str(group)}\n'
         with codecs.open(filename=js, mode='w', encoding='utf-8') as file:
             file.write(jsmin.jsmin(syntax))
+
+        with codecs.open(filename=cv, mode='w', encoding='utf-8') as file:
+            fname = os.path.basename(js)
+            file.write(f'https://cdn.jsdelivr.net/gh/Jehoshaphat-kr/tdatlib/tdatlib/market/archive/deploy/{fname}')
         return
 
     def pd2json(self):
@@ -113,8 +121,3 @@ class _market(object):
 
 # Alias
 marketmap = _market()
-
-if __name__ == "__main__":
-    marketmap.collect()
-    marketmap.pd2js()
-    marketmap.pd2json()

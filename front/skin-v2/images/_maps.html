@@ -32,11 +32,17 @@
   * Contact: tdat.tistory@gmail.com
   * License: MIT
   ======================================================== -->
-  <script src="https://cdn.jsdelivr.net/gh/Jehoshaphat-kr/tdatlib/tdatlib/market/archive/deploy/marketdata.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/Jehoshaphat-kr/tdatlib/tdatlib/market/archive/common/suffix.js"></script>
   <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
   <script src="https://cdn.plot.ly/plotly-2.16.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/Jehoshaphat-kr/tdatlib/tdatlib/market/archive/common/suffix.js"></script>
+  <script type="text/javascript">
+    var datascript = document.createElement('script');
+    $.get("https://raw.githubusercontent.com/Jehoshaphat-kr/tdatlib/master/tdatlib/market/archive/deploy/marketdatav.csv", function(data) {
+      datascript.setAttribute('src', data);
+      document.getElementsByTagName('head')[0].appendChild(datascript);
+    }, 'text');
+  </script>
 </head>
 
 <body>
