@@ -37,13 +37,26 @@
   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/Jehoshaphat-kr/tdatlib/tdatlib/market/archive/common/suffix.js"></script>
   <script type="text/javascript">
-    var datahead = document.getElementsByTagName('head')[0]
-    var datascript = document.createElement('script');
-    $.get("https://raw.githubusercontent.com/Jehoshaphat-kr/tdatlib/master/tdatlib/market/archive/deploy/marketdatav.csv", function(data) {
-      console.log(data);
-      datascript.setAttribute('src', data);
-      datahead.appendChild(datascript);
-    }, 'text');
+    function sourcing(url) {
+      var obj = fetch(url);
+      var src = obj.text();
+      var hdr = document.getElementsByTagName("head")[0];
+      var dsc = document.createElement("script");
+      dsc.type = "text/javascript";
+      dsc.src = src;
+      hdr.appendChild(dsc);
+    }
+
+    sourcing("https://raw.githubusercontent.com/Jehoshaphat-kr/tdatlib/master/tdatlib/market/archive/deploy/marketdatav.txt")
+
+    // var datahead = document.getElementsByTagName('head')[0]
+    // var datascript = document.createElement('script');
+    // var datasrc = $.csv.toObject("https://raw.githubusercontent.com/Jehoshaphat-kr/tdatlib/master/tdatlib/market/archive/deploy/marketdatav.csv");
+    // console.log(datasrc);
+    // $.get("https://raw.githubusercontent.com/Jehoshaphat-kr/tdatlib/master/tdatlib/market/archive/deploy/marketdatav.csv", function(data) {
+    //   datascript.src = data;
+    //   datahead.appendChild(datascript);
+    // }, 'text');
   </script>
 </head>
 
@@ -247,6 +260,17 @@
   <!-- Template Main JS File -->
   <script src="./main.js"></script>
   <script type="text/javascript">
+    var scripts = document.getElementsByTagName("script");
+    var cnt = scripts.length;
+    while (cnt) {
+      var curr = scripts[cnt-1];
+      // console.log("@" + curr.src);
+      // if ( curr.src.contains("marketdata") ) {
+      //   eval(curr.innerHTML);
+      //   break;
+      // }
+      cnt--;
+    }
     $(document).ready(function(){
 
       /* Initialize */
