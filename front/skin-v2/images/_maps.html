@@ -95,7 +95,7 @@
           <li><a href="#">시장 보기</a></li>
           <li>시장 지도</li>
         </ol>
-        <h2 style="display:inline-block !important;">시장 지도</h2><span id="market-date"></span>
+        <h2 style="display:inline-block !important;">시장 지도</h2><span id="market-date">(Loading...)</span>
 
       </div>
     </section><!-- End Breadcrumbs -->
@@ -241,7 +241,6 @@
   <script type="text/javascript">
     const static_log = "https://raw.githubusercontent.com/Jehoshaphat-kr/tdatlib/master/tdatlib/market/archive/deploy/marketdatav.txt"
     const static_url = "https://raw.githubusercontent.com/Jehoshaphat-kr/tdatlib/master/tdatlib/market/archive/deploy/marketdata.js"
-
     fetch(static_url, {method: 'GET'})
       .then((response) => response.text())
       .then(data => {
@@ -250,65 +249,14 @@
         $('.map-select').prop('selectedIndex',0);
         $('.option-select').prop('selectedIndex',0);
         $('.map-search').select2({placeholder:"종목명 검색..", allowClear: true});
-
         market_type = $('.map-select').val();
         option_type = $('.option-select').val();
         map_key = market_type;
-
         treemap(map_key);
         setSearch(map_key);
       })
 
-    // async function sourcing(url) {
-    //   var obj = await fetch(url);
-    //   var src = await obj.text();
-    //   var hdr = document.getElementsByTagName("body")[0];
-    //   var dsc = document.createElement("script");
-    //   dsc.type = "text/javascript";
-    //   dsc.src = src;
-    //   console.log(dsc);
-    //   await hdr.appendChild(dsc);
-    //
-    //   /* Initialize */
-    //   $('#market-date').html(trading_date);
-    //   $('.map-select').prop('selectedIndex',0);
-    //   $('.option-select').prop('selectedIndex',0);
-    //   $('.map-search').select2({placeholder:"종목명 검색..", allowClear: true});
-    //
-    //   market_type = $('.map-select').val();
-    //   option_type = $('.option-select').val();
-    //   map_key = market_type;
-    //
-    //   treemap(map_key);
-    //   setSearch(map_key);
-    // }
-    //
-    // sourcing("https://raw.githubusercontent.com/Jehoshaphat-kr/tdatlib/master/tdatlib/market/archive/deploy/marketdatav.txt")
-
-    // var datahead = document.getElementsByTagName('head')[0]
-    // var datascript = document.createElement('script');
-    // var datasrc = $.csv.toObject("https://raw.githubusercontent.com/Jehoshaphat-kr/tdatlib/master/tdatlib/market/archive/deploy/marketdatav.csv");
-    // console.log(datasrc);
-    // $.get("https://raw.githubusercontent.com/Jehoshaphat-kr/tdatlib/master/tdatlib/market/archive/deploy/marketdatav.csv", function(data) {
-    //   datascript.src = data;
-    //   datahead.appendChild(datascript);
-    // }, 'text');
-
     $(document).ready(function(){
-
-      // /* Initialize */
-      // $('#market-date').html(trading_date);
-      // $('.map-select').prop('selectedIndex',0);
-      // $('.option-select').prop('selectedIndex',0);
-      // $('.map-search').select2({placeholder:"종목명 검색..", allowClear: true});
-      //
-      // market_type = $('.map-select').val();
-      // option_type = $('.option-select').val();
-      // map_key = market_type;
-      //
-      // treemap(map_key);
-      // setSearch(map_key);
-
       // MAP type selection
       $('.map-select').on('change', function(){
         $('.option-select option[value="PER"]').remove();
