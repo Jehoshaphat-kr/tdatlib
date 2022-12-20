@@ -12,7 +12,7 @@ if __name__ == "__main__":
     if RUN_TREEMAP:
         new_treemap.collect()
         new_treemap.pd2js()
-        old_treemap.treemap_deploy()
+        # old_treemap.treemap_deploy()
 
 
     """

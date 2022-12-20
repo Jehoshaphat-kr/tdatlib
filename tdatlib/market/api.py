@@ -62,15 +62,9 @@ class _market(object):
         return
 
     def pd2js(self):
-        td, ct = krse.rdate, 1
-        vs = f"{td[2:4]}.{td[4:6]}.{td[6:]}"
-        js = os.path.join(os.path.dirname(__file__), f'archive/deploy/marketdata@{vs}r{ct}.js')
-        cv = os.path.join(os.path.dirname(__file__), f'archive/deploy/marketdatav.csv')
-        while os.path.isfile(js):
-            ct += 1
-            js = os.path.join(os.path.dirname(__file__), f'archive/deploy/marketdata@{vs}r{ct}.js')
-
-        syntax = f'var trading_date = "(vs 종가 기준)";\n'
+        td = krse.rdate
+        js = os.path.join(os.path.dirname(__file__), f'archive/deploy/marketdata.js')
+        syntax = f'var trading_date = "({td[2:4]}.{td[4:6]}.{td[6:]} 종가 기준)";\n'
 
         # proc = [('labels', self._labels), ('covers', self._covers), ('ids', self._ids), ('bar', self._bars)]
         proc = [('tdat_labels', self._labels), ('tdat_covers', self._covers), ('tdat_ids', self._ids)]
@@ -88,10 +82,6 @@ class _market(object):
         syntax += f'var group_data = {str(group)}\n'
         with codecs.open(filename=js, mode='w', encoding='utf-8') as file:
             file.write(jsmin.jsmin(syntax))
-
-        with codecs.open(filename=cv, mode='w', encoding='utf-8') as file:
-            fname = os.path.basename(js)
-            file.write(f'https://cdn.jsdelivr.net/gh/Jehoshaphat-kr/tdatlib/tdatlib/market/archive/deploy/{fname}')
         return
 
     def pd2json(self):
