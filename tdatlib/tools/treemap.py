@@ -113,6 +113,7 @@ class treemap(object):
             return f"{x['크기']}억원" if len(x['크기']) < 5 else f"{x['크기'][:-4]}조 {x['크기'][-4:]}억원"
 
         tree = colored.copy()
+        tree.to_csv(r'C:\Users\Administrator\Desktop\Temp\csv.csv', encoding='euc-kr', index=True)
         tree['종가'].fillna('-', inplace=True)
         tree['크기'] = tree['크기'].astype(int).astype(str)
         tree['종목명'] = tree.apply(rename, axis=1)
