@@ -21,13 +21,23 @@ def getSummary(ticker:str) -> str:
     return ' ' + text[0] + ''.join(words) + text[-2] + text[-1]
 
 
-def getProducts(ticker:str) -> pd.DataFrame:
+def getAllProducts(ticker: str) -> pd.DataFrame:
     url = f"http://cdn.fnguide.com/SVO2//json/chart/02/chart_A{ticker}_01_N.json"
     src = json.loads(urlopen(url=url).read().decode('utf-8-sig', 'replace'))
     header = pd.DataFrame(src['chart_H'])[['ID', 'NAME']].set_index(keys='ID').to_dict()['NAME']
     header.update({'PRODUCT_DATE': '기말'})
     products = pd.DataFrame(src['chart']).rename(columns=header).set_index(keys='기말')
 
+    i = products.columns[-1]
+    products['Sum'] = products.astype(float).sum(axis=1)
+    products = products[(90 <= products.Sum) & (products.Sum < 110)].astype(float)
+    products[i] = products[i] - (products.Sum - 100)
+    return products.drop(columns=['Sum'])
+
+
+def getRecentProducts(ticker: str = str(), products: pd.DataFrame = None) -> pd.DataFrame:
+    if not isinstance(products, pd.DataFrame):
+        products = getAllProducts(ticker=ticker)
     i = -1 if products.iloc[-1].astype(float).sum() > 10 else -2
     df = products.iloc[i].T.dropna().astype(float)
     df.drop(index=df[df < 0].index, inplace=True)
@@ -237,8 +247,12 @@ class _fnguide(object):
         return self.__property__(key=inner().f_code.co_name)
 
     @property
-    def Products(self) -> pd.DataFrame:
+    def AllProducts(self) -> pd.DataFrame:
         return self.__property__(key=inner().f_code.co_name)
+
+    @property
+    def RecentProducts(self) -> pd.DataFrame:
+        return self.__property__(key=inner().f_code.co_name, products=self.AllProducts)
 
     @property
     def Statement(self) -> pd.DataFrame:
@@ -305,20 +319,22 @@ class _fnguide(object):
 
 
 if __name__ == '__main__':
-    tester = _fnguide(ticker='316140')
-    print(tester.Summary)
-    print(tester.Products)
-    print(tester.Statement)
-    print(tester.Asset)
-    print(tester.Profit)
-    print(tester.Expenses)
-    print(tester.Foreigner)
-    print(tester.Consensus)
-    print(tester.Nps)
-    print(tester.BenchmarkReturn)
-    print(tester.BenchmarkMultiple)
-    print(tester.Multifactor)
-    print(tester.MultipleSeries)
-    print(tester.MultipleBand)
-    print(tester.ShortSell)
-    print(tester.ShortBalance)
+    ticker = '316140'
+    tester = _fnguide(ticker=ticker)
+    # print(tester.Summary)
+    print(tester.AllProducts)
+    print(tester.RecentProducts)
+    # print(tester.Statement)
+    # print(tester.Asset)
+    # print(tester.Profit)
+    # print(tester.Expenses)
+    # print(tester.Foreigner)
+    # print(tester.Consensus)
+    # print(tester.Nps)
+    # print(tester.BenchmarkReturn)
+    # print(tester.BenchmarkMultiple)
+    # print(tester.Multifactor)
+    # print(tester.MultipleSeries)
+    # print(tester.MultipleBand)
+    # print(tester.ShortSell)
+    # print(tester.ShortBalance)

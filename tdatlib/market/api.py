@@ -14,7 +14,10 @@ class _market(object):
         'CR1D', 'CR1W', 'CR1M', 'CR3M', 'CR6M', 'CR1Y',
         'CPER', 'CPBR', 'CDIV'
     ]
-    def __init__(self):
+    _datum = pd.DataFrame(columns=['종목코드'])
+    _labels, _covers, _ids, _bars = dict(), dict(), dict(), dict()
+
+    def _basing(self) -> list:
         kq = index.deposit('2001')
         overview = krse.overview.drop(columns=['종목명', 'IPO', '거래량']).copy()
         wics = krse.wics.join(overview, how='left').sort_values(by='시가총액', ascending=False)
@@ -30,8 +33,7 @@ class _market(object):
         wi26_largecap = wi26_largecap.join(krse.performance(wi26_largecap.index), how='left')
         wi26_midcap = wi26[~wi26.index.isin(wi26_largecap.index)].head(300)
         wi26_midcap = wi26_midcap.join(krse.performance(wi26_midcap.index), how='left')
-
-        self._kwargs = [
+        return [
             (dict(baseline=wics_largecap, name='WICS', tag='LCap', kosdaq=kq), 'indful'),
             (dict(baseline=wics_midcap, name='WICS', tag='MCap', kosdaq=kq), 'indksm'),
             (dict(baseline=wi26_largecap, name='WI26', tag='LCap', kosdaq=kq), 'secful'),
@@ -39,12 +41,8 @@ class _market(object):
             (dict(baseline=etfs, name='ETF', tag='', kosdaq=kq), 'etfful'),
         ]
 
-        self._datum = pd.DataFrame(columns=['종목코드'])
-        self._labels, self._covers, self._ids, self._bars = dict(), dict(), dict(), dict()
-        return
-
     def collect(self):
-        proc = tqdm(self._kwargs)
+        proc = tqdm(self._basing())
         for kwarg, var in proc:
             mm = treemap(**kwarg)
             proc.set_description(desc=f'{mm.name}{mm.tag}')

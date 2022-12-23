@@ -1,6 +1,7 @@
 from tdatlib.stock.fnguide import (
     getSummary,
-    getProducts,
+    getAllProducts,
+    getRecentProducts,
     getStatement,
     getExpenses,
     getConsensus,

@@ -54,6 +54,22 @@ class _settings(object):
     def hover(self, hover:str):
         self.obj['hovertemplate'] = hover
 
+    @property
+    def yhoverformat(self) -> str:
+        return self.obj['yhoverformat']
+
+    @yhoverformat.setter
+    def yhoverformat(self, yhoverformat:str):
+        self.obj['yhoverformat'] = yhoverformat
+
+    @property
+    def xhoverformat(self) -> str:
+        return self.obj['xhoverformat']
+
+    @xhoverformat.setter
+    def xhoverformat(self, xhoverformat: str):
+        self.obj['xhoverformat'] = xhoverformat
+
 
 class draw_line(_settings):
     def __init__(self, data:pd.Series, name:str=str()):
