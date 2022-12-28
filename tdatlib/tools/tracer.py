@@ -104,6 +104,12 @@ class draw_candle(_settings):
     def __call__(self):
         return self.obj
 
+class draw_bband(object):
+    def __init__(self, data:pd.DataFrame, name:str=str()):
+        self.upper = go.Trace(
+            x=data.upper,
+        )
+
 
 def draw_recession(fig:go.Figure, market:str):
     recession = [

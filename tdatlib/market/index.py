@@ -108,6 +108,12 @@ class _index(_fetch):
         return self.__getattribute__(f'__snp500_{self.period}')
 
     @property
+    def nasdaq(self) -> pd.DataFrame:
+        if not hasattr(self, f'__nasdaq_{self.period}'):
+            self.__setattr__(f'__nasdaq_{self.period}', self.ohlcv(ticker='^IXIC'))
+        return self.__getattribute__(f'__nasdaq_{self.period}')
+
+    @property
     def properties(self) -> list:
         exclude = [
             'properties',
