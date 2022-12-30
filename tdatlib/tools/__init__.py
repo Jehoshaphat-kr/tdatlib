@@ -8,6 +8,10 @@ from tdatlib.tools.tseries import(
 )
 from tdatlib.tools.tracer import (
     draw_line,
+    draw_bar,
     draw_candle,
-    draw_recession
+    add_recession
+)
+from tdatlib.tools.technical import (
+    bollinger_band
 )

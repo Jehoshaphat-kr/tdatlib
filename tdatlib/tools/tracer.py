@@ -3,109 +3,30 @@ import plotly.graph_objects as go
 import pandas as pd
 
 
-class _settings(object):
-    obj = None
+def draw_line(data:pd.Series, name:str=str(), unit:str=str()):
+    return go.Scatter(
+        name=name if name else data.name, x=data.index, y=data, visible=True,
+        showlegend=True,
+        xhoverformat="%Y/%m/%d", yhoverformat=".2f", hovertemplate="%{x}<br>%{y}" + unit + "<extra></extra>"
+    )
 
-    @property
-    def legend(self) -> bool:
-        return self.obj['showlegend']
+def draw_bar(data:pd.Series, name:str=str(), unit:str=str()):
+    return go.Bar(
+        name=name if name else data.name, x=data.index, y=data, visible=True,
+        showlegend=False,
+        xhoverformat='%Y/%m/%d', yhoverformat=',', hovertemplate='%{x}<br>%{y}' + unit +'<extra></extra>',
+    )
 
-    @legend.setter
-    def legend(self, on_off:bool):
-        self.obj['showlegend'] = on_off
+def draw_candle(data:pd.DataFrame, name:str=str()):
+    return go.Candlestick(
+        name=name if name else data.name,
+        x=data.index, open=data.시가, high=data.고가, low=data.저가, close=data.종가,
+        visible=True, showlegend=True,
+        increasing_line=dict(color='red'), decreasing_line=dict(color='royalblue'),
+        xhoverformat="%Y/%m/%d", yhoverformat=".2f"
+    )
 
-    @property
-    def visible(self) -> bool:
-        return self.obj['visible']
-
-    @visible.setter
-    def visible(self, on_off_legendonly: bool or str):
-        self.obj['visible'] = on_off_legendonly
-
-    @property
-    def width(self) -> float or int:
-        return self.obj['line']['width']
-
-    @width.setter
-    def width(self, width:float or int):
-        self.obj['line'].update(dict(width=width))
-
-    @property
-    def color(self) -> str:
-        return self.obj['line']['color']
-
-    @color.setter
-    def color(self, color:str):
-        self.obj['line'].update(dict(color=color))
-
-    @property
-    def dash(self) -> str:
-        return self.obj['line']['dash']
-
-    @dash.setter
-    def dash(self, dash:str):
-        self.obj['line'].update(dict(dash=dash))
-
-    @property
-    def hover(self) -> str:
-        return self.obj['hovertemplate']
-
-    @hover.setter
-    def hover(self, hover:str):
-        self.obj['hovertemplate'] = hover
-
-    @property
-    def yhoverformat(self) -> str:
-        return self.obj['yhoverformat']
-
-    @yhoverformat.setter
-    def yhoverformat(self, yhoverformat:str):
-        self.obj['yhoverformat'] = yhoverformat
-
-    @property
-    def xhoverformat(self) -> str:
-        return self.obj['xhoverformat']
-
-    @xhoverformat.setter
-    def xhoverformat(self, xhoverformat: str):
-        self.obj['xhoverformat'] = xhoverformat
-
-
-class draw_line(_settings):
-    def __init__(self, data:pd.Series, name:str=str()):
-        self.obj = go.Scatter(
-            name=name if name else data.name,
-            x=data.index, y=data,
-            visible=True, showlegend=True, line=dict(),
-            yhoverformat='.2f', xhoverformat='%Y/%m/%d', hovertemplate='%{x}<br>%{y}'
-        )
-
-    def __call__(self):
-        return self.obj
-
-
-class draw_candle(_settings):
-    def __init__(self, data:pd.DataFrame, name:str=str()):
-        self.obj = go.Candlestick(
-            name=name if name else data.name,
-            x=data.index,
-            open=data.시가,
-            high=data.고가,
-            low=data.저가,
-            close=data.종가,
-            visible=True,
-            showlegend=True,
-            increasing_line=dict(color='red'),
-            decreasing_line=dict(color='royalblue'),
-            xhoverformat='%Y/%m/%d',
-            yhoverformat='.2f',
-        )
-
-    def __call__(self):
-        return self.obj
-
-
-def draw_recession(fig:go.Figure, market:str):
+def add_recession(fig:go.Figure, market:str):
     recession = [
         {'label': 'blank#01', 'from': datetime(1994, 11, 8), 'to': datetime(1995, 5, 27)},
         {'label': 'blank#02', 'from': datetime(1996, 5, 7), 'to': datetime(1997, 1, 7)},
@@ -146,12 +67,3 @@ def draw_recession(fig:go.Figure, market:str):
             x0 = start
         fig.add_vrect(x0=x0, x1=x1, fillcolor='grey', opacity=0.2, line_width=0)
     return fig
-
-
-if __name__ == "__main__":
-    from tdatlib.macro.ecos import ecos
-
-    raw = ecos()
-    trace = draw_line(raw.CD금리91D)
-
-    print(trace())

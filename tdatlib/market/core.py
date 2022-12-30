@@ -17,20 +17,28 @@ import urllib.request as req
 
 class _marketime(object):
     def __init__(self, td:str or datetime=None):
-        clk = datetime.now(timezone('Asia/Seoul'))
-        cur = get_nearest_business_day_in_a_week(date=clk.strftime("%Y%m%d"), prev=True)
-        wkd = clk.weekday()
-
-        if td and isinstance(td, str):
-            date = td
-        elif td and isinstance(td, datetime):
-            date = td.strftime("%Y%m%d")
+        self._now = datetime.now(timezone('Asia/Seoul'))
+        if isinstance(td, str) and td:
+            self._date = td
+        elif isinstance(td, datetime) and td:
+            self._date = td.strftime("%Y%m%d")
         else:
-            date = datetime.now(timezone('Asia/Seoul')).strftime("%Y%m%d")
-
-        self.rdate = get_nearest_business_day_in_a_week(date=date, prev=True)
-        self.is_open = self.rdate == cur and 900 <= int(clk.strftime("%H%M")) <= 1530 and not wkd in [5, 6]
+            self._date = self._now.strftime("%Y%m%d")
         return
+
+    @property
+    def rdate(self) -> str:
+        if not hasattr(self, '__rdate'):
+            self.__setattr__('__rdate', get_nearest_business_day_in_a_week(date=self._date, prev=True))
+        return self.__getattribute__('__rdate')
+
+    @property
+    def is_open(self) -> bool:
+        if not hasattr(self, '__is_open'):
+            today = self._now.strftime("%Y%m%d") == self.rdate
+            clock = 859 <= int(self._now.strftime("%H%M")) <= 1531
+            self.__setattr__('__is_open', today and clock)
+        return self.__getattribute__('__is_open')
 
     @property
     def dates(self) -> dict:
