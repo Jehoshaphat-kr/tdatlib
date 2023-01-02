@@ -20,16 +20,20 @@ class _default(object):
     def __init__(self, ohlcv: pd.DataFrame, name: str = str(), unit: str = str()):
         self.ohlcv = ohlcv
         self.name = name if name else ohlcv.name
-        self.curr = unit if unit else '-'
+        self.curr = unit if unit else ''
         return
 
     @property
     def key(self) -> str:
         return self.__key
 
-    @key.setter
-    def key(self, key: str):
-        self.__key = key
+    @property
+    def col(self) -> str:
+        return self.__col
+
+    @col.setter
+    def col(self, col: str):
+        self.__col = col
 
     @property
     def window(self) -> int:
@@ -57,7 +61,7 @@ class _default(object):
 
     @property
     def basis(self) -> pd.Series:
-        attr = f'__basis_{self.__key}'
+        attr = f'__basis_{self.key}'
         if not hasattr(self, attr):
             if self.__col == "TP":
                 self.__setattr__(attr, (self.ohlcv.고가 + self.ohlcv.저가 + self.ohlcv.종가) / 3)
@@ -67,7 +71,7 @@ class _default(object):
 
     @property
     def middle(self) -> pd.Series:
-        attr = f'__middle_{self.__key}'
+        attr = f'__middle_{self.key}'
         if not hasattr(self, attr):
             _t = self.basis.rolling(window=self.window).mean()
             self.__setattr__(attr, _t)
@@ -75,7 +79,7 @@ class _default(object):
 
     @property
     def upper_edge(self) -> pd.Series:
-        attr = f'__upper_edge_{self.__key}'
+        attr = f'__upper_edge_{self.key}'
         if not hasattr(self, attr):
             _t = self.middle + self.__std * self.basis.rolling(window=self.window).std()
             self.__setattr__(attr, _t)
@@ -83,7 +87,7 @@ class _default(object):
 
     @property
     def lower_edge(self) -> pd.Series:
-        attr = f'__lower_edge_{self.__key}'
+        attr = f'__lower_edge_{self.key}'
         if not hasattr(self, attr):
             _t = self.middle - self.__std * self.basis.rolling(window=self.window).std()
             self.__setattr__(attr, _t)
@@ -91,7 +95,7 @@ class _default(object):
 
     @property
     def upper_trend(self) -> pd.Series:
-        attr = f'__upper_trend_{self.__key}'
+        attr = f'__upper_trend_{self.key}'
         if not hasattr(self, attr):
             _t = self.middle + (self.__std/2) * self.basis.rolling(window=self.window).std()
             self.__setattr__(attr, _t)
@@ -99,7 +103,7 @@ class _default(object):
 
     @property
     def lower_trend(self) -> pd.Series:
-        attr = f'__lower_trend_{self.__key}'
+        attr = f'__lower_trend_{self.key}'
         if not hasattr(self, attr):
             _t = self.middle - (self.__std/2) * self.basis.rolling(window=self.window).std()
             self.__setattr__(attr, _t)
@@ -108,7 +112,7 @@ class _default(object):
 
     @property
     def width(self) -> pd.Series:
-        attr = f'__width_{self.__key}'
+        attr = f'__width_{self.key}'
         if not hasattr(self, attr):
             _t = ((self.upper_edge - self.lower_edge) / self.middle) * 100
             self.__setattr__(attr, _t)
@@ -116,7 +120,7 @@ class _default(object):
 
     @property
     def pctb(self) -> pd.Series:
-        attr = f'__pctb_{self.__key}'
+        attr = f'__pctb_{self.key}'
         if not hasattr(self, attr):
             _t = (self.basis - self.lower_edge) / (self.upper_edge - self.lower_edge).where(
                 self.upper_edge != self.lower_edge, np.nan
@@ -128,15 +132,23 @@ class _default(object):
 
 class _analytic(_default):
 
-    def traditional(self):
-        pctb = self.pctb.dropna()
-        uz = zc(pctb - 1)
-        lz = zc(pctb)
-        sell = []
-        print(u)
-        print(l)
-        print(self.pctb)
-        return
+    @property
+    def traditional_signal(self) -> pd.DataFrame:
+        attr = f'__t_sig_{self.key}'
+        if not hasattr(self, attr):
+            sell, buy, prev = list(), list(), 0
+            for date, curr in self.pctb.dropna().items():
+                if prev > 1 > curr:
+                    sell.append(date)
+                if prev < 0 < curr:
+                    buy.append(date)
+                prev = curr
+            _t = pd.concat(
+                objs=dict(sell=self.ohlcv.loc[sell, '종가'], buy=self.ohlcv.loc[buy, '종가']),
+                axis=1
+            )
+            self.__setattr__(attr, _t)
+        return self.__getattribute__(attr)
 
 
 class _traces(_analytic):
@@ -202,6 +214,24 @@ class _traces(_analytic):
         return _t
 
     @property
+    def trace_traditional_sell(self) -> go.Scatter:
+        sell = self.traditional_signal.sell.dropna()
+        return go.Scatter(
+            name="[T] Sell", x=sell.index, y=sell, visible='legendonly',
+            mode='markers', marker=dict(symbol='triangle-down', color='red', size=8),
+            xhoverformat="%Y/%m/%d", yhoverformat=",.2f", hovertemplate="%{x}<br>%{y}" + self.curr + "<extra>Sell</extra>"
+        )
+
+    @property
+    def trace_traditional_buy(self) -> go.Scatter:
+        buy = self.traditional_signal.buy.dropna()
+        return go.Scatter(
+            name="[T] Buy", x=buy.index, y=buy, visible='legendonly',
+            mode='markers', marker=dict(symbol='triangle-up', color='green', size=8),
+            xhoverformat="%Y/%m/%d", yhoverformat=",.2f", hovertemplate="%{x}<br>%{y}" + self.curr + "<extra>Buy</extra>"
+        )
+
+    @property
     def figure(self) -> go.Figure:
         fig = make_subplots(
             rows=4, cols=1, shared_xaxes=True,
@@ -223,6 +253,8 @@ class _traces(_analytic):
         trace_volume.marker = dict(color=self.ohlcv.거래량.pct_change().apply(lambda x: 'blue' if x < 0 else 'red'))
         fig.add_trace(trace_price, row=1, col=1)
         fig.add_trace(trace_volume, row=2, col=1)
+        fig.add_trace(self.trace_traditional_buy, row=1, col=1)
+        fig.add_trace(self.trace_traditional_sell, row=1, col=1)
 
         fig.update_layout(
             title=f"{self.name} Bollinger Band", plot_bgcolor="white", height=750,
