@@ -13,7 +13,7 @@ from tdatlib.tools.tracer import (
     add_recession
 )
 from tdatlib.tools.technical import (
-    bollinger_band,
     zc,
-    ev
+    bollinger_band,
+    evaluate
 )
