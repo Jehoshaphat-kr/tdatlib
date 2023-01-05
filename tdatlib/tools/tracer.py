@@ -13,7 +13,7 @@ def draw_line(data:pd.Series, name:str=str(), unit:str=str()):
 def draw_bar(data:pd.Series, name:str=str(), unit:str=str()):
     return go.Bar(
         name=name if name else data.name, x=data.index, y=data, visible=True,
-        showlegend=False,
+        showlegend=True,
         xhoverformat='%Y/%m/%d', yhoverformat=',', hovertemplate='%{x}<br>%{y}' + unit +'<extra></extra>',
     )
 

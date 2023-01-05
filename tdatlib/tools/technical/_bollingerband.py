@@ -232,7 +232,64 @@ class _traces(_analytic):
         )
 
     @property
-    def figure(self) -> go.Figure:
+    def figure_basic(self) -> go.Figure:
+        fig = make_subplots(rows=2, cols=1, shared_xaxes=True, row_width=[0.2, 0.8], vertical_spacing=0.01)
+
+        fig.add_trace(self.trace_upper_edge, row=1, col=1)
+
+        trace_middle = self.trace_middle
+        trace_middle.line = dict(color='rgb(197, 224, 180)')
+        fig.add_trace(trace_middle, row=1, col=1)
+
+        trace_lower = self.trace_lower_edge
+        trace_lower.line = dict(color='rgb(197, 224, 180)')
+        fig.add_trace(trace_lower, row=1, col=1)
+
+        trace_price = draw_candle(data=self.ohlcv, name=self.name)
+        fig.add_trace(trace_price, row=1, col=1)
+
+        trace_volume = draw_bar(data=self.ohlcv.거래량, name="거래량")
+        trace_volume.marker = dict(color=self.ohlcv.거래량.pct_change().apply(lambda x: 'blue' if x < 0 else 'red'))
+        fig.add_trace(trace_volume, row=2, col=1)
+
+        fig.update_layout(
+            title=f"볼린저밴드: {self.name}", plot_bgcolor="white", height=750,
+            legend=dict(tracegroupgap=5),
+            xaxis=dict(
+                showgrid=True, gridwidth=0.5, gridcolor='lightgrey', autorange=True,
+                showline=True, linewidth=1, linecolor='grey', mirror=False
+            ),
+            yaxis=dict(
+                title=f"{self.name}[{'-' if not self.curr else self.curr}]",
+                showgrid=True, gridwidth=0.5, gridcolor='lightgrey', autorange=True,
+                showline=True, linewidth=0.5, linecolor='grey', mirror=False
+            ),
+            xaxis2=dict(
+                showticklabels=True, tickformat='%Y/%m/%d',
+                showgrid=True, gridwidth=0.5, gridcolor='lightgrey', autorange=True,
+                showline=True, linewidth=1, linecolor='grey', mirror=False
+            ),
+            yaxis2=dict(
+                title=f"거래량",
+                showgrid=True, gridwidth=0.5, gridcolor='lightgrey', autorange=True,
+                showline=True, linewidth=0.5, linecolor='grey', mirror=False
+            ),
+            xaxis_rangeslider=dict(visible=False),
+            xaxis_rangeselector=dict(
+                buttons=list([
+                    dict(count=1, label="1m", step="month", stepmode="backward"),
+                    dict(count=3, label="3m", step="month", stepmode="backward"),
+                    dict(count=6, label="6m", step="month", stepmode="backward"),
+                    dict(count=1, label="YTD", step="year", stepmode="todate"),
+                    dict(count=1, label="1y", step="year", stepmode="backward"),
+                    dict(step="all")
+                ])
+            ),
+        )
+        return fig
+
+    @property
+    def figure_full(self) -> go.Figure:
         fig = make_subplots(
             rows=4, cols=1, shared_xaxes=True,
             row_width=[0.2, 0.2, 0.15, 0.5], vertical_spacing=0.02
@@ -257,7 +314,7 @@ class _traces(_analytic):
         fig.add_trace(self.trace_traditional_sell, row=1, col=1)
 
         fig.update_layout(
-            title=f"{self.name} Bollinger Band", plot_bgcolor="white", height=750,
+            title=f"볼린저밴드: {self.name}", plot_bgcolor="white", height=750,
             legend=dict(tracegroupgap=5),
             xaxis=dict(
                 showgrid=True, gridwidth=0.5, gridcolor='lightgrey', autorange=True,
