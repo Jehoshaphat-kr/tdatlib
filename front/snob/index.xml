@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <skin>
   <information>
-    <name>Snow Ball</name>
+    <name>LAB￦ONS</name>
     <version>1.1</version>
     <description>
-      <![CDATA[ⓒ 2021-2022. JEHYEUK LEE.]]>
+      <![CDATA[ⓒ 2021-2023. JEHYEUK LEE.]]>
     </description>
     <license>
       <![CDATA[MIT]]>
@@ -12,7 +12,7 @@
   </information>
   <author>
     <name>JEHYEUK LEE</name>
-    <homepage>http://the-day-after-tomorrow.tistory.com</homepage>
+    <homepage>http://labwons.tistory.com</homepage>
     <email>jhlee_0319@naver.com</email>
   </author>
   <default>

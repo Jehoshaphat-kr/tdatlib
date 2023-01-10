@@ -1781,7 +1781,7 @@ section {
   background-color: #fafafa;
   padding: 60px;
   position: relative;
-  text-align: center;
+  text-align: left;
   margin: 20px 0;
 }
 
@@ -1801,7 +1801,6 @@ section {
   top: 0;
   bottom: 0;
   width: 3px;
-  background-color: #012970;
   margin-top: 20px;
   margin-bottom: 20px;
 }
