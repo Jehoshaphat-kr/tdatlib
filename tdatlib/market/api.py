@@ -51,7 +51,7 @@ class _market(object):
             self._labels[var] = mdata['종목코드'].tolist()
             self._covers[var] = mdata['분류'].tolist()
             self._ids[var] = mdata['ID'].tolist()
-            # self._bars[var] = mdata
+            self._bars[var] = mm.bardata['종목코드'].tolist()
             self._datum = pd.concat(
                 objs=[self._datum, mdata[~mdata['종목코드'].isin(self._datum['종목코드'])]],
                 axis=0, ignore_index=True
@@ -64,8 +64,7 @@ class _market(object):
         js = os.path.join(os.path.dirname(__file__), f'archive/deploy/marketdata.js')
         syntax = f'var trading_date = " ({td[2:4]}.{td[4:6]}.{td[6:]} 종가 기준)";\n'
 
-        # proc = [('labels', self._labels), ('covers', self._covers), ('ids', self._ids), ('bar', self._bars)]
-        proc = [('tdat_labels', self._labels), ('tdat_covers', self._covers), ('tdat_ids', self._ids)]
+        proc = [('tdat_labels', self._labels), ('tdat_covers', self._covers), ('tdat_ids', self._ids), ('tdat_bar', self._bars)]
         for name, data in proc:
             syntax += 'var %s = {\n' % name
             for var, val in data.items():
