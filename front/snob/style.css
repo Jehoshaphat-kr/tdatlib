@@ -164,6 +164,12 @@ section {
   padding: 20px 0;
 }
 
+@media (max-width: 768px) {
+  .header {
+    padding: 10px 0;
+  }
+}
+
 .header.header-scrolled {
   background: #fff;
   padding: 15px 0;
@@ -1038,7 +1044,6 @@ section {
 # Portfolio
 --------------------------------------------------------------*/
 .portfolio #portfolio-flters {
-  padding: 0;
   margin: 0 auto 25px auto;
   list-style: none;
   text-align: center;
@@ -1689,6 +1694,12 @@ section {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
+@media (max-width: 768px) {
+  .blog .entry {
+    padding: 15px;
+  }
+}
+
 .blog .entry .entry-img {
   max-height: 440px;
   margin: -30px -30px 20px -30px;
@@ -1748,7 +1759,7 @@ section {
 }
 
 .blog .entry .entry-content p {
-  line-height: 24px;
+  line-height: 30px;
 }
 
 .blog .entry .entry-content .read-more {
@@ -1779,10 +1790,16 @@ section {
 .blog .entry .entry-content blockquote {
   overflow: hidden;
   background-color: #fafafa;
-  padding: 60px;
+  padding: 30px;
   position: relative;
   text-align: left;
   margin: 20px 0;
+}
+
+@media (max-width: 768px) {
+  .blog .entry .entry-content blockquote {
+    padding: 30px 15px;
+  }
 }
 
 .blog .entry .entry-content blockquote p {
@@ -2045,6 +2062,12 @@ section {
   padding: 30px;
   margin: 0 0 60px 20px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+  .blog .sidebar {
+    margin: 0 0 60px 0px;
+  }
 }
 
 .blog .sidebar .sidebar-title {
@@ -2460,7 +2483,6 @@ section {
   background-repeat: no-repeat;
   background-position: left 6px center;
   background-size: 1.5em;
-  background-color: #fff;
   text-align: left;
 }
 
@@ -2597,4 +2619,21 @@ section {
   }
 }
 
+.snob-split-dot {
+    border: none;
+    font-size: 0;
+    line-height: 0;
+    width: 64px;
+    height: 20px;
+    margin: 20px auto;
+    background: url(https://t1.daumcdn.net/keditor/dist/0.4.0/image/divider-line.svg);
+    background-position: 0 0;
+    background-repeat: no-repeat;
+    background-size: 200px 200px;
+}
+
+.img-fluid-tdat {
+  width:100%;
+  height: auto;
+}
 /* JEHYEUK REV END */
