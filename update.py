@@ -6,13 +6,13 @@ CHK_ETF     = False
 CHK_THEME   = False
 
 if __name__ == "__main__":
-    old_treemap = treemap_api_old_version.KR()
+    # old_treemap = treemap_api_old_version.KR()
     new_treemap = treemap_api_new_version.marketmap
 
     if RUN_TREEMAP:
         new_treemap.collect()
         new_treemap.pd2js()
-        old_treemap.treemap_deploy()
+        # old_treemap.treemap_deploy()
 
 
     """

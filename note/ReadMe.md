@@ -1,66 +1,92 @@
-# BOLLINGER BAND
-
-* Reference<br>
-  1) The Basics I, https://www.investopedia.com/articles/technical/102201.asp
-  2) The Basics II, https://www.investopedia.com/terms/b/bollingerbands.asp
+INTRO
+One of the great joys of having invented an analytical technique such as Bollinger Bands is seeing what other people do with it. The rules below covering the use of Bollinger Bands were assembled in response to questions often asked by users and our experience over 30 years of using the bands.  While there are many ways to use Bollinger Bands, these rules should serve as a good beginning point.
+해석 볼린저 밴드와 같은 분석 기술을 발명한 것의 큰 기쁨 중 하나는 다른 사람들이 그것을 사용하여 무엇을 하는지 보는 것입니다. 볼린저밴드 사용에 관한 아래 22가지 규칙은 사용자가 자주 묻는 질문과 30년 이상의 밴드 사용 경험에 대한 응답으로 구성되었습니다. 볼린저 밴드를 사용하는 방법에는 여러 가지가 있지만 이러한 규칙은 좋은 출발점이 되어야 합니다.
 
 
-### The Basics
-(Thumbnail)
-
-#### Intro.
-볼린저 밴드는 미국의 재무 분석가 존 볼린저(John A. Bollinger, 1950.5.27~)에 의해 개발된 유가 증권의 기술적 분석 도구입니다.
-정의는 꽤 단순합니다. 주가의 이동평균선을 중심선으로 하고 가격의 변동성을 나타내는 이동표준편차를 상/하단에 일정 거리만큼 두어 위치 시키면 끝입니다.
-이 때 이동평균선 및 이동표준편차는 일반적으로 20거래일을 기준으로 하고 두 지표간 거리는 2배수만큼 차이 나게 위치시키는 것이 일반적입니다.
-
-(중심선; Center-Line) = (종가 또는 Typical Price)의 20거래일 평균값<br>
-(상단선; Upper-Line) = 중심선 + 2 x (종가 또는 Typical Price)의 20거래일 표준편차값<br>
-(하단선; Lower-Line) = 중심선 - 2 x (종가 또는 Typical Price)의 20거래일 표준편차값
-
-이 때, Typical Price는 (종가 + 고가 + 저가) / 3으로 정의합니다.
-
-#### 유용성
-(일반 사용 사례; KOSPI)
-
-볼린저 밴드는 직관적으로 지지/저항, 다시 말해 목표하는 매매 가격의 상한선과 하한선을 찾을 수 있도록 돕습니다.
-경우에 따라서는 중심선이 지지/저항선의 역할을 할 수도 있죠.
-그래서 이 지표의 개발 초기에는 하한선에 도달했을 때 매수, 상한선에 도달했을 때 매도하는 기법이 각광 받기도 했습니다.
+BOLLINGER BANDS RULES
+1. Bollinger Bands provide a relative definition of high and low. By definition price is high at the upper band and low at the lower band.
+- Bollinger Bands는 높고 낮은 상대적인 정의를 제공합니다. 정의에 따르면 가격은 상단 밴드에서 높고 하단 밴드에서 낮습니다.
 
 
-#### 한계점
-(매수 실패 사례; Slider Pictures, SK하이닉스)
-
-물론 현재 이 방식으로 투자를 하는 것은 권하지 않는 위험한 방법입니다.
-상승 또는 하락 추세에 있는 주식의 경우 지속적으로 상한선 또는 하한선을 타고 이동하며 변동성을 키우기도 하기 때문입니다.
-무턱대고 주가가 밴드 하한선에 도달했다고 매수를 했다가는 큰 손실을 볼 수도 있습니다.
-상기 사례에서 볼 수 있듯이 볼린저 밴드는 단독 사용 시 오인 신호(Fault Signal)을 만들 수 있습니다.
-따라서 볼린저 밴드는 다른 지표들과 함께 보조 지표로 사용해야 하는 점을 꼭 유의해야합니다.
-
-#### 활용 사례
-
-위험성도 있지만 볼린저 밴드는 많은 투자자들이 보편적으로 사용하는 보조 지표입니다.
-또한 여러가지 해석을 할 수 있는 재미있는 지표이기도 하지요. 본 칼럼에서는 그 중에서도 가장 유명한 2가지 신호를 소개하고자 합니다.
-
-1. 밴드의 폭(Width): 변동성 지표
-
-(밴드 폭; Width) = 
-
-밴드의 폭은 이동표준편차, 즉 누적된 변동성을 나타냅니다. 밴드의 폭이 넓어진다는 말은 곧 주가의 변동성이 커진다는 말과 같습니다.
-변동성은 다른 말로 리스크입니다. 높은 리스크에는 높은 수익률이 따라올 수도 있고, 처참한 수익률이 기다리고 있을 수도 있습니다.
-따라서 변동성 지표를 활용한다면 적절한 리스크 관리를 할 수 있겠죠.
-
-2. %B: 과매수/과매도 판단 지표
-
-(밴드 대비 가격; %B) = 
-
-일반적으로 가격이 상한성을 상회한다면 과매수(Over-Bought) 상태고 합니다. 주가가 과열되었다는 것이죠. 이 경우는 확률적으로 주가가 하락할 가능성이 높다고 판단합니다.
-반대로 가격이 하한선을 하회한다면 과매도(Over-Sold) 상태라고 합니다. 주가가 필요 이상으로 하락했다고 판단하며 주가의 상승 여력이 있는 가능성을 엿볼 수 있습니다.
+2. That relative definition can be used to compare price action and indicator action to arrive at rigorous buy and sell decisions.
+- 이러한 상대적인 정의는 엄격한 매수 및 매도 결정에 도달하기 위해 가격 행동과 지표 행동을 비교하는 데 사용될 수 있습니다.
 
 
-이 외에도 볼린저 밴드를 활용한 다양한 투자 기법이 있습니다. 이어지는 칼럼에서 확인하세요!
+3. Appropriate indicators can be derived from momentum, volume, sentiment, open interest, inter-market data, etc.
+- 적절한 지표는 모멘텀, 거래량, 정서, 미결제약정, 시장 간 데이터 등에서 도출할 수 있습니다.
+ 
 
-#### 마무리
+4. If more than one indicator is used the indicators should not be directly related to one another. For example, a momentum indicator might complement a volume indicator successfully, but two momentum indicators aren't better than one.
+- 둘 이상의 지표가 사용되는 경우 지표는 서로 직접 관련되어서는 안 됩니다. 예를 들어, 모멘텀 지표는 볼륨 지표를 성공적으로 보완할 수 있지만 두 개의 모멘텀 지표가 하나보다 나은 것은 아닙니다.
 
-재차 강조하지만 보조 지표는 투자를 돕는 분석 도구이지 선행 지표가 아닙니다. 이는 결코 완벽하지 않으며 여기에 대한 과한 의존성은 건강한 투자를 해치는 요인이 됩니다.
-하지만 적절한 가설과 검증을 통해 만들어진 기법은 빠른 투자 의사결정에 도움이 될 수 있습니다.
-[Snowball-ing]에서는 투자에 유익한 정보를 보다 안전하고 신뢰성있게 다루기 위해 노력하겠습니다. 
+
+5. Bollinger Bands can be used in pattern recognition to define/clarify pure price patterns such as "M" tops and "W" bottoms, momentum shifts, etc.
+- 볼린저 밴드는 패턴 인식에 사용되어 "M" 고점 및 "W" 저점, 모멘텀 이동 등과 같은 순수한 가격 패턴을 정의/명확하게 할 수 있습니다.
+
+
+6. Tags of the bands are just that, tags not signals. A tag of the upper Bollinger Band is NOT in-and-of-itself a sell signal. A tag of the lower Bollinger Band is NOT in-and-of-itself a buy signal.
+- 밴드의 태그는 신호가 아닌 태그일 뿐입니다. 상위 Bollinger Band의 태그는 그 자체로 매도 신호가 아닙니다. 낮은 Bollinger Band의 태그는 그 자체로 구매 신호가 아닙니다.
+
+
+7. In trending markets price can, and does, walk up the upper Bollinger Band and down the lower Bollinger Band.
+- 추세 시장에서 가격은 상위 볼린저 밴드 위로 올라가고 하위 볼린저 밴드 아래로 내려갈 수 있습니다.
+
+
+8. Closes outside the Bollinger Bands are initially continuation signals, not reversal signals. (This has been the basis for many successful volatility breakout systems.)
+- Bollinger Bands 외부의 종가는 처음에는 반전 신호가 아닌 연속 신호입니다. (이것은 많은 성공적인 변동성 돌파 시스템의 기반이 되었습니다.)
+
+
+9. The default parameters of 20 periods for the moving average and standard deviation calculations, and two standard deviations for the width of the bands are just that, defaults. The actual parameters needed for any given market/task may be different.
+- 이동 평균 및 표준편차 계산을 위한 20개 기간의 기본 매개변수와 밴드 폭을 위한 2개의 표준편차가 바로 기본값입니다. 주어진 시장/작업에 필요한 실제 매개변수는 다를 수 있습니다.
+
+
+10. The average deployed as the middle Bollinger Band should not be the best one for crossovers. Rather, it should be descriptive of the intermediate-term trend.
+- 중간 Bollinger Band로 배치된 평균은 크로스오버에 가장 적합하지 않아야 합니다. 오히려 중기 추세를 설명해야 합니다.
+
+
+11. For consistent price containment: If the average is lengthened the number of standard deviations needs to be increased; from 2 at 20 periods, to 2.1 at 50 periods. Likewise, if the average is shortened the number of standard deviations should be reduced; from 2 at 20 periods, to 1.9 at 10 periods.
+- 일관된 가격 억제를 위해: 평균이 길어지면 표준 편차의 수가 증가해야 합니다. 20주기에 2에서 50주기에 2.1로. 마찬가지로, 평균이 짧아지면 표준편차의 수가 줄어들어야 합니다. 20주기에 2에서 10주기에 1.9로.
+
+
+12.Traditional Bollinger Bands are based upon a simple moving average. This is because a simple average is used in the standard deviation calculation and we wish to be logically consistent.
+- 전통적인 볼린저 밴드는 단순 이동 평균을 기반으로 합니다. 이는 표준 편차 계산에 단순 평균이 사용되며 논리적으로 일관성이 있기를 원하기 때문입니다.
+
+
+13. Exponential Bollinger Bands eliminate sudden changes in the width of the bands caused by large price changes exiting the back of the calculation window. Exponential averages must be used for BOTH the middle band and in the calculation of standard deviation.
+- 지수 볼린저 밴드는 계산 창 뒤에서 나오는 큰 가격 변동으로 인한 밴드 너비의 갑작스러운 변화를 제거합니다. 지수 평균은 중간 대역과 표준 편차 계산 모두에 사용되어야 합니다.
+
+
+14. Make no statistical assumptions based on the use of the standard deviation calculation in the construction of the bands. The distribution of security prices is non-normal and the typical sample size in most deployments of Bollinger Bands is too small for statistical significance. (In practice we typically find 90%, not 95%, of the data inside Bollinger Bands with the default parameters)
+- 대역 구성 시 표준 편차 계산을 기반으로 통계적 가정을 하지 마십시오. 유가 증권 가격의 분포는 비정상적이며 Bollinger Bands의 대부분 배포에서 일반적인 표본 크기는 통계적으로 유의하기에는 너무 작습니다. (실제로 우리는 일반적으로 기본 매개변수를 사용하여 Bollinger Bands 내부 데이터의 95%가 아닌 90%를 찾습니다.)
+
+
+15. %b tells us where we are in relation to the Bollinger Bands. The position within the bands is calculated using an adaptation of the formula for Stochastics
+- %b는 Bollinger Bands와 관련하여 현재 위치를 알려줍니다. 밴드 내의 위치는 Stochastics 공식을 적용하여 계산됩니다.
+
+
+16. %b has many uses; among the more important are identification of divergences, pattern recognition and the coding of trading systems using Bollinger Bands.
+- %b에는 다양한 용도가 있습니다. 더 중요한 것은 차이 식별, 패턴 인식 및 Bollinger Bands를 사용한 거래 시스템 코딩입니다.
+
+
+17. Indicators can be normalized with %b, eliminating fixed thresholds in the process. To do this plot 50-period or longer Bollinger Bands on an indicator and then calculate %b of the indicator.
+- 지표는 %b로 정규화되어 프로세스에서 고정 임계값을 제거할 수 있습니다. 이 작업을 수행하려면 지표에 50주기 이상의 볼린저 밴드를 그린 다음 지표의 %b를 계산합니다.
+
+
+18. BandWidth tells us how wide the Bollinger Bands are. The raw width is normalized using the middle band. Using the default parameters BandWidth is four times the coefficient of variation.
+- BandWidth는 볼린저 밴드의 폭을 알려줍니다. 원시 너비는 중간 밴드를 사용하여 정규화됩니다. 기본 매개변수 사용 BandWidth는 변동 계수의 4배입니다.
+
+
+19. BandWidth has many uses. Its most popular use is to identify "The Squeeze", but is also useful in identifying trend changes.
+- BandWidth는 많은 용도로 사용됩니다. 가장 널리 사용되는 용도는 "The Squeeze"를 식별하는 것이지만 추세 변화를 식별하는 데에도 유용합니다.
+
+
+20. Bollinger Bands can be used on most financial time series, including equities, indices, foreign exchange, commodities, futures, options and bonds.
+- 볼린저 밴드는 주식, 지수, 외환, 원자재, 선물, 옵션 및 채권을 포함한 대부분의 금융 시계열에 사용할 수 있습니다.
+
+
+21. Bollinger Bands can be used on bars of any length, 5 minutes, one hour, daily, weekly, etc. The key is that the bars must contain enough activity to give a robust picture of the price-formation mechanism at work.
+- Bollinger Bands는 5분, 1시간, 매일, 매주 등 모든 길이의 막대에 사용할 수 있습니다. 핵심은 막대가 작동 중인 가격 형성 메커니즘에 대한 강력한 그림을 제공할 수 있는 충분한 활동을 포함해야 한다는 것입니다.
+
+
+22. Bollinger Bands do not provide continuous advice; rather they help identify setups where the odds may be in your favor.
+- Bollinger Bands는 지속적인 조언을 제공하지 않습니다. 오히려 확률이 유리한 설정을 식별하는 데 도움이 됩니다.
