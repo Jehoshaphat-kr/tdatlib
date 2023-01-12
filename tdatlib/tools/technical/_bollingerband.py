@@ -150,6 +150,21 @@ class _analytic(_default):
             self.__setattr__(attr, _t)
         return self.__getattribute__(attr)
 
+    @property
+    def propulsion_signal(self) -> pd.DataFrame:
+        attr = f'__p_sig_{self.key}'
+        if not hasattr(self, attr):
+            self.upper_edge.name = '상단선'
+            df = pd.concat([self.ohlcv, self.upper_edge], axis=1)
+            _t = df[df.종가 >= df.상단선]
+            _t = pd.concat(
+                objs=dict(sell=[np.nan] * len(_t), buy=self.ohlcv.loc[_t.index, '종가']),
+                axis=1
+            )
+            self.__setattr__(attr, _t)
+        return self.__getattribute__(attr)
+
+
 
 class _traces(_analytic):
 
