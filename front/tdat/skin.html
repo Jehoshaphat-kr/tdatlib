@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>[##_page_title_##]</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="./images/bootstrap.min.css" rel="stylesheet">
+  <link href="./images/bootstrap-icons.css" rel="stylesheet">
+  <link href="./images/aos.css" rel="stylesheet">
+  <link href="./images/remixicon.css" rel="stylesheet">
+  <link href="./images/swiper-bundle.min.css" rel="stylesheet">
+  <link href="./images/glightbox.min.css" rel="stylesheet">
+
+  <!-- Template Main CSS File -->
+  <link href="./style.css" rel="stylesheet">
+
+  <!-- Template Market Map -->
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+  <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
+  <script type="text/javascript">
+    var _t_sbar_rct_obj = [];
+    var _t_sbar_pop_obj = [];
+    var _t_sbar_tag_obj = {
+      link:[],
+      name:[]
+    };
+
+    function sbar_post(mem, date, link, title, thumbnail){
+      var _time = document.createElement("time");
+      var _a = document.createElement('a');
+      var _h4 = document.createElement('h4');
+      var _img = document.createElement('img');
+      var _div = document.createElement("div");
+
+      _time.setAttribute('datetime', '1900-01-01');
+      _time.innerHTML = date;
+      _a.setAttribute('href', link);
+      _a.innerHTML = title;
+      _h4.appendChild(_a);
+      _img.setAttribute('src', thumbnail);
+
+      _div.classList.add('post-item');
+      _div.classList.add('clearfix');
+      _div.appendChild(_img);
+      _div.appendChild(_h4);
+      _div.appendChild(_time);
+      mem.push(_div);
+    }
+
+  </script>
+</head>
+
+<body>
+  <s_t3>
+    <!-- ************************************************************ -->
+    <!-- 사용자 데이터 접근 User Defined - Access Data by. TDAT내일모레 -->
+    <!-- 티스토리 제공 치환자 데이터 사전 변수화 작업                    -->
+    <!-- ************************************************************ -->
+
+    <!-- Sidebar :: Recent Post Ojbects -->
+    <s_sidebar_element>
+      <s_rctps_rep>
+        <script type="text/javascript">
+          sbar_post(
+            _t_sbar_rct_obj,
+            "[##_rctps_rep_date_##]",
+            "[##_rctps_rep_link_##]",
+            "[##_rctps_rep_title_##]",
+            "<s_rctps_rep_thumbnail>[##_rctps_rep_thumbnail_##]</s_rctps_rep_thumbnail>"
+          );
+        </script>
+      </s_rctps_rep>
+    </s_sidebar_element>
+
+    <!-- Sidebar :: Popular Post Ojbects -->
+    <s_sidebar_element>
+      <s_rctps_popular_rep>
+        <script type="text/javascript">
+          sbar_post(
+            _t_sbar_pop_obj,
+            "[##_rctps_rep_date_##]",
+            "[##_rctps_rep_link_##]",
+            "[##_rctps_rep_title_##]",
+            "<s_rctps_rep_thumbnail>[##_rctps_rep_thumbnail_##]</s_rctps_rep_thumbnail>"
+          );
+        </script>
+      </s_rctps_popular_rep>
+    </s_sidebar_element>
+
+    <!-- Sidebar :: Tags Ojbects -->
+    <s_sidebar_element>
+      <s_random_tags>
+        <script type="text/javascript">
+          _t_sbar_tag_obj.link.push("[##_tag_link_##]");
+          _t_sbar_tag_obj.name.push("[##_tag_name_##]");
+        </script>
+      </s_random_tags>
+    </s_sidebar_element>
+
+    <!-- Paging Object -->
+    <div style="display:none !important;">
+      <s_paging>
+        <div class="blog-pagination">
+          <ul class="justify-content-center">
+            <li><a [##_prev_page_##] class="[##_no_more_prev_##]"> 이전 </a></li>
+            <s_paging_rep>
+              <li class="active"><a [##_paging_rep_link_##]>[##_paging_rep_link_num_##]</a></li>
+            </s_paging_rep>
+            <li><a [##_next_page_##] class="[##_no_more_next_##]"> 다음 </a></li>
+          </ul>
+        </div>
+      </s_paging>
+    </div>
+    <script type="text/javascript">
+      var paging = document.getElementsByClassName('blog-pagination')[0];
+    </script>
+
+    <!-- Search Object -->
+    <s_sidebar_element>
+      <div style="display:none !important;">
+        <s_search>
+          <input id="searchbar" type="text" name="[##_search_name_##]" value="[##_search_text_##]" onkeypress="if (event.keyCode == 13) { [##_search_onclick_submit_##] }"/>
+          <button id="searchbutton" type="submit" onclick="[##_search_onclick_submit_##]"><i class="bi bi-search"></i></button>
+        </s_search>
+      </div>
+    </s_sidebar_element>
+    <script type="text/javascript">
+      var searchbar = document.getElementById('searchbar');
+      var searchbut = document.getElementById('searchbutton');
+    </script>
+
+    <!-- ************************************************************ -->
+    <!-- **************************** END *************************** -->
+    <!-- ************************************************************ -->
+
+  <!-- ======= Header ======= -->
+  <header id="header" class="header fixed-top">
+    <div class="container-fluid container-xl d-flex align-items-center justify-content-between">
+
+      <a href="https://snowball-ing.com/" class="logo d-flex align-items-center">
+        <img src="./images/logo.png" alt="">
+        <span>Snowball-ing</span>
+      </a>
+
+      <nav id="navbar" class="navbar">
+        <ul>
+          <li><a class="nav-link active" href="https://snowball-ing.com/">홈</a></li>
+          <li class="dropdown"><a href="./images/_maps.html"><span>시장 보기</span> <i class="bi bi-chevron-down"></i></a>
+            <ul>
+              <li><a href="./images/_maps.html">시장 지도</a></li>
+              <li><a href="#">버블 차트</a></li>
+              <li><a href="#">업종별 등락률</a></li>
+            </ul>
+          </li>
+          <li class="dropdown"><a href="https://snowball-ing.com/category/%EA%B8%B0%EC%88%A0%20%EB%B6%84%EC%84%9D/"><span>기술 분석</span> <i class="bi bi-chevron-down"></i></a>
+            <ul>
+              <li><a href="https://snowball-ing.com/category/%ED%88%AC%EC%9E%90%20%EC%A7%80%ED%91%9C/">투자 지표</a></li>
+              <li><a href="https://snowball-ing.com/category/%EB%B0%B1%20%ED%85%8C%EC%8A%A4%ED%8A%B8/">백 테스트</a></li>
+            </ul>
+          </li>
+          <li class="dropdown"><a href="https://snowball-ing.com/category/%EA%B8%B0%EB%B3%B8%20%EB%B6%84%EC%84%9D/"><span>기본 분석</span> <i class="bi bi-chevron-down"></i></a>
+            <ul>
+              <li><a href="https://snowball-ing.com/category/%EC%82%B0%EC%97%85%20%EB%B6%84%EC%84%9D/">산업 분석</a></li>
+              <li><a href="https://snowball-ing.com/category/%EA%B8%B0%EC%97%85%20%EC%A1%B0%EC%82%AC/">기업 조사</a></li>
+            </ul>
+          </li>
+          <li class="dropdown"><a href="https://snowball-ing.com/category/%EA%B8%B0%EB%B3%B8%20%EB%B6%84%EC%84%9D/"><span>투자 노트</span> <i class="bi bi-chevron-down"></i></a>
+            <ul>
+              <li><a href="https://snowball-ing.com/category/%EA%B2%BD%EC%A0%9C%20%EC%97%AD%EC%82%AC/">경제 역사</a></li>
+              <li><a href="https://snowball-ing.com/category/%EC%8B%A4%EC%A0%84%20%ED%88%AC%EC%9E%90/">실전 투자</a></li>
+              <li><a href="https://snowball-ing.com/category/%EA%B0%80%EC%9D%B4%EB%93%9C/">가이드</a></li>
+            </ul>
+          </li>
+        </ul>
+        <i class="bi bi-list mobile-nav-toggle"></i>
+      </nav>
+    </div>
+  </header>
+  <!-- End Header -->
+
+  <main id="main">
+
+    <s_list>
+    <!-- ======= Breadcrumbs ======= -->
+    <section class="breadcrumbs">
+      <div id="tdat-breadcrumbs" class="container">
+        <ol id="tdat-breadcrumbs-category">
+          <li><a href="https://snowball-ing.com">홈</a></li>
+          <li><a href="https://snowball-ing.com/category">분류</a></li>
+        </ol>
+      </div>
+    </section>
+    <script type="text/javascript">
+      var categories = "[##_list_conform_##]".split('/');
+      var breadcrumb = document.getElementById('tdat-breadcrumbs');
+      var bread_list = document.getElementById('tdat-breadcrumbs-category');
+      for (var i = 0; i < categories.length; i++) {
+        var _li = document.createElement('li');
+        _li.innerHTML = categories[i];
+        bread_list.appendChild(_li);
+      }
+      var _h2 = document.createElement('h2');
+      _h2.innerHTML = categories[categories.length - 1];
+      breadcrumb.appendChild(_h2);
+    </script>
+    <!-- End Breadcrumbs -->
+
+    <!-- ======= Blog Section ======= -->
+    <section id="blog" class="blog">
+      <div class="container" data-aos="fade-up">
+
+        <div class="row">
+
+          <div class="col-lg-8 entries">
+            <s_list_rep>
+            <article class="entry">
+
+              <div class="entry-img">
+                <s_list_rep_thumbnail>
+                <img src="[##_list_rep_thumbnail_##]" alt="[##_list_rep_title_##]" class="img-fluid">
+                </s_list_rep_thumbnail>
+              </div>
+
+              <h2 class="entry-title">
+                <a href="[##_list_rep_link_##]">[##_list_rep_title_##]</a>
+              </h2>
+
+              <div class="entry-meta">
+                <ul>
+                  <li class="d-flex align-items-center"><i class="bi bi-person"></i> <a href="blog-single.html">내일모레</a></li>
+                  <li class="d-flex align-items-center"><i class="bi bi-clock"></i> <a href="#"><time datetime="2020-01-01">[##_list_rep_regdate_##]</time></a></li>
+                  <li class="d-flex align-items-center"><i class="bi bi-chat-dots"></i> <a href="blog-single.html">[##_list_rep_rp_cnt_##]개의 댓글</a></li>
+                </ul>
+              </div>
+
+              <div class="entry-content">
+                <p>[##_list_rep_summary_##]</p>
+                <div class="read-more">
+                  <a href="[##_list_rep_link_##]">더 보기</a>
+                </div>
+              </div>
+
+            </article><!-- End blog entry -->
+            </s_list_rep>
+
+            <div id="entry-blog-paging"></div>
+            <script type="text/javascript">
+              var temp = document.getElementById('entry-blog-paging');
+              temp.appendChild(paging);
+            </script>
+
+          </div><!-- End blog entries list -->
+
+          <div class="col-lg-4">
+
+            <div class="sidebar">
+
+              <h3 class="sidebar-title">Search</h3>
+              <div class="sidebar-item search-form">
+                <form id=searchform action=""></form>
+              </div><!-- End sidebar search formn-->
+              <script type="text/javascript">
+                var searchform = document.getElementById('searchform');
+                searchform.appendChild(searchbar);
+                searchform.appendChild(searchbut);
+              </script>
+
+              <h3 class="sidebar-title">Recent Posts</h3>
+              <div id="_side_recent" class="sidebar-item recent-posts"></div>
+              <script type="text/javascript">
+                var temp = document.getElementById('_side_recent');
+                for (var i = 0; i < _t_sbar_rct_obj.length; i++) {
+                  temp.appendChild(_t_sbar_rct_obj[i]);
+                }
+              </script>
+              <!-- End sidebar recent posts-->
+
+              <h3 class="sidebar-title">Popular Posts</h3>
+              <div id="_side_popular" class="sidebar-item recent-posts"></div>
+              <script type="text/javascript">
+                var temp = document.getElementById('_side_popular');
+                for (var i = 0; i < _t_sbar_pop_obj.length; i++) {
+                  temp.appendChild(_t_sbar_pop_obj[i]);
+                }
+              </script>
+              <!-- End sidebar popular posts-->
+
+              <h3 class="sidebar-title">Tags</h3>
+              <div class="sidebar-item tags">
+                <ul id="_side_tags"></ul>
+              </div>
+              <script type="text/javascript">
+                var temp = document.getElementById('_side_tags');
+                for (var i = 0; i < 10; i++) {
+                  var _li = document.createElement('li');
+                  var _a = document.createElement('a');
+                  _a.setAttribute('href', _t_sbar_tag_obj.link[i]);
+                  _a.innerHTML = _t_sbar_tag_obj.name[i];
+                  temp.appendChild(_li.appendChild(_a));
+                }
+              </script>
+              <!-- End sidebar tags-->
+
+            </div>
+            <!-- End sidebar -->
+
+          </div>
+          <!-- End blog sidebar -->
+
+        </div>
+
+      </div>
+    </section><!-- End Blog Section -->
+    </s_list>
+
+
+    <s_article_rep>
+      <s_permalink_article_rep>
+
+        <!-- ======= Breadcrumbs ======= -->
+        <section class="breadcrumbs">
+          <div class="container">
+
+            <ol>
+              <li><a href="[##_article_rep_category_link_##]">[##_article_rep_category_##]</a></li>
+            </ol>
+            <h2>[##_article_rep_title_##]</h2>
+
+          </div>
+        </section>
+        <!-- End Breadcrumbs -->
+
+        <!-- ======= Blog Single Section ======= -->
+        <section id="blog" class="blog">
+          <div class="container" data-aos="fade-up">
+
+            <div class="row">
+
+              <div class="col-lg-8 entries">
+
+                <article class="entry entry-single">
+                  <div class="entry-meta">
+                    <ul>
+                      <li class="d-flex align-items-center"><i class="bi bi-person"></i><a href="#">내일모레</a></li>
+                      <li class="d-flex align-items-center"><i class="bi bi-clock"></i><a href="#"><time datetime="2020-01-01">[##_article_rep_simple_date_##]</time></a></li>
+                      <li class="d-flex align-items-center"><i class="bi bi-chat-dots"></i><a href="#"><s_rp_count>[##_article_rep_rp_cnt_##]</s_rp_count></a></li>
+                    </ul>
+                  </div>
+
+                  <div class="entry-content">
+                    [##_article_rep_desc_##]
+                  </div>
+
+                  <div class="entry-footer">
+                    <s_tag_label>
+                      <!-- article-tag -->
+                      <i class="bi bi-tags"></i>
+                      <ul class="tags">[##_tag_label_rep_##]</ul>
+                      <!-- End area_tag -->
+                    </s_tag_label>
+                  </div>
+
+                </article><!-- End blog entry -->
+
+                <div class="blog-author d-flex align-items-center">
+                  <img src="./images/author.jpg" class="rounded-circle float-left" alt="">
+                  <div>
+                    <h4>내일모레</h4>
+                    <div class="social-links">
+                      <a href="https://twitters.com/#"><i class="bi bi-twitter"></i></a>
+                      <a href="https://facebook.com/#"><i class="bi bi-facebook"></i></a>
+                      <a href="https://instagram.com/#"><i class="biu bi-instagram"></i></a>
+                    </div>
+                    <p>
+                      블로그 운영자. 자동차 업계 N년차 연구개발직. 미혼. ESTJ. 본인이 주식하려고 종목 고르면 떨어지는데 남의 종목 골라주면 오르는. 그래서 주식 공부해서 남주기로 마음 먹은.
+                    </p>
+                  </div>
+                </div><!-- End blog author bio -->
+
+                <s_rp>
+                  <div class="blog-comments">
+                    <s_rp_container>
+                      <h4 class="comments-count">댓글</h4>
+                      <ol class="comments-list">
+                        <s_rp_rep>
+                          <li id='[##_rp_rep_id_##]' class="comment">
+                            <div class="[##_rp_rep_class_##] d-flex">
+                              <div class="comment-img"><img src="[##_rp_rep_logo_##]" alt=""></div>
+                              <div>
+                                <h5>
+                                  <a href="[##_rp_rep_link_##]">[##_rp_rep_name_##]</a>
+                                  <a href="#" onclick="[##_rp_rep_onclick_reply_##]" class="reply"><i class="bi bi-reply-fill"></i> 댓글</a>
+                                  <a href="#" onclick="[##_rp_rep_onclick_delete_##]" class="reply"><i class="bi bi-trash-fill"></i> 수정/삭제</a>
+                                </h5>
+                                <time datetime="2020-01-01">[##_rp_rep_date_##]</time>
+                                <p>[##_rp_rep_desc_##]</p>
+                              </div>
+                            </div>
+                            <s_rp2_container>
+                              <ul class="comments-list">
+                                <s_rp2_rep>
+                                  <li id='[##_rp_rep_id_##]' class="comment comment-reply">
+                                    <div class="[##_rp_rep_class_##] d-flex">
+                                      <div class="comment-img"><img src="[##_rp_rep_logo_##]" alt=""></div>
+                                      <div>
+                                        <h5>
+                                          <a href="[##_rp_rep_link_##]">[##_rp_rep_name_##]</a>
+                                          <a href="#" onclick="[##_rp_rep_onclick_delete_##]" class="modify"><i class="bi bi-trash-fill"></i> 수정/삭제</a>
+                                        </h5>
+                                        <time datetime="2020-01-01">[##_rp_rep_date_##]</time>
+                                        <p>[##_rp_rep_desc_##]</p>
+                                      </div>
+                                    </div>
+                                  </li>
+                                </s_rp2_rep>
+                              </ul>
+                            </s_rp2_container>
+                          </li>
+                        </s_rp_rep>
+                      </ol>
+                    </s_rp_container>
+
+                  <s_rp_input_form>
+                    <div class="reply-form">
+                      <h4>댓글을 남겨주세요</h4>
+                      <p>광고, 홍보, 악의적 비방 및 근거 없는 정보 제공은 임의 삭제될 수 있습니다.</p>
+                      <s_rp_member>
+                        <s_rp_guest>
+                          <p>
+                            <input type="text" name="[##_rp_input_name_##]" value="[##_guest_name_##]" class="form-control" placeholder="이름* "/>
+                          </p>
+                          <p>
+                            <input type="password" maxlength="8" name="[##_rp_input_password_##]" value="[##_rp_admin_check_##]" class="form-control" placeholder="비밀번호* "/>
+                          </p>
+                        </s_rp_guest>
+                      </s_rp_member>
+                      <p>
+                        <input type="checkbox" name="[##_rp_input_is_secret_##]"/>
+                        <label for="secret"> 비밀글 </label>
+                      </p>
+                      <p>
+                        <textarea name="[##_rp_input_comment_##]" rows="3" cols="50" class="form-control" placeholder="댓글을 남겨주세요.* "></textarea>
+                      </p>
+                      <p>
+                        <input type="submit" class="btn btn-primary" value="댓글 달기" onclick="[##_rp_onclick_submit_##]" />
+                      </p>
+                    </div>
+                  </s_rp_input_form>
+
+                  </div>
+                  <!-- End blog comments -->
+                </s_rp>
+
+              </div><!-- End blog entries list -->
+
+              <div class="col-lg-4">
+
+                <div class="sidebar">
+
+                  <h3 class="sidebar-title">Search</h3>
+                  <div class="sidebar-item search-form">
+                    <form id=searchform action=""></form>
+                  </div><!-- End sidebar search formn-->
+                  <script type="text/javascript">
+                    var searchform = document.getElementById('searchform');
+                    searchform.appendChild(searchbar);
+                    searchform.appendChild(searchbut);
+                  </script>
+
+                  <h3 class="sidebar-title">Recent Posts</h3>
+                  <div id="_side_recent" class="sidebar-item recent-posts"></div>
+                  <script type="text/javascript">
+                    var temp = document.getElementById('_side_recent');
+                    for (var i = 0; i < _t_sbar_rct_obj.length; i++) {
+                      temp.appendChild(_t_sbar_rct_obj[i]);
+                    }
+                  </script>
+                  <!-- End sidebar recent posts-->
+
+                  <h3 class="sidebar-title">Popular Posts</h3>
+                  <div id="_side_popular" class="sidebar-item recent-posts"></div>
+                  <script type="text/javascript">
+                    var temp = document.getElementById('_side_popular');
+                    for (var i = 0; i < _t_sbar_pop_obj.length; i++) {
+                      temp.appendChild(_t_sbar_pop_obj[i]);
+                    }
+                  </script>
+                  <!-- End sidebar popular posts-->
+
+                  <h3 class="sidebar-title">Tags</h3>
+                  <div class="sidebar-item tags">
+                    <ul id="_side_tags"></ul>
+                  </div>
+                  <script type="text/javascript">
+                    var temp = document.getElementById('_side_tags');
+                    for (var i = 0; i < 10; i++) {
+                      var _li = document.createElement('li');
+                      var _a = document.createElement('a');
+                      _a.setAttribute('href', _t_sbar_tag_obj.link[i]);
+                      _a.innerHTML = _t_sbar_tag_obj.name[i];
+                      temp.appendChild(_li.appendChild(_a));
+                    }
+                  </script>
+                  <!-- End sidebar tags-->
+
+                </div>
+                <!-- End sidebar -->
+
+              </div>
+              <!-- End blog sidebar -->
+
+            </div>
+          </div>
+        </section>
+
+      </s_permalink_article_rep>
+    </s_article_rep>
+
+    <s_cover_group>
+    <p>&nbsp;&nbsp;&nbsp;</p>
+
+    <!-- ======= Dashboard Section ======= -->
+    <!--
+    <section id="counts" class="counts">
+      <div class="container" data-aos="fade-up">
+        <header class="section-header">
+          <h2>Dash Board</h2>
+        </header>
+
+        <div class="row gy-4">
+          <div class="col-lg-3 col-md-6">
+            <div class="count-box">
+              <i class="bi bi-collection"></i>
+              <div>
+                <span>17</span>
+                <p>투자 진행 종목</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6">
+            <div class="count-box">
+              <i class="bi bi-file-arrow-up" style="color: #ee6c20;"></i>
+              <div>
+                <span data-purecounter-start="0" data-purecounter-end="12" data-purecounter-duration="1" class="purecounter"></span>
+                <p>상승 종목</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6">
+            <div class="count-box">
+              <i class="bi bi-file-arrow-down" style="color: #15be56;"></i>
+              <div>
+                <span data-purecounter-start="0" data-purecounter-end="5" data-purecounter-duration="1" class="purecounter"></span>
+                <p>하락 종목</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6">
+            <div class="count-box">
+              <i class="bi bi-percent" style="color: #bb0852;"></i>
+              <div>
+                <span>-15.4%</span>
+                <p>수익률</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+    -->
+    <!-- End Counts Section -->
+
+    <!-- ======= Services Section ======= -->
+    <section id="services" class="services">
+
+      <div class="container" data-aos="fade-up">
+
+        <header class="section-header">
+          <h2>Services</h2>
+        </header>
+
+        <div class="row gy-4">
+
+          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+            <div class="service-box blue">
+              <i class="ri-road-map-line icon"></i>
+              <h3>시장 지도 Maps</h3>
+              <p>경제적 자유를 찾아떠나는 여행길,<br>지도는 필수겠죠?</p>
+              <a href="./images/_maps.html" class="read-more"><span>Read More</span> <i class="bi bi-arrow-right"></i></a>
+            </div>
+          </div>
+
+          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+            <div class="service-box orange">
+              <i class="ri-bubble-chart-line icon"></i>
+              <h3>버블 차트 Bubbles</h3>
+              <p>힘들게 찾던 정보와 비교 작업을 <br>편리하게 도와드리겠습니다.</p>
+              <a href="#" class="read-more"><span>Read More</span> <i class="bi bi-arrow-right"></i></a>
+            </div>
+          </div>
+
+          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="400">
+            <div class="service-box green">
+              <!-- <i class="ri-discuss-line icon"></i> -->
+              <h3>광고</h3>
+              <p>광고 위치 #1</p>
+              <!-- <a href="#" class="read-more"><span>Read More</span> <i class="bi bi-arrow-right"></i></a> -->
+            </div>
+          </div>
+
+          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="500">
+            <div class="service-box red">
+              <i class="ri-bar-chart-box-line icon"></i>
+              <h3>산업 차트 Sectors</h3>
+              <p>산업 분류별 정보들을 <br>한 눈에 확인 할 수 있습니다.</p>
+              <a href="#" class="read-more"><span>Read More</span> <i class="bi bi-arrow-right"></i></a>
+            </div>
+          </div>
+
+          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="600">
+            <div class="service-box purple">
+              <i class="ri-find-replace-line icon"></i>
+              <h3>기업 분석 Analysis</h3>
+              <p>유망한 기업을 찾고 <br>꼼꼼하게 공부해서 핵심만 짚었습니다.</p>
+              <a href="#" class="read-more"><span>Read More</span> <i class="bi bi-arrow-right"></i></a>
+            </div>
+          </div>
+
+          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="700">
+            <div class="service-box pink">
+              <i class="ri-chat-history-line icon"></i>
+              <h3>투자 역사 History</h3>
+              <p>과거는 미래를 비추는 거울이라고 하죠.<br>리스크 관리 관점의 투자 역사를 탐구합니다.</p>
+              <a href="#" class="read-more"><span>Read More</span> <i class="bi bi-arrow-right"></i></a>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+    <!-- End Services Section -->
+
+    <!-- ======= Recent Blog Posts Section ======= -->
+    <s_cover_rep>
+    <s_cover name="recent">
+    <section id="recent-blog-posts" class="recent-blog-posts">
+
+      <div class="container" data-aos="fade-up">
+
+        <header class="section-header">
+          <h2>Recent Post</h2>
+        </header>
+
+        <div class="row">
+          <s_cover_item>
+          <div class="col-lg-4">
+            <div class="post-box">
+              <s_cover_item_thumbnail>
+              <div class="post-img"><img src="[##_cover_item_thumbnail_##]" class="img-fluid" alt=""></div>
+              </s_cover_item_thumbnail>
+
+              <s_cover_item_article_info>
+              <span class="post-date">[##_cover_item_simple_date_##]</span>
+              <h3 class="post-title">[##_cover_item_title_##]</h3>
+              </s_cover_item_article_info>
+              <a href="[##_cover_item_url_##]" class="readmore stretched-link mt-auto"><span>더 보기</span><i class="bi bi-arrow-right"></i></a>
+
+            </div>
+          </div>
+          </s_cover_item>
+        </div>
+
+      </div>
+
+    </section><!-- End Recent Blog Posts Section -->
+    </s_cover>
+
+
+    <!-- ======= Recent Blog Posts Section ======= -->
+
+    <s_cover name="recommended">
+    <section id="recent-blog-posts" class="recent-blog-posts">
+
+      <div class="container" data-aos="fade-up">
+
+        <header class="section-header">
+          <h2>Recommended Post</h2>
+        </header>
+
+        <div class="row">
+          <s_cover_item>
+          <div class="col-lg-4">
+            <div class="post-box">
+              <s_cover_item_thumbnail>
+              <div class="post-img"><img src="[##_cover_item_thumbnail_##]" class="img-fluid" alt=""></div>
+              </s_cover_item_thumbnail>
+
+              <s_cover_item_article_info>
+              <span class="post-date">[##_cover_item_simple_date_##]</span>
+              <h3 class="post-title">[##_cover_item_title_##]</h3>
+              </s_cover_item_article_info>
+              <a href="[##_cover_item_url_##]" class="readmore stretched-link mt-auto"><span>더 보기</span><i class="bi bi-arrow-right"></i></a>
+
+            </div>
+          </div>
+          </s_cover_item>
+        </div>
+
+      </div>
+
+    </section><!-- End Recent Blog Posts Section -->
+    </s_cover>
+    </s_cover_rep>
+
+
+    <!-- ======= Counts Section ======= -->
+    <section id="counts" class="counts">
+      <div class="container" data-aos="fade-up">
+
+        <header class="section-header">
+          <h2>Blog Statistics</h2>
+        </header>
+
+        <div class="row gy-4">
+
+          <div class="col-lg-3 col-md-6">
+            <div class="count-box">
+              <i class="bi bi-people"></i>
+              <div>
+                <span data-purecounter-start="0" data-purecounter-end="[##_count_total_##]" data-purecounter-duration="1" class="purecounter"></span>
+                <p>전체 방문자</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-3 col-md-6">
+            <div class="count-box">
+              <i class="bi bi-person-check" style="color: #ee6c20;"></i>
+              <div>
+                <span data-purecounter-start="0" data-purecounter-end="[##_count_yesterday_##]" data-purecounter-duration="1" class="purecounter"></span>
+                <p>어제</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-3 col-md-6">
+            <div class="count-box">
+              <i class="bi bi-person-plus" style="color: #15be56;"></i>
+              <div>
+                <span data-purecounter-start="0" data-purecounter-end="[##_count_today_##]" data-purecounter-duration="1" class="purecounter"></span>
+                <p>오늘</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-3 col-md-6">
+            <div class="count-box">
+              <i class="bi bi-journal-text" style="color: #bb0852;"></i>
+              <div>
+                <span data-purecounter-start="0" data-purecounter-end="50" data-purecounter-duration="1" class="purecounter"></span>
+                <p>포스팅 수</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+    <!-- End Counts Section -->
+    </s_cover_group>
+
+  </main><!-- End #main -->
+
+  <!-- ======= Footer ======= -->
+  <footer id="footer" class="footer">
+
+    <div class="footer-top">
+      <div class="container">
+        <div class="row gy-4">
+          <div class="col-lg-5 col-md-12 footer-info">
+            <a href="index.html" class="logo d-flex align-items-center">
+              <img src="./images/logo.png" alt="">
+              <span>Snow Ball.com</span>
+            </a>
+            <p>티스토리(Tistory) 플랫폼에 기반한 <b>개인 블로그</b>이며 본 사이트에서 취득한 어떤 정보도 법적인 효력을 갖지 못합니다. 모든 투자의 책임은 투자자 본인에게 있습니다.
+            참고한 정보의 출처는 신뢰할 만하나, 열람 시점이나 제공처의 사정 따라 정보의 정확성이 달라질 수 있습니다.</p>
+            <div class="social-links mt-3">
+              <a href="#" class="twitter"><i class="bi bi-twitter"></i></a>
+              <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
+              <a href="#" class="instagram"><i class="bi bi-instagram bx bxl-instagram"></i></a>
+              <a href="#" class="linkedin"><i class="bi bi-linkedin bx bxl-linkedin"></i></a>
+            </div>
+          </div>
+
+          <div class="col-lg-2 col-6 footer-links">
+            <h4>주요 정보 출처</h4>
+            <ul>
+              <li><i class="bi bi-chevron-right"></i> <a href="http://data.krx.co.kr/contents/MDC/MAIN/main/index.cmd">한국거래소</a></li>
+              <li><i class="bi bi-chevron-right"></i> <a href="https://dart.fss.or.kr/">전자공시시스템</a></li>
+              <li><i class="bi bi-chevron-right"></i> <a href="https://finance.naver.com/">네이버증권</a></li>
+              <li><i class="bi bi-chevron-right"></i> <a href="https://comp.fnguide.com/SVO2/ASP/SVD_main.asp?pGB=1&gicode=A005930&cID=&MenuYn=Y&ReportGB=&NewMenuID=11&stkGb=&strResearchYN=">에프앤가이드</a></li>
+              <li><i class="bi bi-chevron-right"></i> <a href="https://news.einfomax.co.kr/">연합인포맥스</a></li>
+            </ul>
+          </div>
+
+          <div class="col-lg-2 col-6 footer-links">
+            <h4>주요 서비스</h4>
+            <ul>
+              <li><i class="bi bi-chevron-right"></i> <a href="./images/_maps.html">시장 지도</a></li>
+              <li><i class="bi bi-chevron-right"></i> <a href="#">버블 지도</a></li>
+              <li><i class="bi bi-chevron-right"></i> <a href="#">산업 차트</a></li>
+              <li><i class="bi bi-chevron-right"></i> <a href="#">기업 분석</a></li>
+              <li><i class="bi bi-chevron-right"></i> <a href="#">투자 역사</a></li>
+            </ul>
+          </div>
+
+          <div class="col-lg-3 col-md-12 footer-contact text-center text-md-start">
+            <h4>Contact</h4>
+            <p>
+              <strong>Email:</strong> tdat.tistory@gmail.com <br>
+              <strong>Open Kakao:</strong> 준비 중 <br>
+            </p>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="copyright">
+        &copy; Copyright <strong><span>TDAT내일모레</span></strong>. All Rights Reserved
+      </div>
+      <div class="credits">
+        Designed by TDAT내일모레
+      </div>
+    </div>
+  </footer><!-- End Footer -->
+
+  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Tistory Compatible -->
+
+  <!-- Vendor JS Files -->
+  <script src="./images/bootstrap.bundle.min.js"></script>
+  <script src="./images/aos.js"></script>
+  <script src="./images/swiper-bundle.min.js"></script>
+  <script src="./images/purecounter.js"></script>
+  <script src="./images/isotope.pkgd.min.js"></script>
+  <script src="./images/glightbox.min.js"></script>
+
+  <!-- Template Main JS File -->
+  <script src="./images/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.8.3/angular.min.js"></script>
+  <script type="text/javascript" src="https://cdn.plot.ly/plotly-latest.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  </s_t3>
+</body>
+
+</html>

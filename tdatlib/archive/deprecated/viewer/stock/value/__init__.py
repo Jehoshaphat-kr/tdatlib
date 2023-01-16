@@ -1,1 +1,0 @@
-from tdatlib.archive.deprecated.viewer.stock import value

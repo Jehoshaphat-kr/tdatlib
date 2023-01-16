@@ -1,1 +1,0 @@
-https://cdn.jsdelivr.net/gh/Jehoshaphat-kr/tdatlib/tdatlib/market/archive/deploy/marketdata@22.12.19r1.js
