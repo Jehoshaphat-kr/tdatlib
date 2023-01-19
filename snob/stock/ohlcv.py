@@ -18,9 +18,10 @@ np.seterr(divide='ignore', invalid='ignore')
 class _ohlcv(object):
 
     __period = 20
-    def __init__(self, ticker:str):
+    def __init__(self, ticker:str, basis:pd.DataFrame=None):
         self.ticker = ticker
         self.curr = 'USD' if ticker.isalpha() else 'KRW'
+        self.base = basis
         return
 
     @property
@@ -35,12 +36,15 @@ class _ohlcv(object):
     def name(self) -> str:
         if not hasattr(self, '__name'):
             if self.ticker.isalpha():
-                name = self.ticker
+                self.__setattr__('__name', self.ticker)
+            elif isinstance(self.base, pd.DataFrame):
+                self.__setattr__('__name', self.base.loc[self.ticker, '종목명'])
             else:
                 name = get_market_ticker_name(ticker=self.ticker)
                 if isinstance(name, pd.DataFrame):
-                    name = get_etf_ticker_name(ticker=self.ticker)
-            self.__setattr__('__name', name)
+                    self.__setattr__('__name', get_etf_ticker_name(ticker=self.ticker))
+                else:
+                    self.__setattr__('__name', name)
         return self.__getattribute__('__name')
 
     @property

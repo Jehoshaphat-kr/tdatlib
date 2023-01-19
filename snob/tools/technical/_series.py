@@ -14,8 +14,8 @@ def zc(series:pd.Series or np.array):
 class evaluate(object):
     __td = 20
     __yd = 5.0
-    def __init__(self, ohlcv:pd.DataFrame, buysell:pd.DataFrame):
-        self.ohlcv, self.buysell = ohlcv, buysell
+    def __init__(self, ohlcv:pd.DataFrame, buysell:pd.DataFrame, name:str):
+        self.ohlcv, self.buysell, self.name = ohlcv, buysell, name
         return
 
     @property
@@ -68,13 +68,18 @@ class evaluate(object):
         copy = self.edges.copy()
         maxi = copy.최대.dropna()
         mini = copy.최소.dropna()
+        mxdt = maxi[maxi==maxi.max()].index[0]
+        mndt = mini[mini==mini.min()].index[0]
         eva = {
-            'TRADING DAYS': f'{len(self.ohlcv)} DAYS',
-            'BUY SIGNALED': f'{len(copy)} DAYS',
-            'OVER PERFORM': f'{len(maxi[maxi >= self.target_yd])} DAYS',
-            'SUCCESS RATE': f'{round(100 * len(maxi[maxi >= self.target_yd])/len(copy), 2)}%',
-            'AVERAGE RISE': f'{round(maxi.mean(), 2)}%',
-            'AVERAGE DROP': f'{round(mini.mean(), 2)}%',
-            'WORST CASE'  : f'{mini.min()}%'
+            'TRADING DAYS'   : f'{len(self.ohlcv)} DAYS',
+            'BUY SIGNALED'   : f'{len(copy)} DAYS',
+            'OVER PERFORM'   : f'{len(maxi[maxi >= self.target_yd])} DAYS',
+            'SUCCESS RATE'   : f'{round(100 * len(maxi[maxi >= self.target_yd])/len(copy), 2)}%',
+            'AVERAGE RISE'   : f'{round(maxi.mean(), 2)}%',
+            'AVERAGE DROP'   : f'{round(mini.mean(), 2)}%',
+            'BEST CASE'      : f'{round(maxi.max(), 2)}%',
+            'BEST CASE DATE' : f'{mxdt.date()}',
+            'WORST CASE'     : f'{mini.min()}%',
+            'WORST CASE DATE': f'{mndt.date()}'
         }
-        return pd.DataFrame(data=eva, index=[0])
+        return pd.DataFrame(data=eva, index=[self.name])

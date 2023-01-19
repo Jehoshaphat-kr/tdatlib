@@ -133,7 +133,7 @@ class _default(object):
 class _analytic(_default):
 
     @property
-    def traditional_signal(self) -> pd.DataFrame:
+    def obos_signal(self) -> pd.DataFrame:
         attr = f'__t_sig_{self.key}'
         if not hasattr(self, attr):
             sell, buy, prev = list(), list(), 0
@@ -229,20 +229,20 @@ class _traces(_analytic):
         return _t
 
     @property
-    def trace_traditional_sell(self) -> go.Scatter:
-        sell = self.traditional_signal.sell.dropna()
+    def trace_obos_sell(self) -> go.Scatter:
+        sell = self.obos_signal.sell.dropna()
         return go.Scatter(
             name="[T] Sell", x=sell.index, y=sell, visible='legendonly',
-            mode='markers', marker=dict(symbol='triangle-down', color='red', size=8),
+            mode='markers', marker=dict(symbol='triangle-down', color='red', size=9),
             xhoverformat="%Y/%m/%d", yhoverformat=",.2f", hovertemplate="%{x}<br>%{y}" + self.curr + "<extra>Sell</extra>"
         )
 
     @property
-    def trace_traditional_buy(self) -> go.Scatter:
-        buy = self.traditional_signal.buy.dropna()
+    def trace_obos_buy(self) -> go.Scatter:
+        buy = self.obos_signal.buy.dropna()
         return go.Scatter(
             name="[T] Buy", x=buy.index, y=buy, visible='legendonly',
-            mode='markers', marker=dict(symbol='triangle-up', color='green', size=8),
+            mode='markers', marker=dict(symbol='triangle-up', color='green', size=9),
             xhoverformat="%Y/%m/%d", yhoverformat=",.2f", hovertemplate="%{x}<br>%{y}" + self.curr + "<extra>Buy</extra>"
         )
 
@@ -325,8 +325,8 @@ class _traces(_analytic):
         trace_volume.marker = dict(color=self.ohlcv.거래량.pct_change().apply(lambda x: 'blue' if x < 0 else 'red'))
         fig.add_trace(trace_price, row=1, col=1)
         fig.add_trace(trace_volume, row=2, col=1)
-        fig.add_trace(self.trace_traditional_buy, row=1, col=1)
-        fig.add_trace(self.trace_traditional_sell, row=1, col=1)
+        fig.add_trace(self.trace_obos_buy, row=1, col=1)
+        fig.add_trace(self.trace_obos_sell, row=1, col=1)
 
         fig.update_layout(
             title=f"볼린저밴드: {self.name}", plot_bgcolor="white", height=750,
