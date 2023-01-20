@@ -168,7 +168,7 @@ class _group(_marketime):
                 fetch.drop(columns=['산업'], inplace=True)
                 fetch.to_csv(os.path.join(self._dir, 'wi26.csv'), index=True, encoding='utf-8')
             self.__setattr__(f'__wi26', fetch.drop(columns=['DT']))
-            return self.__getattribute__(f'__wi26')
+        return self.__getattribute__(f'__wi26')
 
     @property
     def theme(self) -> pd.DataFrame:
