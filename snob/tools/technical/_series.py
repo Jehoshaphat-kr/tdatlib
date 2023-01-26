@@ -60,7 +60,8 @@ class evaluate(object):
                 raw.at[raw.index[n], '최소'] = min(mm)
                 if max(mm) < self.target_yd:
                     raw.at[raw.index[n], '손절'] = round(100 * (sp[-1] / sp[0] - 1), 2)
-        self.__setattr__(attr, raw.drop(columns=['n']).dropna())
+        _t = raw.drop(columns=['n'])
+        self.__setattr__(attr, _t[~_t.buy.isna()])
         return self.__getattribute__(attr)
 
     def eval(self):
@@ -78,6 +79,7 @@ class evaluate(object):
             'BUY SIGNALED'   : len(copy),
             'OVER PERFORM'   : len(maxi[maxi >= self.target_yd]),
             'SUCCESS RATE'   : round(100 * len(maxi[maxi >= self.target_yd])/len(copy), 2),
+            'CUT LOSS RATE'  : round(copy['손절'].dropna().mean(), 2),
             'AVERAGE RISE'   : round(maxi.mean(), 2),
             'AVERAGE DROP'   : round(mini.mean(), 2),
             'BEST CASE'      : round(maxi.max(), 2),
