@@ -48,15 +48,18 @@ class evaluate(object):
         raw['n'] = np.arange(0, len(raw), 1)
         raw['최대'] = np.nan
         raw['최소'] = np.nan
+        raw['손절'] = np.nan
 
         ns = raw[~raw['buy'].isna()]['n']
         for n in ns:
-            sampled = raw.iloc[n:n+self.forward_td]
+            sampled = raw.iloc[(n + 1) : (n + 1) + self.forward_td]
             if not sampled.empty:
                 sp = sampled[['시가', '고가', '저가', '종가']].values.flatten()
                 mm = [round(100 * (p / sp[0] - 1), 2) for p in sp]
                 raw.at[raw.index[n], '최대'] = max(mm)
                 raw.at[raw.index[n], '최소'] = min(mm)
+                if max(mm) < self.target_yd:
+                    raw.at[raw.index[n], '손절'] = round(100 * (sp[-1] / sp[0] - 1), 2)
         self.__setattr__(attr, raw.drop(columns=['n']).dropna())
         return self.__getattribute__(attr)
 
@@ -71,15 +74,15 @@ class evaluate(object):
         mxdt = maxi[maxi==maxi.max()].index[0]
         mndt = mini[mini==mini.min()].index[0]
         eva = {
-            'TRADING DAYS'   : f'{len(self.ohlcv)} DAYS',
-            'BUY SIGNALED'   : f'{len(copy)} DAYS',
-            'OVER PERFORM'   : f'{len(maxi[maxi >= self.target_yd])} DAYS',
-            'SUCCESS RATE'   : f'{round(100 * len(maxi[maxi >= self.target_yd])/len(copy), 2)}%',
-            'AVERAGE RISE'   : f'{round(maxi.mean(), 2)}%',
-            'AVERAGE DROP'   : f'{round(mini.mean(), 2)}%',
-            'BEST CASE'      : f'{round(maxi.max(), 2)}%',
-            'BEST CASE DATE' : f'{mxdt.date()}',
-            'WORST CASE'     : f'{mini.min()}%',
-            'WORST CASE DATE': f'{mndt.date()}'
+            'TRADING DAYS'   : len(self.ohlcv),
+            'BUY SIGNALED'   : len(copy),
+            'OVER PERFORM'   : len(maxi[maxi >= self.target_yd]),
+            'SUCCESS RATE'   : round(100 * len(maxi[maxi >= self.target_yd])/len(copy), 2),
+            'AVERAGE RISE'   : round(maxi.mean(), 2),
+            'AVERAGE DROP'   : round(mini.mean(), 2),
+            'BEST CASE'      : round(maxi.max(), 2),
+            'BEST CASE DATE' : mxdt.date(),
+            'WORST CASE'     : mini.min(),
+            'WORST CASE DATE': mndt.date()
         }
         return pd.DataFrame(data=eva, index=[self.name])

@@ -17,13 +17,13 @@ def draw_bar(data:pd.Series, name:str=str(), unit:str=str()):
         xhoverformat='%Y/%m/%d', yhoverformat=',', hovertemplate='%{x}<br>%{y}' + unit +'<extra></extra>',
     )
 
-def draw_candle(data:pd.DataFrame, name:str=str()):
+def draw_candle(data:pd.DataFrame, name:str=str(), curr:str='KRW'):
     return go.Candlestick(
         name=name if name else data.name,
         x=data.index, open=data.시가, high=data.고가, low=data.저가, close=data.종가,
         visible=True, showlegend=True,
         increasing_line=dict(color='red'), decreasing_line=dict(color='royalblue'),
-        xhoverformat="%Y/%m/%d", yhoverformat=".2f"
+        xhoverformat="%Y/%m/%d", yhoverformat=",d" if curr == "KRW" else ".2f"
     )
 
 def add_recession(fig:go.Figure, market:str):
