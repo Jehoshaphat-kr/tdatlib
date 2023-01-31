@@ -14,9 +14,18 @@ def zc(series:pd.Series or np.array):
 class evaluate(object):
     __td = 20
     __yd = 5.0
+    __sd = 1000000
     def __init__(self, ohlcv:pd.DataFrame, buysell:pd.DataFrame, name:str):
         self.ohlcv, self.buysell, self.name = ohlcv, buysell, name
         return
+
+    @property
+    def seed(self) -> int or float:
+        return self.__sd
+
+    @seed.setter
+    def seed(self, seed:int or float):
+        self.__sd = seed
 
     @property
     def forward_td(self) -> int:
@@ -34,10 +43,33 @@ class evaluate(object):
     def target_yd(self, yd: int or float):
         self.__yd = yd
 
+    def analyze(
+        self,
+        seed:int or float=-1,
+        depo:int or float=0,
+        risk_free:int or float=2.0
+    ):
+        seed = self.seed if seed == -1 else seed
+        depo = self.seed if depo == 0 else depo
+        cash, account, paper, state = seed, 0, 0, 'h'
+
+        base = pd.concat(objs=[self.ohlcv, self.buysell], axis=1)
+        bs = base[~base.buy.isna() | ~base.sell.isna()].copy()
+        indices = base.index.tolist()
+        for r in bs[['buy', 'sell']].itertuples():
+            i, b, s = tuple(r)
+            if not b is np.nan:
+                p_buy = base.loc[indices[indices.index(i) + 1], '시가']
+                print("B@:", i, b, p_buy)
+            # if r[-1]:
+            #     print('B: ', r)
+            # if r[-2]:
+            #     print('S: ', r)
+        return
+
     @property
     def edges(self) -> pd.DataFrame:
         """
-        Buy Signal 기준 {forward_td} 기간 내 최대/최소 수익률 산출
         :return:
         """
         attr = f'__edges_{self.forward_td}'
@@ -88,3 +120,14 @@ class evaluate(object):
             'WORST CASE DATE': mndt.date()
         }
         return pd.DataFrame(data=eva, index=[self.name])
+
+
+if __name__ == "__main__":
+
+    from snob.stock import kr
+    from snob.tools import bollinger_band
+
+    rw = kr('012330')
+    bb = bollinger_band(ohlcv=rw.ohlcv, name=rw.name, unit=rw.curr)
+    es = evaluate(ohlcv=rw.ohlcv, buysell=bb.obos_signal, name=rw.name)
+    es.analyze()
