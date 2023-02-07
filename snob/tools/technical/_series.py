@@ -14,7 +14,7 @@ def zc(series:pd.Series or np.array):
 class evaluate(object):
     __td = 20
     __yd = 5.0
-    __sd = 1000000
+    __sd = 10000000
     def __init__(self, ohlcv:pd.DataFrame, buysell:pd.DataFrame, name:str):
         self.ohlcv, self.buysell, self.name = ohlcv, buysell, name
         return
@@ -45,27 +45,64 @@ class evaluate(object):
 
     def analyze(
         self,
-        seed:int or float=-1,
-        depo:int or float=0,
+        deposit:int or float=-1,
+        div_buy:int or float=-1,
         risk_free:int or float=2.0
     ):
-        seed = self.seed if seed == -1 else seed
-        depo = self.seed if depo == 0 else depo
-        cash, account, paper, state = seed, 0, 0, 'h'
+        """
+
+        :param deposit:
+        :param div_buy:
+        :param risk_free:
+        :return:
+        """
+        principle = self.seed if deposit == -1 else deposit
+        cash = principle # Cash Seed Money
+        stock, buy_at, depo = 0, 0, cash
+        cnt_sel, cnt_buy = 0, 0
 
         base = pd.concat(objs=[self.ohlcv, self.buysell], axis=1)
         bs = base[~base.buy.isna() | ~base.sell.isna()].copy()
         indices = base.index.tolist()
         for r in bs[['buy', 'sell']].itertuples():
             i, b, s = tuple(r)
-            if not b is np.nan:
-                p_buy = base.loc[indices[indices.index(i) + 1], '시가']
-                print("B@:", i, b, p_buy)
-            # if r[-1]:
-            #     print('B: ', r)
-            # if r[-2]:
-            #     print('S: ', r)
-        return
+            o = base.loc[indices[indices.index(i) + 1], '시가']
+            if str(s) == 'nan': # Case Buy
+                depo = depo if div_buy == -1 else div_buy
+                if depo <= cash:
+                    _stock = int(depo / o) # The Number of Stock
+                    cash = cash - (o * _stock)
+                    stock += _stock
+                    cnt_buy += 1
+                # print(f"BUY @{i.date()} / S{stock} ON{o} / C￦{cash} / ")
+            elif str(b) == 'nan' and stock > 0: # Case Sell
+                cash += (stock * o)
+                stock = 0
+                cnt_sel += 1
+
+        d = (indices[-1] - indices[0]).days
+        estimated = base.loc[indices[-1], '종가'] * stock + cash
+        estimated_no_risk = principle * (1.0 + (1-0.154) * risk_free / 100) ** int(d/365)
+        data = dict(
+            START=indices[0].date(),
+            END=indices[-1].date(),
+            PRICE_START=base.loc[indices[0], '종가'],
+            PRICE_END=base.loc[indices[-1], '종가'],
+            DURATION_DAYS=d,
+            DURATION=f'{int(d/365)}Y {int((d - int(d/365) * 365)/30)}M',
+            COUNT_BUY=cnt_buy,
+            COUNT_SELL=cnt_sel,
+            STATUS="hold" if stock else "sell",
+            PRINCIPLE=principle,
+            STOCK=stock,
+            CASH=cash,
+            ESTIMATED=estimated,
+            ESTIMATED_NORISK=int(estimated_no_risk),
+            YIELD=round(100 * ((estimated / principle) - 1), 2),
+            YIELD_NORISK=round(100 * ((estimated_no_risk / principle) - 1), 2),
+        )
+        data['PREMIUM'] = data['YIELD'] - data['YIELD_NORISK']
+        return pd.DataFrame(data=data, index=[self.name])
 
     @property
     def edges(self) -> pd.DataFrame:
@@ -127,7 +164,10 @@ if __name__ == "__main__":
     from snob.stock import kr
     from snob.tools import bollinger_band
 
-    rw = kr('012330')
+    rw = kr('005930')
+    rw.period = 3
     bb = bollinger_band(ohlcv=rw.ohlcv, name=rw.name, unit=rw.curr)
     es = evaluate(ohlcv=rw.ohlcv, buysell=bb.obos_signal, name=rw.name)
-    es.analyze()
+    # estimation = es.analyze(div_buy=1000000)
+    estimation = es.analyze()
+    print(estimation.T)
