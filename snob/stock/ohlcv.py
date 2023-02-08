@@ -18,6 +18,7 @@ np.seterr(divide='ignore', invalid='ignore')
 class _ohlcv(object):
 
     __period = 20
+    __limit = list()
     def __init__(self, ticker:str, basis:pd.DataFrame=None):
         self.ticker = ticker
         self.curr = 'USD' if ticker.isalpha() else 'KRW'
@@ -31,6 +32,14 @@ class _ohlcv(object):
     @period.setter
     def period(self, period:int):
         self.__period = period
+
+    @property
+    def limit(self) -> list:
+        return self.__limit
+
+    @limit.setter
+    def limit(self, limit:list):
+        self.__limit = limit
 
     @property
     def name(self) -> str:
@@ -68,7 +77,8 @@ class _ohlcv(object):
                 ohlcv.index.name = '날짜'
                 ohlcv = ohlcv.rename(columns=dict(zip(o_names, c_names)))
             self.__setattr__(f'__ohlcv_{self.period}', ohlcv)
-        return self.__getattribute__(f'__ohlcv_{self.period}')
+        ohlcv = self.__getattribute__(f'__ohlcv_{self.period}')
+        return ohlcv[(self.limit[0] < ohlcv.index) & (ohlcv.index <= self.limit[1])] if self.limit else ohlcv
 
 
 if __name__ == "__main__":

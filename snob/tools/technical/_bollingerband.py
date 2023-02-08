@@ -268,7 +268,7 @@ class _traces(_analytic):
         fig.add_trace(trace_volume, row=2, col=1)
 
         fig.update_layout(
-            title=f"볼린저밴드: {self.name}", plot_bgcolor="white", height=750,
+            title=f"볼린저밴드: {self.name}", plot_bgcolor="white",
             legend=dict(tracegroupgap=5),
             xaxis=dict(
                 showgrid=True, gridwidth=0.5, gridcolor='lightgrey', autorange=True,
@@ -329,7 +329,7 @@ class _traces(_analytic):
         fig.add_trace(self.trace_obos_sell, row=1, col=1)
 
         fig.update_layout(
-            title=f"볼린저밴드: {self.name}", plot_bgcolor="white", height=750,
+            title=f"볼린저밴드: {self.name}", plot_bgcolor="white",
             legend=dict(tracegroupgap=5),
             xaxis=dict(
                 showgrid=True, gridwidth=0.5, gridcolor='lightgrey', autorange=True,
