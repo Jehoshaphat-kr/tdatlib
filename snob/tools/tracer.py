@@ -3,21 +3,21 @@ import plotly.graph_objects as go
 import pandas as pd
 
 
-def draw_line(data:pd.Series, name:str=str(), unit:str=str()):
+def drawLine(data:pd.Series, name:str=str(), unit:str=str()):
     return go.Scatter(
         name=name if name else data.name, x=data.index, y=data, visible=True,
         showlegend=True,
         xhoverformat="%Y/%m/%d", yhoverformat=".2f", hovertemplate="%{x}<br>%{y}" + unit + "<extra></extra>"
     )
 
-def draw_bar(data:pd.Series, name:str=str(), unit:str=str()):
+def drawBar(data:pd.Series, name:str=str(), unit:str=str()):
     return go.Bar(
         name=name if name else data.name, x=data.index, y=data, visible=True,
         showlegend=True,
         xhoverformat='%Y/%m/%d', yhoverformat=',', hovertemplate='%{x}<br>%{y}' + unit +'<extra></extra>',
     )
 
-def draw_candle(data:pd.DataFrame, name:str=str(), curr:str='KRW'):
+def drawCandle(data:pd.DataFrame, name:str=str(), curr:str= 'KRW'):
     return go.Candlestick(
         name=name if name else data.name,
         x=data.index, open=data.시가, high=data.고가, low=data.저가, close=data.종가,
@@ -26,7 +26,7 @@ def draw_candle(data:pd.DataFrame, name:str=str(), curr:str='KRW'):
         xhoverformat="%Y/%m/%d", yhoverformat=",d" if curr == "KRW" else ".2f"
     )
 
-def add_recession(fig:go.Figure, market:str):
+def addRecession(fig:go.Figure, market:str):
     recession = [
         {'label': 'blank#01', 'from': datetime(1994, 11, 8), 'to': datetime(1995, 5, 27)},
         {'label': 'blank#02', 'from': datetime(1996, 5, 7), 'to': datetime(1997, 1, 7)},

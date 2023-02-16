@@ -7,10 +7,10 @@ from snob.tools.tseries import(
     corr
 )
 from snob.tools.tracer import (
-    draw_line,
-    draw_bar,
-    draw_candle,
-    add_recession
+    drawLine,
+    drawBar,
+    drawCandle,
+    addRecession
 )
 from snob.tools.technical import (
     zc,

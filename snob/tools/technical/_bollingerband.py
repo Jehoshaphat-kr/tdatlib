@@ -1,7 +1,7 @@
 from snob.tools.tracer import (
-    draw_line,
-    draw_bar,
-    draw_candle,
+    drawLine,
+    drawBar,
+    drawCandle,
 )
 from snob.tools.technical._series import zc
 from plotly.subplots import make_subplots
@@ -220,12 +220,12 @@ class _traces(_analytic):
 
     @property
     def trace_width(self) -> go.Scatter:
-        _t = draw_line(data=self.width, name="밴드폭")
+        _t = drawLine(data=self.width, name="밴드폭")
         return _t
 
     @property
     def trace_pctb(self) -> go.Scatter:
-        _t = draw_line(data=self.pctb, name="밴드%B")
+        _t = drawLine(data=self.pctb, name="밴드%B")
         return _t
 
     @property
@@ -260,10 +260,10 @@ class _traces(_analytic):
         trace_lower.line = dict(color='rgb(197, 224, 180)')
         fig.add_trace(trace_lower, row=1, col=1)
 
-        trace_price = draw_candle(data=self.ohlcv, name=self.name)
+        trace_price = drawCandle(data=self.ohlcv, name=self.name)
         fig.add_trace(trace_price, row=1, col=1)
 
-        trace_volume = draw_bar(data=self.ohlcv.거래량, name="거래량")
+        trace_volume = drawBar(data=self.ohlcv.거래량, name="거래량")
         trace_volume.marker = dict(color=self.ohlcv.거래량.pct_change().apply(lambda x: 'blue' if x < 0 else 'red'))
         fig.add_trace(trace_volume, row=2, col=1)
 
@@ -319,9 +319,9 @@ class _traces(_analytic):
         fig.add_trace(self.trace_pctb, row=4, col=1)
         fig.add_hrect(y0=0, y1=1, line_width=0, fillcolor='green', opacity=0.2, row=4, col=1)
 
-        trace_price = draw_candle(data=self.ohlcv, name=self.name)
+        trace_price = drawCandle(data=self.ohlcv, name=self.name)
         trace_price.showlegend = False
-        trace_volume = draw_bar(data=self.ohlcv.거래량, name="거래량")
+        trace_volume = drawBar(data=self.ohlcv.거래량, name="거래량")
         trace_volume.marker = dict(color=self.ohlcv.거래량.pct_change().apply(lambda x: 'blue' if x < 0 else 'red'))
         fig.add_trace(trace_price, row=1, col=1)
         fig.add_trace(trace_volume, row=2, col=1)
