@@ -182,10 +182,10 @@ class _basis(_group):
     _insi = False
     _pdir = os.path.join(os.path.dirname(__file__), rf'archive/common/perf.csv')
     def _get_marketcap(self) -> pd.DataFrame:
-        return get_market_cap_by_ticker(date=self.rdate, market="ALL", alternative=True)
+        return get_market_cap_by_ticker(date=self.rdate, market="ALL", alternative=True).drop_duplicates()
 
     def _get_multiples(self) -> pd.DataFrame:
-        return get_market_fundamental(date=self.rdate, market="ALL", alternative=True)
+        return get_market_fundamental(date=self.rdate, market="ALL", alternative=True).drop_duplicates()
 
     def _get_ipo(self) -> pd.DataFrame:
         io = 'http://kind.krx.co.kr/corpgeneral/corpList.do?method=download'
@@ -193,7 +193,7 @@ class _basis(_group):
         ipo = ipo.rename(columns={'회사명': '종목명', '상장일': 'IPO'}).set_index(keys='종목코드')
         ipo.index = ipo.index.astype(str).str.zfill(6)
         ipo.IPO = pd.to_datetime(ipo.IPO)
-        return ipo[ipo.IPO <= datetime.strptime(self.rdate, "%Y%m%d")]
+        return ipo[ipo.IPO <= datetime.strptime(self.rdate, "%Y%m%d")].drop_duplicates()
 
     def _init_p(self) -> pd.DataFrame:
         if not hasattr(self, '__p'):
