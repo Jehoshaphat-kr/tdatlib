@@ -9,6 +9,7 @@ from pykrx.stock import (
 from tqdm import tqdm
 from datetime import datetime, timedelta
 from pytz import timezone
+from requests.exceptions import JSONDecodeError
 import numpy as np
 import pandas as pd
 import requests, time, os, json
@@ -29,7 +30,10 @@ class _marketime(object):
     @property
     def rdate(self) -> str:
         if not hasattr(self, '__rdate'):
-            self.__setattr__('__rdate', get_nearest_business_day_in_a_week(date=self._date, prev=True))
+            try:
+                self.__setattr__('__rdate', get_nearest_business_day_in_a_week(date=self._date, prev=True))
+            except JSONDecodeError:
+                self.__setattr__('__rdate', datetime.today().strftime("%Y%m%d"))
         return self.__getattribute__('__rdate')
 
     @property
@@ -47,7 +51,10 @@ class _marketime(object):
             td = datetime.strptime(self.rdate, "%Y%m%d")
             dm = lambda x: (td - timedelta(x)).strftime("%Y%m%d")
             loop = [('1D', 1), ('1W', 7), ('1M', 30), ('3M', 91), ('6M', 183), ('1Y', 365), ('2Y', 730)]
-            base.update({l: get_nearest_business_day_in_a_week(date=dm(d)) for l, d in loop})
+            try:
+                base.update({l: get_nearest_business_day_in_a_week(date=dm(d)) for l, d in loop})
+            except JSONDecodeError:
+                base.update({l: dm(d) for l, d in loop})
             self.__setattr__('__dates', base)
         return self.__getattribute__('__dates')
 
